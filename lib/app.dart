@@ -1,23 +1,44 @@
 import 'package:flutter/material.dart';
-import 'core/themes.dart'; // Global theme configurations
-import 'core/routes.dart'; // Route definitions
-import 'view/screens/splash/splash_screen.dart'; // Initial screen (Splash)
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'core/routing/app_router.dart';
+import 'core/routing/app_routes.dart';
+import 'core/themes/app_colors.dart';
+import 'core/utils/utils.dart';
 
 class AgroVision extends StatelessWidget {
-  const AgroVision({super.key});
+  final AppRouter appRouter;
+  const AgroVision({super.key, required this.appRouter});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Smart Agriculture Monitoring', // App title
-      theme: AppTheme.lightTheme, // Applying global light theme
-      darkTheme: AppTheme.darkTheme, // Optional: Dark theme
-      themeMode: ThemeMode.system, // Light/Dark mode based on system preference
-      initialRoute:
-          SplashScreen.routeName, // Setting the initial route to SplashScreen
-      routes: appRoutes, // Setting named routes from routes.dart
-      debugShowCheckedModeBanner:
-          false, // Remove the debug banner in top-right corner
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      child: MaterialApp(
+        title: 'AgroVision',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primaryColor: AppColors.primary,
+          scaffoldBackgroundColor: Colors.white,
+        ),
+        navigatorKey: AppRouter.navigatorKey,
+        onGenerateRoute: appRouter.generateRoute,
+        initialRoute: AppRoutes.splashScreen,
+        builder: (context, child) {
+          return GestureDetector(
+            onTap: () => Utils.closeKeyboard,
+            child: MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: const TextScaler.linear(1.0)),
+              child: child!,
+            ),
+          );
+        },
+        // localizationsDelegates: context.localizationDelegates,
+        // supportedLocales: context.supportedLocales,
+        // locale: context.locale,
+      ),
     );
   }
 }

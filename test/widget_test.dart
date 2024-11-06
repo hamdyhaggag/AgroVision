@@ -6,15 +6,16 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:agro_vision/app.dart';
+import 'package:agro_vision/core/routing/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:agro_vision/main.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const AgroVision());
+    await tester.pumpWidget(AgroVision(
+      appRouter: AppRouter(),
+    ));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
