@@ -6,8 +6,8 @@ import 'core/routing/app_router.dart';
 import 'core/routing/app_routes.dart';
 import 'core/themes/app_colors.dart';
 import 'core/utils/utils.dart';
-import 'cubit/app_cubit/app_cubit.dart';
-import 'cubit/app_cubit/app_state.dart';
+import 'features/splash/Logic/app_cubit.dart';
+import 'features/splash/Logic/app_state.dart';
 
 class AgroVision extends StatelessWidget {
   final AppRouter appRouter;

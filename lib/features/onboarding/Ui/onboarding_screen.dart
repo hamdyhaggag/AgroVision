@@ -1,13 +1,13 @@
 import 'package:agro_vision/core/themes/app_colors.dart';
-import 'package:agro_vision/view/screens/home/home_screen.dart';
-import 'package:agro_vision/view/screens/splash/screen_layout.dart';
+import 'package:agro_vision/features/home/Ui/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../core/helpers/shared_pref_helper.dart';
 import '../../../core/utils/functions.dart';
-import 'onboarding_contents.dart';
-import 'size_config.dart';
+import '../../splash/Ui/screen_layout.dart';
+import '../Logic/onboarding_contents.dart';
+import '../Logic/size_config.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});

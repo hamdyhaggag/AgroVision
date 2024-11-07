@@ -1,7 +1,6 @@
-import 'package:agro_vision/view/screens/onboarding/onboarding_screen.dart';
-import 'package:agro_vision/view/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
-
+import '../../features/onboarding/Ui/onboarding_screen.dart';
+import '../../features/splash/Ui/splash_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {

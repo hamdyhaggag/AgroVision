@@ -1,4 +1,4 @@
-import 'package:agro_vision/view/widgets/dimentions.dart';
+import 'package:agro_vision/shared/widgets/dimentions.dart';
 import 'package:flutter/material.dart';
 import '../../core/themes/app_colors.dart';
 

@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'package:agro_vision/view/screens/splash/screen_layout.dart';
 import 'package:flutter/material.dart';
-import '../../../core/helpers/shared_pref_helper.dart';
-import '../../../core/utils/functions.dart';
-import '../../../main.dart';
-import '../onboarding/onboarding_screen.dart';
+import '../../../../core/helpers/shared_pref_helper.dart';
+import '../../../../core/utils/functions.dart';
+import '../../../../main.dart';
+import '../../onboarding/Ui/onboarding_screen.dart';
+import 'screen_layout.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

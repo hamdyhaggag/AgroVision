@@ -7,7 +7,7 @@ import 'app.dart';
 import 'core/helpers/app_localizations.dart';
 import 'core/helpers/shared_pref_helper.dart';
 import 'core/routing/app_router.dart';
-import 'cubit/app_cubit/bloc_observer_checker.dart';
+import 'bloc_observer_checker.dart';
 
 bool isEnterBefore = false;
 
