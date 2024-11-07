@@ -62,7 +62,7 @@ class ScreenLayout extends StatelessWidget {
               onTap: (index) => appCubit.changeBottomNavIndex(index),
               backgroundColor: AppColors.navBarColor,
               activeColor: Theme.of(context).primaryColor,
-              inactiveColor: AppColors.greyColor,
+              inactiveColor: AppColors.blackColor,
               leftCornerRadius: 32,
               rightCornerRadius: 32,
             ),

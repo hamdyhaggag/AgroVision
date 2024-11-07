@@ -227,7 +227,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               left: 20,
               child: TextButton(
                 onPressed: () {
-                  navigateTo(context, const HomeScreen());
+                  navigateTo(context, const ScreenLayout());
                   CacheHelper.saveData(key: 'isEnterBefore', value: true);
                 },
                 style: TextButton.styleFrom(
