@@ -160,7 +160,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       fontFamily: 'PTS',
                                     ),
                                   ),
-                                  child: Text(
+                                  child: const Text(
                                     "Back",
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
