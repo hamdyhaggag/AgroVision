@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../core/helpers/shared_pref_helper.dart';
 import '../../../core/utils/functions.dart';
-import '../../splash/Ui/screen_layout.dart';
+import '../../home/Ui/screen_layout.dart';
 import '../Logic/onboarding_contents.dart';
 import '../Logic/size_config.dart';
 

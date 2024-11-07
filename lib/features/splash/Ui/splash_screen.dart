@@ -4,7 +4,7 @@ import '../../../../core/helpers/shared_pref_helper.dart';
 import '../../../../core/utils/functions.dart';
 import '../../../../main.dart';
 import '../../onboarding/Ui/onboarding_screen.dart';
-import 'screen_layout.dart';
+import '../../home/Ui/screen_layout.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

@@ -1,13 +1,14 @@
+import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
-import '../Logic/app_cubit.dart';
+import '../../splash/Logic/app_cubit.dart';
 import '../../disease_detection/Ui/disease_detection_screen.dart';
-import '../../home/Ui/home_screen.dart';
-import '../../home/Ui/settings_screen.dart';
+import 'home_screen.dart';
+import 'settings_screen.dart';
 import '../../monitoring/UI/monitoring_screen.dart';
-import '../Logic/app_state.dart';
+import '../../splash/Logic/app_state.dart';
 
 class ScreenLayout extends StatelessWidget {
   const ScreenLayout({super.key});
@@ -15,13 +16,11 @@ class ScreenLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AppCubit(), // Provide the AppCubit to the widget tree
+      create: (_) => AppCubit(),
       child: BlocBuilder<AppCubit, AppStates>(
         builder: (context, state) {
-          final appCubit =
-              AppCubit.get(context); // Get the current AppCubit instance
+          final appCubit = AppCubit.get(context);
 
-          // Define icons for bottom navigation
           final iconList = <IconData>[
             Icons.home,
             Icons.monitor_heart,
@@ -29,7 +28,6 @@ class ScreenLayout extends StatelessWidget {
             Icons.settings,
           ];
 
-          // Screens to navigate between
           final List<Widget> screens = [
             const HomeScreen(),
             const MonitoringScreen(),
@@ -39,31 +37,32 @@ class ScreenLayout extends StatelessWidget {
 
           return Scaffold(
             body: screens[appCubit.bottomNavIndex],
-
             floatingActionButton: FloatingActionButton(
               onPressed: () {
                 if (kDebugMode) {
                   print("Floating Action Button Pressed!");
                 }
               },
-              backgroundColor: Theme.of(context).primaryColor,
-              child: const Icon(Icons.add),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              child: Image.asset(
+                'assets/images/camera.png',
+                width: 50,
+                height: 50,
+                fit: BoxFit.contain,
+              ),
             ),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
-
-            // Animated Bottom Navigation Bar
             bottomNavigationBar: AnimatedBottomNavigationBar(
               icons: iconList,
-              activeIndex: appCubit
-                  .bottomNavIndex, // Use the current index from the cubit
+              activeIndex: appCubit.bottomNavIndex,
               gapLocation: GapLocation.center,
               notchSmoothness: NotchSmoothness.smoothEdge,
-              onTap: (index) => appCubit
-                  .changeBottomNavIndex(index), // Change index using cubit
-              backgroundColor: Theme.of(context).canvasColor,
+              onTap: (index) => appCubit.changeBottomNavIndex(index),
+              backgroundColor: AppColors.navBarColor,
               activeColor: Theme.of(context).primaryColor,
-              inactiveColor: Colors.grey,
+              inactiveColor: AppColors.greyColor,
               leftCornerRadius: 32,
               rightCornerRadius: 32,
             ),

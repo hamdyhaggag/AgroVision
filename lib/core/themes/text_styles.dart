@@ -14,7 +14,7 @@ class TextStyles {
 
   static final TextStyle size14GreyDarkLight = TextStyle(
     fontSize: 14.sp,
-    color: AppColors.greyDark,
+    color: AppColors.greyColor,
     fontWeight: FontWeights.light,
   );
 
