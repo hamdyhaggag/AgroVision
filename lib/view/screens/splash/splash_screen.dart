@@ -1,14 +1,89 @@
+import 'dart:async';
+import 'package:agro_vision/view/screens/splash/screen_layout.dart';
 import 'package:flutter/material.dart';
+import '../../../core/helpers/shared_pref_helper.dart';
+import '../../../core/utils/functions.dart';
+import '../../../main.dart';
+import '../onboarding/onboarding_screen.dart';
 
-class SplashScreen extends StatelessWidget {
-  static const String routeName = '/splash';
-
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Splash Screen')),
+  SplashScreenState createState() => SplashScreenState();
+}
+
+class SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
     );
+
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInCubic,
+    );
+
+    _animationController.forward();
+
+    Timer(const Duration(seconds: 3), () {
+      if (isEnterBefore) {
+        navigateAndFinish(context, const ScreenLayout());
+      } else {
+        CacheHelper.saveData(key: 'isEnterBefore', value: true);
+        navigateAndFinish(context, const OnboardingScreen());
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                opacity: 0.09,
+                image: AssetImage('assets/images/App_Logo.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedBuilder(
+                    animation: _animation,
+                    builder: (context, child) {
+                      return Opacity(
+                        opacity: _animation.value,
+                        child: child,
+                      );
+                    },
+                    child: Transform.translate(
+                      offset: const Offset(-20.0, 0.0),
+                      child: const Image(
+                        image: AssetImage('assets/images/App_Logo.png'),
+                        height: 240.0,
+                        width: 270.0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )));
   }
 }

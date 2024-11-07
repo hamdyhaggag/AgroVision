@@ -1,94 +1,55 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:developer';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SharedPrefHelper {
-  SharedPrefHelper._();
+class CacheHelper {
+  static SharedPreferences? sharedPreferences;
 
-  static removeData(String key) async {
-    debugPrint('SharedPrefHelper : data with key : $key has been removed');
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences.remove(key);
+  static init() async {
+    sharedPreferences = await SharedPreferences.getInstance();
   }
 
-  static clearAllData() async {
-    debugPrint('SharedPrefHelper : all data has been cleared');
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences.clear();
-  }
+  //===============================================================
 
-  static setData(String key, value) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    debugPrint("SharedPrefHelper : setData with key : $key and value : $value");
-    if (value.runtimeType is String) {
-      await sharedPreferences.setString(key, value);
-    } else if (value.runtimeType is int) {
-      await sharedPreferences.setInt(key, value);
-    } else if (value.runtimeType is bool) {
-      await sharedPreferences.setBool(key, value);
-    } else if (value.runtimeType is double) {
-      await sharedPreferences.setDouble(key, value);
-    } else {
-      throw ArgumentError('Unsupported value type');
+  static saveData({
+    required String key,
+    required dynamic value,
+  }) async {
+    log("saving >>> $value into local >>> with key $key");
+
+    if (value is String) {
+      sharedPreferences!.setString(key, value);
     }
-    // switch (value.runtimeType) {
-    //   case String:
-    //     await sharedPreferences.setString(key, value);
-    //     break;
-    //   case int:
-    //     await sharedPreferences.setInt(key, value);
-    //     break;
-    //   case bool:
-    //     await sharedPreferences.setBool(key, value);
-    //     break;
-    //   case double:
-    //     await sharedPreferences.setDouble(key, value);
-    //     break;
-    //   default:
-    //     return null;
-    // }
+    if (value is int) {
+      sharedPreferences!.setInt(key, value);
+    }
+    if (value is double) {
+      sharedPreferences!.setDouble(key, value);
+    }
+    if (value is bool) {
+      sharedPreferences!.setBool(key, value);
+    }
   }
 
-  static getBool(String key) async {
-    debugPrint('SharedPrefHelper : getBool with key : $key');
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getBool(key) ?? false;
+  //===============================================================
+
+  static String getString({required String key}) {
+    return sharedPreferences!.getString(key) ?? "";
   }
 
-  static getDouble(String key) async {
-    debugPrint('SharedPrefHelper : getDouble with key : $key');
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getDouble(key) ?? 0.0;
+  static int getInteger({required String key}) {
+    return sharedPreferences!.getInt(key) ?? 0;
   }
 
-  static getInt(String key) async {
-    debugPrint('SharedPrefHelper : getInt with key : $key');
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getInt(key) ?? 0;
+  static bool getBoolean({required String key}) {
+    return sharedPreferences!.getBool(key) ?? false;
   }
 
-  static getString(String key) async {
-    debugPrint('SharedPrefHelper : getString with key : $key');
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getString(key) ?? '';
-  }
+  //===============================================================
 
-  static setSecuredString(String key, String value) async {
-    const flutterSecureStorage = FlutterSecureStorage();
-    debugPrint(
-        "FlutterSecureStorage : setSecuredString with key : $key and value : $value");
-    await flutterSecureStorage.write(key: key, value: value);
-  }
-
-  static getSecuredString(String key) async {
-    const flutterSecureStorage = FlutterSecureStorage();
-    debugPrint('FlutterSecureStorage : getSecuredString with key :');
-    return await flutterSecureStorage.read(key: key) ?? '';
-  }
-
-  static clearAllSecuredData() async {
-    debugPrint('FlutterSecureStorage : all data has been cleared');
-    const flutterSecureStorage = FlutterSecureStorage();
-    await flutterSecureStorage.deleteAll();
+  static Future<bool> removeData({required String key}) async {
+    //return await sharedPreferences!.clear();
+    return await sharedPreferences!.remove(key);
   }
 }
+
+//===============================================================

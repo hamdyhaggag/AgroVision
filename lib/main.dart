@@ -5,14 +5,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'app.dart';
 import 'core/helpers/app_localizations.dart';
-import 'core/helpers/bloc_observer_checker.dart';
+import 'core/helpers/shared_pref_helper.dart';
 import 'core/routing/app_router.dart';
+import 'cubit/app_cubit/bloc_observer_checker.dart';
+
+bool isEnterBefore = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ScreenUtil.ensureScreenSize();
   await EasyLocalization.ensureInitialized();
+  await CacheHelper.init();
+  await initializeAppSettings();
   // setupGetIt();
+
   Bloc.observer = const BlocObserverChecker();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(
@@ -25,4 +31,8 @@ void main() async {
       child: AgroVision(appRouter: AppRouter()),
     ),
   );
+}
+
+Future<void> initializeAppSettings() async {
+  isEnterBefore = CacheHelper.getBoolean(key: ('isEnterBefore'));
 }

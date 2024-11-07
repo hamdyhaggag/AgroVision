@@ -8,5 +8,5 @@ class AppImages {
   AppImages._();
 
   static const String imagesPath = 'assets/images';
-  static const String splashBackground = '$imagesPath/splash_background.png';
+  static const String appLogo = '$imagesPath/App_Logo.png';
 }

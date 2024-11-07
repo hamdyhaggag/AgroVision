@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   AppColors._();
-
-  static final Color primary = HexColor.fromHex('#1A858D');
+  static const Color primaryColor = Color(0xff34C759);
+  static final Color secondaryColor2 = HexColor.fromHex('#34C759');
   static final Color background = HexColor.fromHex('#1A858D');
   static final Color error = HexColor.fromHex('#1A858D');
-  static final Color black = HexColor.fromHex('#1A858D');
-  static final Color white = HexColor.fromHex('#1A858D');
+  static Color whiteColor = const Color(0xffffffff);
+  static Color blackColor = const Color(0xff000000);
   static final Color grey = HexColor.fromHex('#1A858D');
   static final Color greyLight = HexColor.fromHex('#1A858D');
   static final Color greyDark = HexColor.fromHex('#1A858D');
+  /////////////////////
+
+  static Color greyColor = Colors.grey;
 }

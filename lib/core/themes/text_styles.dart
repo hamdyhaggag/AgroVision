@@ -8,7 +8,7 @@ class TextStyles {
 
   static final TextStyle size12PrimaryRegular = TextStyle(
     fontSize: 12.sp,
-    color: AppColors.primary,
+    color: AppColors.primaryColor,
     fontWeight: FontWeights.regular,
   );
 
@@ -20,7 +20,7 @@ class TextStyles {
 
   static final TextStyle size16BlackRegular = TextStyle(
     fontSize: 16.sp,
-    color: AppColors.black,
+    color: AppColors.blackColor,
     fontWeight: FontWeights.regular,
   );
 }
