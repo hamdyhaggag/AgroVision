@@ -127,16 +127,68 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           (index) => _buildDots(index: index),
                         ),
                       ),
-                      _currentPage + 1 == contents.length
-                          ? Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: isSmallScreen ? 40 : 40,
-                                  vertical: isSmallScreen ? 58 : 58),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 58,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: _currentPage == 0
+                              ? MainAxisAlignment.center
+                              : MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Back button (only shows if _currentPage > 0)
+                            if (_currentPage > 0)
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    _controller.previousPage(
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      curve: Curves.easeIn,
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.greyLight,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: isSmallScreen ? 15 : 17,
+                                    ),
+                                    textStyle: TextStyle(
+                                      fontSize: isSmallScreen ? 20 : 23,
+                                      fontFamily: 'PTS',
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "Back",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.greyColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                            // Spacer between buttons for both 'Back, Next' and 'Back, Start'
+                            if (_currentPage > 0) const SizedBox(width: 10),
+
+                            // Next or Start Now button
+                            Expanded(
                               child: ElevatedButton(
                                 onPressed: () {
-                                  navigateTo(context, const ScreenLayout());
-                                  CacheHelper.saveData(
-                                      key: 'isEnterBefore', value: true);
+                                  if (_currentPage + 1 == contents.length) {
+                                    navigateTo(context, const ScreenLayout());
+                                    CacheHelper.saveData(
+                                        key: 'isEnterBefore', value: true);
+                                  } else {
+                                    _controller.nextPage(
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      curve: Curves.easeIn,
+                                    );
+                                  }
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primaryColor,
@@ -144,8 +196,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   padding: EdgeInsets.symmetric(
-                                    horizontal:
-                                        isSmallScreen ? 60 : width * 0.2,
                                     vertical: isSmallScreen ? 15 : 17,
                                   ),
                                   textStyle: TextStyle(
@@ -153,44 +203,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     fontFamily: 'PTS',
                                   ),
                                 ),
-                                child: const Text(
-                                  "Start Now",
-                                  style: TextStyle(color: Colors.white),
+                                child: Text(
+                                  _currentPage == contents.length - 1
+                                      ? "Start"
+                                      : "Next",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
-                            )
-                          : Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: isSmallScreen ? 40 : 40,
-                                  vertical: isSmallScreen ? 58 : 58),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  _controller.nextPage(
-                                    duration: const Duration(milliseconds: 200),
-                                    curve: Curves.easeIn,
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryColor,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal:
-                                        isSmallScreen ? 60 : width * 0.2,
-                                    vertical: isSmallScreen ? 15 : 17,
-                                  ),
-                                  textStyle: TextStyle(
-                                    fontSize: isSmallScreen ? 20 : 23,
-                                    fontFamily: 'PTS',
-                                  ),
-                                ),
-                                child: const Text(
-                                  "Next",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            )
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

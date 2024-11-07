@@ -9,8 +9,8 @@ class AppColors {
   static final Color error = HexColor.fromHex('#1A858D');
   static Color whiteColor = const Color(0xffffffff);
   static Color blackColor = const Color(0xff000000);
-  static final Color grey = HexColor.fromHex('#1A858D');
-  static final Color greyLight = HexColor.fromHex('#1A858D');
+  static const Color greyLight = Color(0xffe8e8e8);
+  static const Color grey = Color(0xffa1a1a1);
   static final Color greyDark = HexColor.fromHex('#1A858D');
   /////////////////////
 
