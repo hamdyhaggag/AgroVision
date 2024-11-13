@@ -121,7 +121,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
             style: TextStyle(
               color: Color(0xFF001640),
               fontSize: 12,
-              fontFamily: 'Poppins',
+              fontFamily: 'DIN',
               fontWeight: FontWeight.w500,
             ),
           ),

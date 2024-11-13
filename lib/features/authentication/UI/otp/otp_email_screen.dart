@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:agro_vision/core/utils/functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,15 +21,16 @@ class OtpEmailScreen extends StatefulWidget {
 class _OtpEmailScreenState extends State<OtpEmailScreen> {
   bool isLoading = false;
   int _start = 60;
-  late Timer _timer;
+  Timer? _timer;
   String? otpCode;
   final TextEditingController otpController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   void startTimer() {
-    const oneSec = Duration(seconds: 1);
+    _timer?.cancel();
+    _start = 60;
     _timer = Timer.periodic(
-      oneSec,
+      const Duration(seconds: 1),
       (Timer timer) {
         if (_start == 0) {
           setState(() {
@@ -52,9 +54,9 @@ class _OtpEmailScreenState extends State<OtpEmailScreen> {
 
   @override
   void dispose() {
-    super.dispose();
-    _timer.cancel();
+    _timer?.cancel();
     otpController.dispose();
+    super.dispose();
   }
 
   @override
@@ -77,83 +79,87 @@ class _OtpEmailScreenState extends State<OtpEmailScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       RichText(
-                        text: TextSpan(children: [
-                          TextSpan(
-                            text:
-                                '     Please enter the 6 digit code\n   sent to: ',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.navy,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text:
+                                  '     Please enter the 6 digit code\n   sent to: ',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.navy,
+                              ),
                             ),
-                          ),
-                          TextSpan(
-                            text: widget.email,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.primaryColor,
+                            TextSpan(
+                              text: widget.email,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.primaryColor,
+                              ),
                             ),
-                          ),
-                        ]),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 10),
-                    child: PinCodeTextField(
-                      controller: otpController,
-                      length: 6,
-                      obscureText: false,
-                      animationType: AnimationType.fade,
-                      pinTheme: PinTheme(
-                        shape: PinCodeFieldShape.box,
-                        borderRadius: BorderRadius.circular(6.r),
-                        fieldHeight: 50.h,
-                        fieldWidth: 50.w,
-                        activeFillColor: Colors.white,
-                        activeColor: AppColors.primaryColor,
-                        inactiveColor: AppColors.primaryColorshade,
-                        inactiveFillColor: Colors.white,
-                        selectedFillColor: Colors.white,
-                        disabledColor: Colors.white,
-                        borderWidth: 0.1,
-                        activeBorderWidth: 1.5,
-                        inactiveBorderWidth: 1.5,
-                        selectedBorderWidth: 1.5,
-                      ),
-                      animationDuration: const Duration(milliseconds: 300),
-                      backgroundColor: Colors.white,
-                      onCompleted: (v) {
-                        if (kDebugMode) {
-                          print("Completed");
-                        }
-                      },
-                      onChanged: (code) {
-                        setState(() {
-                          otpCode = code;
-                        });
-                        if (kDebugMode) {
-                          print(code);
-                        }
-                      },
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter the OTP code';
-                        } else if (value.length != 6) {
-                          return 'OTP code must be 6 digits';
-                        }
-                        return null;
-                      },
-                      appContext: context,
-                    )),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  child: PinCodeTextField(
+                    controller: otpController,
+                    length: 6,
+                    obscureText: false,
+                    animationType: AnimationType.fade,
+                    pinTheme: PinTheme(
+                      shape: PinCodeFieldShape.box,
+                      borderRadius: BorderRadius.circular(6.r),
+                      fieldHeight: 50.h,
+                      fieldWidth: 50.w,
+                      activeFillColor: Colors.white,
+                      activeColor: AppColors.primaryColor,
+                      inactiveColor: AppColors.primaryColorshade,
+                      inactiveFillColor: Colors.white,
+                      selectedFillColor: Colors.white,
+                      disabledColor: Colors.white,
+                      borderWidth: 0.1,
+                      activeBorderWidth: 1.5,
+                      inactiveBorderWidth: 1.5,
+                      selectedBorderWidth: 1.5,
+                    ),
+                    animationDuration: const Duration(milliseconds: 300),
+                    backgroundColor: Colors.white,
+                    onCompleted: (v) {
+                      if (kDebugMode) {
+                        print("Completed");
+                      }
+                    },
+                    onChanged: (code) {
+                      setState(() {
+                        otpCode = code;
+                      });
+                      if (kDebugMode) {
+                        print(code);
+                      }
+                    },
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter the OTP code';
+                      } else if (value.length != 6) {
+                        return 'OTP code must be 6 digits';
+                      }
+                      return null;
+                    },
+                    appContext: context,
+                  ),
+                ),
                 CustomBottom(
-                    text: 'Verify Code',
-                    onPressed: () {
-                      validateTheDoVerify(context);
-                    }),
+                  text: 'Verify Code',
+                  onPressed: () {
+                    validateTheDoVerify(context);
+                  },
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Text(
@@ -166,12 +172,7 @@ class _OtpEmailScreenState extends State<OtpEmailScreen> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {
-                    setState(() {
-                      _start = 45;
-                    });
-                    startTimer();
-                  },
+                  onTap: startTimer,
                   child: Text(
                     'Resend Code',
                     style: TextStyle(
@@ -192,12 +193,12 @@ class _OtpEmailScreenState extends State<OtpEmailScreen> {
   void validateTheDoVerify(BuildContext context) {
     if (formKey.currentState!.validate()) {
       if (otpCode != null && otpCode!.isNotEmpty) {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (_) => CreateNewPassword(
-                      email: widget.email,
-                    )));
+        navigateAndFinish(
+          context,
+          CreateNewPassword(
+            email: widget.email,
+          ),
+        );
       } else {
         showDialog(
           context: context,

@@ -1,14 +1,60 @@
-import 'package:agro_vision/shared/widgets/custom_appbar.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/themes/app_colors.dart';
+import '../../../../shared/widgets/custom_appbar.dart';
 import '../../../../shared/widgets/custom_botton.dart';
 
-class OtpPhoneScreen extends StatelessWidget {
+class OtpPhoneScreen extends StatefulWidget {
   const OtpPhoneScreen({super.key});
+
+  @override
+  State<OtpPhoneScreen> createState() => _OtpPhoneScreenState();
+}
+
+class _OtpPhoneScreenState extends State<OtpPhoneScreen> {
+  int _start = 60;
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void startTimer() {
+    _timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (Timer timer) {
+        if (_start == 0) {
+          setState(() {
+            timer.cancel();
+          });
+        } else {
+          setState(() {
+            _start--;
+          });
+        }
+      },
+    );
+  }
+
+  void resetTimer() {
+    _timer.cancel();
+    setState(() {
+      _start = 45;
+    });
+    startTimer();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,24 +72,26 @@ class OtpPhoneScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   RichText(
-                    text: TextSpan(children: [
-                      TextSpan(
-                        text: 'Please enter the 4 digit code\n    sent to:',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.navy,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Please enter the 4 digit code\n    sent to: ',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.navy,
+                          ),
                         ),
-                      ),
-                      TextSpan(
-                        text: ' +20 1234567890',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.primaryColor,
+                        TextSpan(
+                          text: '+20 1234567890',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.primaryColor,
+                          ),
                         ),
-                      ),
-                    ]),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -58,34 +106,31 @@ class OtpPhoneScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 fieldWidth: 64.w,
                 cursorColor: AppColors.primaryColor,
-
                 showFieldAsBox: true,
-
-                onCodeChanged: (String code) {
-                  //handle validation or checks here
-                },
-                //runs when every textfield is filled
+                onCodeChanged: (String code) {},
                 onSubmit: (String verificationCode) {
                   showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text("Verification Code"),
-                          content: Text('Code entered is $verificationCode'),
-                        );
-                      });
-                }, // end onSubmit
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text("Verification Code"),
+                        content: Text('Code entered is $verificationCode'),
+                      );
+                    },
+                  );
+                },
               ),
             ),
             CustomBottom(
-                text: 'Verify Code',
-                onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.createNewPassword);
-                }),
+              text: 'Verify Code',
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.createNewPassword);
+              },
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Text(
-                '00:45',
+                '00:${_start.toString().padLeft(2, '0')}',
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -94,7 +139,7 @@ class OtpPhoneScreen extends StatelessWidget {
               ),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: resetTimer,
               child: Text(
                 'Resend Code',
                 style: TextStyle(
@@ -103,7 +148,7 @@ class OtpPhoneScreen extends StatelessWidget {
                   color: AppColors.navy,
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

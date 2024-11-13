@@ -86,7 +86,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               contents[i].title,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontFamily: "PTS",
+                                fontFamily: 'DIN',
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.blackColor,
                                 fontSize: isSmallScreen ? 24 : 12,
@@ -99,7 +99,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 return Text(
                                   contents[i].desc,
                                   style: TextStyle(
-                                    fontFamily: "PTS",
+                                    fontFamily: 'DIN',
                                     fontWeight: FontWeight.w300,
                                     color: AppColors.blackColor,
                                     fontSize: fontSize,
@@ -157,7 +157,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     ),
                                     textStyle: TextStyle(
                                       fontSize: isSmallScreen ? 20 : 23,
-                                      fontFamily: 'PTS',
+                                      fontFamily: 'DIN',
                                     ),
                                   ),
                                   child: const Text(
@@ -199,7 +199,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   ),
                                   textStyle: TextStyle(
                                     fontSize: isSmallScreen ? 20 : 23,
-                                    fontFamily: 'PTS',
+                                    fontFamily: 'DIN',
                                   ),
                                 ),
                                 child: Text(
@@ -234,7 +234,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   textStyle: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: isSmallScreen ? 18 : 20,
-                    fontFamily: 'PTS',
+                    fontFamily: 'DIN',
                   ),
                 ),
                 child: const Text(
