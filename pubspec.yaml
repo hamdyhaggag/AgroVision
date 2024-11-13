@@ -57,6 +57,7 @@ flutter:
     - assets/translations/
     - assets/images/onboarding/
     - assets/images/authentication/
+    - shorebird.yaml
 
   fonts:
     - family: DIN

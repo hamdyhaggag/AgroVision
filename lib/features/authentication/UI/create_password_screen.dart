@@ -114,13 +114,13 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(bottom: 4.0),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4.0),
           child: Text(
             'Password',
             style: TextStyle(
-              color: Color(0xFF001640),
-              fontSize: 12,
+              color: const Color(0xFF001640),
+              fontSize: 12.sp,
               fontFamily: 'DIN',
               fontWeight: FontWeight.w500,
             ),
@@ -130,9 +130,9 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
           controller: passwordController,
           hintText: 'Password',
           isObscureText: isPasswordObscureText,
-          prefixIcon: const Icon(
+          prefixIcon: Icon(
             Icons.lock_outline_rounded,
-            size: 18,
+            size: 18.sp,
           ),
           suffixIcon: GestureDetector(
             onTap: () {
@@ -150,13 +150,13 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
             }
           },
         ),
-        const Padding(
-          padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
           child: Text(
             'Confirm Password',
             style: TextStyle(
-              color: Color(0xFF001640),
-              fontSize: 12,
+              color: const Color(0xFF001640),
+              fontSize: 12.sp,
               fontFamily: 'DIN',
               fontWeight: FontWeight.w500,
             ),
@@ -165,9 +165,9 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
         CustomTextField(
           controller: passwordConfirmationController,
           hintText: 'Confirm Password',
-          prefixIcon: const Icon(
+          prefixIcon: Icon(
             Icons.lock_outline_rounded,
-            size: 18,
+            size: 18.sp,
           ),
           isObscureText: isPasswordConfirmationObscureText,
           suffixIcon: GestureDetector(
