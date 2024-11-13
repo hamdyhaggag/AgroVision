@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
   static const Color primaryColor = Color(0xff34C759);
+  static const Color primaryColorshade = Color(0xffb2e2c3);
+  static const Color navy = Color(0xff51526C);
   static final Color secondaryColor = HexColor.fromHex('#34C759');
   static final Color background = HexColor.fromHex('#1A858D');
   static final Color error = HexColor.fromHex('#1A858D');

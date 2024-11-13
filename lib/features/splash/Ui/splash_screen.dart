@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'package:agro_vision/features/authentication/UI/login_screen.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/helpers/shared_pref_helper.dart';
 import '../../../../core/utils/functions.dart';
 import '../../../../main.dart';
 import '../../onboarding/Ui/onboarding_screen.dart';
-import '../../home/Ui/screen_layout.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -36,7 +36,7 @@ class SplashScreenState extends State<SplashScreen>
 
     Timer(const Duration(seconds: 3), () {
       if (isEnterBefore) {
-        navigateAndFinish(context, const ScreenLayout());
+        navigateAndFinish(context, const LogInScreen());
       } else {
         CacheHelper.saveData(key: 'isEnterBefore', value: true);
         navigateAndFinish(context, const OnboardingScreen());

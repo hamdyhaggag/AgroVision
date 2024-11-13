@@ -34,6 +34,12 @@ dependencies:
   flutter_svg: ^2.0.13
   flutter_vibrate: ^1.3.0
   animated_bottom_navigation_bar: ^1.3.3
+  font_awesome_flutter: ^10.8.0
+  pin_code_fields: ^8.0.1
+  otp_timer_button: ^1.1.1
+  flutter_otp_text_field: ^1.2.0
+
+
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +56,7 @@ flutter:
     - assets/images/
     - assets/translations/
     - assets/images/onboarding/
+    - assets/images/authentication/
 
   fonts:
     - family: DIN
