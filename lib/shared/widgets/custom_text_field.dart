@@ -20,6 +20,7 @@ class CustomTextField extends StatelessWidget {
     this.inputTextStyle,
     this.errorBorder,
     this.focusErrorBorder,
+    this.keyboardType, // Added parameter
   });
 
   final EdgeInsetsGeometry? contentPadding;
@@ -37,6 +38,7 @@ class CustomTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final Function(String?) validator;
   final TextEditingController? controller;
+  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
@@ -49,27 +51,29 @@ class CustomTextField extends StatelessWidget {
         controller: controller,
         onChanged: onChange,
         onSaved: onSaved,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
-            isDense: true,
-            contentPadding: contentPadding ??
-                EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-            constraints: BoxConstraints(
-              maxHeight: height * 0.0625,
-              maxWidth: width,
-            ),
-            suffixIcon: suffixIcon,
-            prefixIcon: prefixIcon,
-            hintText: hintText,
-            hintStyle: TextStyle(
-                color: const Color(0xff929BAB),
-                fontSize: 14.sp,
-                fontWeight: FontWeight.normal),
-            enabledBorder: enabledBorder ?? borderCustom(),
-            focusedBorder:
-                focusedBorder ?? borderCustom(AppColors.primaryColor),
-            errorBorder: errorBorder ?? borderCustom(Colors.red),
-            focusedErrorBorder: focusErrorBorder ?? borderCustom(Colors.red),
-            errorStyle: const TextStyle(fontSize: 0.01)),
+          isDense: true,
+          contentPadding: contentPadding ??
+              EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+          constraints: BoxConstraints(
+            maxHeight: height * 0.0625,
+            maxWidth: width,
+          ),
+          suffixIcon: suffixIcon,
+          prefixIcon: prefixIcon,
+          hintText: hintText,
+          hintStyle: TextStyle(
+            color: const Color(0xff929BAB),
+            fontSize: 14.sp,
+            fontWeight: FontWeight.normal,
+          ),
+          enabledBorder: enabledBorder ?? borderCustom(),
+          focusedBorder: focusedBorder ?? borderCustom(AppColors.primaryColor),
+          errorBorder: errorBorder ?? borderCustom(Colors.red),
+          focusedErrorBorder: focusErrorBorder ?? borderCustom(Colors.red),
+          errorStyle: const TextStyle(fontSize: 0.01),
+        ),
         validator: (value) {
           return validator(value);
         },

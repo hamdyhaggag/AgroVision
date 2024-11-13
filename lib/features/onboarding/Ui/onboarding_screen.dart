@@ -1,10 +1,10 @@
 import 'package:agro_vision/core/themes/app_colors.dart';
+import 'package:agro_vision/features/authentication/UI/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../core/helpers/shared_pref_helper.dart';
 import '../../../core/utils/functions.dart';
-import '../../home/Ui/screen_layout.dart';
 import '../Logic/onboarding_contents.dart';
 import '../Logic/size_config.dart';
 
@@ -178,7 +178,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               child: ElevatedButton(
                                 onPressed: () {
                                   if (_currentPage + 1 == contents.length) {
-                                    navigateTo(context, const ScreenLayout());
+                                    navigateTo(context, const LogInScreen());
                                     CacheHelper.saveData(
                                         key: 'isEnterBefore', value: true);
                                   } else {
@@ -226,7 +226,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               left: 20,
               child: TextButton(
                 onPressed: () {
-                  navigateTo(context, const ScreenLayout());
+                  navigateTo(context, const LogInScreen());
                   CacheHelper.saveData(key: 'isEnterBefore', value: true);
                 },
                 style: TextButton.styleFrom(

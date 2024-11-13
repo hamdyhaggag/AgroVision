@@ -1,3 +1,4 @@
+import 'package:agro_vision/shared/widgets/custom_appbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -5,7 +6,6 @@ import 'package:flutter_svg/svg.dart';
 import '../../../core/helpers/app_regexp.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/themes/app_colors.dart';
-import '../../../shared/widgets/custom_back_arrow_button.dart';
 import '../../../shared/widgets/custom_botton.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 
@@ -66,149 +66,142 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const CustomAppBar(title: 'Create New Password'),
       body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                child: Row(
-                  children: [
-                    const CustomArrowBackBottom(),
-                    SizedBox(
-                      width: 8.w,
-                    ),
-                    Text(
-                      'Forgot Password',
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                    child: SvgPicture.asset(
+                        'assets/images/authentication/Create_New_Password.svg'),
+                  ),
+                  Center(
+                    child: Text(
+                      'New password must be\ndifferent from the last password',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w500,
                         color: AppColors.navy,
                       ),
                     ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: SvgPicture.asset(
-                    'assets/images/authentication/Create_New_Password.svg'),
-              ),
-              Text(
-                '    New password must be\ndiffrent from last password',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.navy,
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Password',
-                    style: TextStyle(
-                      color: Color(0xFF001640),
-                      fontSize: 12,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                    ),
                   ),
-                  CustomTextField(
-                    controller: passwordController,
-                    hintText: 'Password',
-                    isObscureText: isPasswordObscureText,
-                    prefixIcon: const Icon(
-                      Icons.lock_outline_rounded,
-                      size: 18,
-                    ),
-                    suffixIcon: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isPasswordObscureText = !isPasswordObscureText;
-                        });
-                      },
-                      child: Icon(
-                        isPasswordObscureText
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a valid password';
-                      }
-                    },
-                  ),
-                  const Text(
-                    'Confirm Password',
-                    style: TextStyle(
-                      color: Color(0xFF001640),
-                      fontSize: 12,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  CustomTextField(
-                    controller: passwordConfirmationController,
-                    hintText: 'Confirm Password',
-                    prefixIcon: const Icon(
-                      Icons.lock_outline_rounded,
-                      size: 18,
-                    ),
-                    isObscureText: isPasswordConfirmationObscureText,
-                    suffixIcon: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isPasswordConfirmationObscureText =
-                              !isPasswordConfirmationObscureText;
-                        });
-                      },
-                      child: Icon(
-                        isPasswordConfirmationObscureText
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a valid password';
-                      }
-                      if (value != passwordController.text) {
-                        return 'Passwords do not match';
-                      }
+                  SizedBox(height: 24.h),
+                  buildPasswordSection(),
+                  SizedBox(height: 12.h),
+                  CustomBottom(
+                    text: 'Save Password',
+                    onPressed: () {
+                      validateThenDoNewPassword(context);
                     },
                   ),
                 ],
               ),
-              SizedBox(
-                height: 12.h,
-              ),
-              CustomBottom(
-                text: 'Save Password',
-                onPressed: () {
-                  validateThenDoNewPassword(context);
-                },
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  Widget buildPasswordSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 4.0),
+          child: Text(
+            'Password',
+            style: TextStyle(
+              color: Color(0xFF001640),
+              fontSize: 12,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        CustomTextField(
+          controller: passwordController,
+          hintText: 'Password',
+          isObscureText: isPasswordObscureText,
+          prefixIcon: const Icon(
+            Icons.lock_outline_rounded,
+            size: 18,
+          ),
+          suffixIcon: GestureDetector(
+            onTap: () {
+              setState(() {
+                isPasswordObscureText = !isPasswordObscureText;
+              });
+            },
+            child: Icon(
+              isPasswordObscureText ? Icons.visibility_off : Icons.visibility,
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a valid password';
+            }
+          },
+        ),
+        const Padding(
+          padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+          child: Text(
+            'Confirm Password',
+            style: TextStyle(
+              color: Color(0xFF001640),
+              fontSize: 12,
+              fontFamily: 'DIN',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        CustomTextField(
+          controller: passwordConfirmationController,
+          hintText: 'Confirm Password',
+          prefixIcon: const Icon(
+            Icons.lock_outline_rounded,
+            size: 18,
+          ),
+          isObscureText: isPasswordConfirmationObscureText,
+          suffixIcon: GestureDetector(
+            onTap: () {
+              setState(() {
+                isPasswordConfirmationObscureText =
+                    !isPasswordConfirmationObscureText;
+              });
+            },
+            child: Icon(
+              isPasswordConfirmationObscureText
+                  ? Icons.visibility_off
+                  : Icons.visibility,
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a valid password';
+            }
+            if (value != passwordController.text) {
+              return 'Passwords do not match';
+            }
+          },
+        ),
+      ],
+    );
+  }
+
   void validateThenDoNewPassword(BuildContext context) {
     if (_formKey.currentState!.validate()) {
-      // Here, we're setting the email directly
       String? email = widget.email;
       if (kDebugMode) {
         print('Email: $email');
-      } // Log for debugging purposes
-
-      // Simulate password change logic
-      // You can add your own logic for updating password here
+      }
 
       Navigator.pushNamed(context, AppRoutes.congratulationsScreen);
     }

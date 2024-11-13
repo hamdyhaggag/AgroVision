@@ -42,6 +42,7 @@ class _ForgotPasswordPhoneState extends State<ForgotPasswordPhone> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             child: CustomTextField(
+                keyboardType: TextInputType.number,
                 hintText: '01234567890',
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 20,
