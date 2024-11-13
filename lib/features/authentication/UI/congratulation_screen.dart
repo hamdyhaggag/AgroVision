@@ -1,7 +1,8 @@
+import 'package:agro_vision/core/utils/functions.dart';
+import 'package:agro_vision/features/authentication/UI/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import '../../../core/routing/app_routes.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../shared/widgets/custom_botton.dart';
 
@@ -43,7 +44,7 @@ class CongratulationsScreen extends StatelessWidget {
               CustomBottom(
                 text: 'Login',
                 onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.loginScreen);
+                  navigateAndFinish(context, const LogInScreen());
                 },
               ),
             ],

@@ -1,7 +1,9 @@
 import 'package:agro_vision/core/themes/app_colors.dart';
+import 'package:agro_vision/features/home/Ui/screen_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/routing/app_routes.dart';
+import '../../../core/utils/functions.dart';
 import '../../../shared/widgets/custom_botton.dart';
 import '../../../shared/widgets/emai_and_password.dart';
 
@@ -75,7 +77,7 @@ class _LogInScreenState extends State<LogInScreen> {
                 CustomBottom(
                   text: 'Log In',
                   onPressed: () {
-                    Navigator.pushNamed(context, AppRoutes.screenLayout);
+                    navigateAndFinish(context, const ScreenLayout());
                   },
                 ),
               ],
