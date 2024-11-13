@@ -38,6 +38,7 @@ dependencies:
   pin_code_fields: ^8.0.1
   otp_timer_button: ^1.1.1
   flutter_otp_text_field: ^1.2.0
+  flutter_launcher_icons: ^0.14.1
 
 
 
