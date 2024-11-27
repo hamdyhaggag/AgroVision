@@ -32,7 +32,6 @@ dependencies:
   get_it: ^8.0.2
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.13
-  flutter_vibrate: ^1.3.0
   animated_bottom_navigation_bar: ^1.3.3
   font_awesome_flutter: ^10.8.0
   pin_code_fields: ^8.0.1

@@ -43,7 +43,7 @@ class AppRouter {
         );
       case AppRoutes.createNewPassword:
         return MaterialPageRoute(
-          builder: (_) => CreateNewPassword(),
+          builder: (_) => const CreateNewPassword(),
         );
       case AppRoutes.congratulationsScreen:
         return MaterialPageRoute(
