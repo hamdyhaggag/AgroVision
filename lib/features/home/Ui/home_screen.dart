@@ -13,7 +13,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final notes = _getNotes();
+    final notes = someNotesList();
     final fields = someFieldsList();
 
     return Scaffold(
@@ -74,7 +74,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   // Dummy Data
-  List<Map<String, String>> _getNotes() => [
+  List<Map<String, String>> someNotesList() => [
         {
           'image': 'assets/images/field.png',
           'date': 'May 24 • 5:43 pm',

@@ -24,7 +24,6 @@ class FieldsWidget extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                // Navigate to AllFieldsScreen
                 Navigator.push(
                   context,
                   MaterialPageRoute(

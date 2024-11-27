@@ -1,3 +1,4 @@
+import 'package:agro_vision/features/home/Ui/notes_screen.dart';
 import 'package:agro_vision/shared/widgets/custom_botton.dart';
 import 'package:flutter/material.dart';
 
@@ -16,9 +17,34 @@ class NotesListWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Notes",
-            style: TextStyle(
-                fontSize: 18, fontFamily: 'Syne', fontWeight: FontWeight.bold)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text("Notes",
+                style: TextStyle(
+                    fontSize: 18,
+                    fontFamily: 'Syne',
+                    fontWeight: FontWeight.bold)),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NotesScreen(notes: notes),
+                  ),
+                );
+              },
+              child: const Text(
+                'See All',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'SYNE',
+                ),
+              ),
+            )
+          ],
+        ),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -34,10 +60,11 @@ class NotesListWidget extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Center(
-            child: CustomBottom(
-          text: 'Add New Note',
-          onPressed: onAddNote,
-        )),
+          child: CustomBottom(
+            text: 'Add New Note',
+            onPressed: onAddNote,
+          ),
+        ),
       ],
     );
   }

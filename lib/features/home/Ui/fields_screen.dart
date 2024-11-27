@@ -38,7 +38,7 @@ class FieldsScreen extends StatelessWidget {
                   child: Image.asset(
                     field['image']!,
                     fit: BoxFit.cover,
-                    height: 155, // Adjust the height as per your design
+                    height: 155,
                   ),
                 ),
                 Padding(

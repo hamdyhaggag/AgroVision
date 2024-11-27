@@ -11,6 +11,6 @@ class AppRoutes {
   static const String otpEmailScreen = "/otpEmailScreen";
   static const String createNewPassword = "/CreateNewPassword";
   static const String congratulationsScreen = "/congratulationsScreen";
-  static const String notesScreen = "/notesScreen";
+  static const String seeAllNotes = "/seeAllNotes";
   static const String seeAllFields = "/seeAllFields";
 }

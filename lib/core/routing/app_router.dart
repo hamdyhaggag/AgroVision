@@ -56,10 +56,12 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => FieldsScreen(fields: fields),
         );
-      case AppRoutes.notesScreen:
+      case AppRoutes.seeAllNotes:
+        final notes = settings.arguments as List<Map<String, String>>;
         return MaterialPageRoute(
-          builder: (_) => const NotesScreen(),
+          builder: (_) => NotesScreen(notes: notes),
         );
+
       default:
         return MaterialPageRoute(
           builder: (_) => const OnboardingScreen(),
