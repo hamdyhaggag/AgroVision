@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../features/home/Ui/fields_screen.dart';
 
 class FieldsWidget extends StatelessWidget {
   final List<Map<String, String>> fields;
@@ -10,9 +11,37 @@ class FieldsWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Fields',
-            style: TextStyle(
-                fontSize: 18, fontFamily: 'Syne', fontWeight: FontWeight.bold)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'My Fields',
+              style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'Syne',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                // Navigate to AllFieldsScreen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FieldsScreen(fields: fields),
+                  ),
+                );
+              },
+              child: const Text(
+                'See All',
+                style: TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'SYNE'),
+              ),
+            ),
+          ],
+        ),
         SizedBox(
           height: 200,
           child: ListView.builder(

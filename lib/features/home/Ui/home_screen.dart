@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final notes = _getNotes();
-    final fields = _getFields();
+    final fields = someFieldsList();
 
     return Scaffold(
       appBar: _buildAppBar(context),
@@ -87,7 +87,7 @@ class HomeScreen extends StatelessWidget {
         },
       ];
 
-  List<Map<String, String>> _getFields() => [
+  List<Map<String, String>> someFieldsList() => [
         {
           'image': 'assets/images/field.png',
           'name': 'Empty Fields',
@@ -102,8 +102,14 @@ class HomeScreen extends StatelessWidget {
         },
         {
           'image': 'assets/images/field.png',
+          'name': 'Empty Fields',
+          'size': '10 ha',
+          'type': 'Grapes',
+        },
+        {
+          'image': 'assets/images/field.png',
           'name': 'Grape Fields',
-          'size': '11 ha',
+          'size': '10 ha',
           'type': 'Grapes',
         },
       ];

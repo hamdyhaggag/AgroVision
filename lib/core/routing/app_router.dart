@@ -1,10 +1,12 @@
 import 'package:agro_vision/features/authentication/UI/congratulation_screen.dart';
+import 'package:agro_vision/features/home/Ui/fields_screen.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/UI/create_password_screen.dart';
 import '../../features/authentication/UI/forgot password/forgot_password_email.dart';
 import '../../features/authentication/UI/forgot password/forgot_password_phone.dart';
 import '../../features/authentication/UI/otp/otp_email_screen.dart';
 import '../../features/authentication/UI/otp/otp_phone_screen.dart';
+import '../../features/home/Ui/notes_screen.dart';
 import '../../features/home/Ui/screen_layout.dart';
 import '../../features/onboarding/Ui/onboarding_screen.dart';
 import '../../features/splash/Ui/splash_screen.dart';
@@ -48,6 +50,15 @@ class AppRouter {
       case AppRoutes.congratulationsScreen:
         return MaterialPageRoute(
           builder: (_) => const CongratulationsScreen(),
+        );
+      case AppRoutes.seeAllFields:
+        final fields = settings.arguments as List<Map<String, String>>;
+        return MaterialPageRoute(
+          builder: (_) => FieldsScreen(fields: fields),
+        );
+      case AppRoutes.notesScreen:
+        return MaterialPageRoute(
+          builder: (_) => const NotesScreen(),
         );
       default:
         return MaterialPageRoute(
