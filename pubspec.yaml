@@ -57,6 +57,7 @@ flutter:
     - assets/translations/
     - assets/images/onboarding/
     - assets/images/authentication/
+    - assets/icon/
     - shorebird.yaml
 
   fonts:

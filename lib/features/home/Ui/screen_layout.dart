@@ -63,8 +63,8 @@ class ScreenLayout extends StatelessWidget {
               backgroundColor: AppColors.navBarColor,
               activeColor: Theme.of(context).primaryColor,
               inactiveColor: AppColors.greyColor,
-              leftCornerRadius: 32,
-              rightCornerRadius: 32,
+              leftCornerRadius: 0,
+              rightCornerRadius: 0,
             ),
           );
         },
