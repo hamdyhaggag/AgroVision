@@ -38,6 +38,8 @@ dependencies:
   otp_timer_button: ^1.1.1
   flutter_otp_text_field: ^1.2.0
   flutter_launcher_icons: ^0.14.1
+  fl_chart: ^0.69.2
+
 
 
 

@@ -8,6 +8,7 @@ import '../../features/authentication/UI/otp/otp_email_screen.dart';
 import '../../features/authentication/UI/otp/otp_phone_screen.dart';
 import '../../features/home/Ui/notes_screen.dart';
 import '../../features/home/Ui/screen_layout.dart';
+import '../../features/monitoring/UI/field_detail_screen.dart';
 import '../../features/onboarding/Ui/onboarding_screen.dart';
 import '../../features/splash/Ui/splash_screen.dart';
 import 'app_routes.dart';
@@ -60,6 +61,13 @@ class AppRouter {
         final notes = settings.arguments as List<Map<String, String>>;
         return MaterialPageRoute(
           builder: (_) => NotesScreen(notes: notes),
+        );
+      case AppRoutes.fieldDetailScreen:
+        final field = settings.arguments as Map<String, String>;
+
+        return MaterialPageRoute(
+          builder: (_) => FieldDetailScreen(
+              field: field), // Pass the field data to the screen
         );
 
       default:
