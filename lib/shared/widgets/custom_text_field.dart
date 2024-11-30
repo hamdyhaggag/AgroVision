@@ -20,7 +20,8 @@ class CustomTextField extends StatelessWidget {
     this.inputTextStyle,
     this.errorBorder,
     this.focusErrorBorder,
-    this.keyboardType, // Added parameter
+    this.keyboardType,
+    this.errorMessage, // New parameter
   });
 
   final EdgeInsetsGeometry? contentPadding;
@@ -39,46 +40,64 @@ class CustomTextField extends StatelessWidget {
   final Function(String?) validator;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
+  final String? errorMessage; // Added field
 
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    return SizedBox(
-      width: 347.w,
-      height: 48.h,
-      child: TextFormField(
-        controller: controller,
-        onChanged: onChange,
-        onSaved: onSaved,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          isDense: true,
-          contentPadding: contentPadding ??
-              EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-          constraints: BoxConstraints(
-            maxHeight: height * 0.0625,
-            maxWidth: width,
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 347.w,
+          height: 48.h,
+          child: TextFormField(
+            controller: controller,
+            onChanged: onChange,
+            onSaved: onSaved,
+            keyboardType: keyboardType,
+            decoration: InputDecoration(
+              isDense: true,
+              contentPadding: contentPadding ??
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+              constraints: BoxConstraints(
+                maxHeight: height * 0.0625,
+                maxWidth: width,
+              ),
+              suffixIcon: suffixIcon,
+              prefixIcon: prefixIcon,
+              hintText: hintText,
+              hintStyle: TextStyle(
+                color: const Color(0xff929BAB),
+                fontSize: 14.sp,
+                fontWeight: FontWeight.normal,
+              ),
+              enabledBorder: enabledBorder ?? borderCustom(),
+              focusedBorder:
+                  focusedBorder ?? borderCustom(AppColors.primaryColor),
+              errorBorder: errorBorder ?? borderCustom(Colors.red),
+              focusedErrorBorder: focusErrorBorder ?? borderCustom(Colors.red),
+            ),
+            validator: (value) {
+              return validator(value);
+            },
+            obscureText: isObscureText ?? false,
           ),
-          suffixIcon: suffixIcon,
-          prefixIcon: prefixIcon,
-          hintText: hintText,
-          hintStyle: TextStyle(
-            color: const Color(0xff929BAB),
-            fontSize: 14.sp,
-            fontWeight: FontWeight.normal,
-          ),
-          enabledBorder: enabledBorder ?? borderCustom(),
-          focusedBorder: focusedBorder ?? borderCustom(AppColors.primaryColor),
-          errorBorder: errorBorder ?? borderCustom(Colors.red),
-          focusedErrorBorder: focusErrorBorder ?? borderCustom(Colors.red),
-          errorStyle: const TextStyle(fontSize: 0.01),
         ),
-        validator: (value) {
-          return validator(value);
-        },
-        obscureText: isObscureText ?? false,
-      ),
+        if (errorMessage != null && errorMessage!.isNotEmpty)
+          Padding(
+            padding: EdgeInsets.only(top: 4.h, left: 12.w),
+            child: Text(
+              errorMessage!,
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 12.sp,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
