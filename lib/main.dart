@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'app.dart';
+import 'core/dependency_injection/di.dart';
 import 'core/helpers/app_localizations.dart';
 import 'core/helpers/shared_pref_helper.dart';
 import 'core/routing/app_router.dart';
@@ -17,7 +18,7 @@ void main() async {
   await EasyLocalization.ensureInitialized();
   await CacheHelper.init();
   await initializeAppSettings();
-  // setupGetIt();
+  await setupGetIt();
 
   Bloc.observer = const BlocObserverChecker();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -34,5 +35,5 @@ void main() async {
 }
 
 Future<void> initializeAppSettings() async {
-  isEnterBefore = CacheHelper.getBoolean(key: ('isEnterBefore'));
+  isEnterBefore = CacheHelper.getBoolean(key: 'isEnterBefore');
 }

@@ -178,7 +178,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               child: ElevatedButton(
                                 onPressed: () {
                                   if (_currentPage + 1 == contents.length) {
-                                    navigateTo(context, const LogInScreen());
+                                    navigateTo(context, const LoginScreen());
                                     CacheHelper.saveData(
                                         key: 'isEnterBefore', value: true);
                                   } else {
@@ -226,7 +226,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               left: 20,
               child: TextButton(
                 onPressed: () {
-                  navigateTo(context, const LogInScreen());
+                  navigateTo(context, const LoginScreen());
                   CacheHelper.saveData(key: 'isEnterBefore', value: true);
                 },
                 style: TextButton.styleFrom(

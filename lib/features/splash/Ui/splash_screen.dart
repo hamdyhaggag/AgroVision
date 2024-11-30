@@ -36,7 +36,7 @@ class SplashScreenState extends State<SplashScreen>
 
     Timer(const Duration(seconds: 3), () {
       if (isEnterBefore) {
-        navigateAndFinish(context, const LogInScreen());
+        navigateAndFinish(context, const LoginScreen());
       } else {
         CacheHelper.saveData(key: 'isEnterBefore', value: true);
         navigateAndFinish(context, const OnboardingScreen());

@@ -54,11 +54,11 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
     passwordController.addListener(() {
       setState(() {
         hasLowercase = AppRegex.hasLowerCase(passwordController.text);
-        hasUppercase = AppRegex.hasUpperCase(passwordController.text);
-        hasSpecialCharacters =
-            AppRegex.hasSpecialCharacter(passwordController.text);
+        // hasUppercase = AppRegex.hasUpperCase(passwordController.text);
+        // hasSpecialCharacters =
+        //     AppRegex.hasSpecialCharacter(passwordController.text);
         hasNumber = AppRegex.hasNumber(passwordController.text);
-        hasMinLength = AppRegex.hasMinLength(passwordController.text);
+        // hasMinLength = AppRegex.hasMinLength(passwordController.text);
       });
     });
   }

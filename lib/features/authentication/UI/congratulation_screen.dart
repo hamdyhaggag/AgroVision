@@ -44,7 +44,7 @@ class CongratulationsScreen extends StatelessWidget {
               CustomBottom(
                 text: 'Login',
                 onPressed: () {
-                  navigateAndFinish(context, const LogInScreen());
+                  navigateAndFinish(context, const LoginScreen());
                 },
               ),
             ],
