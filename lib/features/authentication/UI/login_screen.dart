@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../core/routing/app_routes.dart';
 import '../../../core/utils/utils.dart';
 import '../../../shared/widgets/custom_botton.dart';
 import '../../../shared/widgets/emai_and_password.dart';
@@ -53,14 +54,17 @@ class LoginScreen extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 4, left: 4),
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.pushNamed(
+                            context, AppRoutes.forgotPasswordPhone);
+                      },
                       child: Text(
                         'Forgot Password?',
                         style: TextStyle(
                           color: AppColors.primaryColor,
                           fontFamily: 'SYNE',
                           fontSize: 12.sp,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
