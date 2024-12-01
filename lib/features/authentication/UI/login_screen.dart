@@ -11,6 +11,7 @@ import '../../../shared/widgets/show_custom_notification_error.dart';
 import '../Data/model/login_request_body.dart';
 import '../Logic/login_cubit.dart';
 import '../Logic/login_state.dart';
+import 'package:lottie/lottie.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -71,12 +72,21 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(
-                  height: 12.h,
+                  height: 15.h,
                 ),
                 BlocBuilder<LoginCubit, LoginState>(
                   builder: (context, state) {
                     if (state is Loading) {
-                      return const CircularProgressIndicator();
+                      return Center(
+                        child: SizedBox(
+                          height: 100,
+                          width: 100,
+                          child: Lottie.asset(
+                            'assets/animations/loading.json',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      );
                     }
                     return CustomBottom(
                       text: 'Log In',
@@ -86,18 +96,17 @@ class LoginScreen extends StatelessWidget {
                         if (kDebugMode) {
                           print(
                               context.read<LoginCubit>().emailController.text);
-                        }
-                        if (kDebugMode) {
                           print(context
                               .read<LoginCubit>()
                               .passwordController
                               .text);
                         }
+
                         validateThenDoLogin(context);
                       },
                     );
                   },
-                ),
+                )
               ],
             ),
           ),
