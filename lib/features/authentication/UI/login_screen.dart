@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../shared/widgets/custom_botton.dart';
 import '../../../shared/widgets/emai_and_password.dart';
+import '../../../shared/widgets/show_custom_notification_error.dart';
 import '../Data/model/login_request_body.dart';
 import '../Logic/login_cubit.dart';
 import '../Logic/login_state.dart';
@@ -25,7 +26,7 @@ class LoginScreen extends StatelessWidget {
                 ? 'Invalid email or password. Please try again.'
                 : state.error;
 
-            showCustomNotification(context, errorMessage, Colors.red);
+            showCustomNotification(context, errorMessage, AppColors.greyColor);
           }
         },
         child: Padding(
@@ -107,55 +108,5 @@ class LoginScreen extends StatelessWidget {
             ),
           );
     }
-  }
-
-  void showCustomNotification(
-      BuildContext context, String message, Color color) {
-    late OverlayEntry overlayEntry;
-    overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        bottom: 0,
-        left: 0,
-        right: 0,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w),
-            color: color,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    message,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    overlayEntry.remove();
-                  },
-                  icon: const Icon(Icons.close, color: Colors.white),
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Insert the overlay entry into the Overlay
-    Overlay.of(context).insert(overlayEntry);
-
-    // Automatically remove the notification after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
-      overlayEntry.remove();
-    });
   }
 }
