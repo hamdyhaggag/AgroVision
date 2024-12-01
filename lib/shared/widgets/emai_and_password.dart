@@ -18,6 +18,7 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
   bool hasSpecialCharacters = false;
   bool hasNumber = false;
   bool hasMinLength = false;
+  bool isPasswordObscureText = true;
 
   late TextEditingController passwordController;
   @override
@@ -53,11 +54,20 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
                 size: 18.sp,
               ),
               validator: (value) {
-                if (value == null ||
-                    value.isEmpty ||
-                    !AppRegex.isEmailValid(value)) {
-                  return 'please enter a valid email';
+                if (value == null || value.isEmpty) {
+                  return 'Please enter an email address';
                 }
+                if (!value.contains('@')) {
+                  return 'Email must contain "@"';
+                }
+                if (!value.contains('.') ||
+                    value.indexOf('.') < value.indexOf('@')) {
+                  return 'Email must have a valid domain (e.g., ".com")';
+                }
+                if (!AppRegex.isEmailValid(value)) {
+                  return 'Please enter a valid email address';
+                }
+                return null; // Validation passed
               },
               controller: context.read<LoginCubit>().emailController,
             ),
@@ -66,16 +76,43 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
             ),
             CustomTextField(
               hintText: 'Password',
+              isObscureText: isPasswordObscureText,
               prefixIcon: const Icon(
                 Icons.lock_outline_rounded,
                 size: 18,
               ),
+              suffixIcon: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isPasswordObscureText = !isPasswordObscureText;
+                  });
+                },
+                child: Icon(
+                  isPasswordObscureText
+                      ? Icons.visibility_off
+                      : Icons.visibility,
+                ),
+              ),
               validator: (value) {
-                if (value == null ||
-                    value.isEmpty ||
-                    !AppRegex.isPasswordValid(value)) {
-                  return 'please enter a valid password';
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a password';
                 }
+                if (!AppRegex.hasLowerCase(value)) {
+                  return 'Password must contain at least one lowercase letter';
+                }
+                if (!AppRegex.hasUpperCase(value)) {
+                  return 'Password must contain at least one uppercase letter';
+                }
+                if (!AppRegex.hasNumber(value)) {
+                  return 'Password must contain at least one number';
+                }
+                if (!AppRegex.hasSpecialCharacter(value)) {
+                  return 'must contain at least one special character (@, #, !, etc.)';
+                }
+                if (!AppRegex.hasMinLength(value)) {
+                  return 'Password must be at least 8 characters long';
+                }
+                return null; // If all checks pass, no error message is returned
               },
               controller: context.read<LoginCubit>().passwordController,
             ),
