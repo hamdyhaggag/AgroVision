@@ -36,6 +36,11 @@ class AgroVision extends StatelessWidget {
             theme: ThemeData(
               primaryColor: AppColors.primaryColor,
               scaffoldBackgroundColor: Colors.white,
+              textSelectionTheme: const TextSelectionThemeData(
+                cursorColor: AppColors.primaryColor,
+                selectionColor: AppColors.primaryColor,
+                selectionHandleColor: AppColors.primaryColor,
+              ),
             ),
             navigatorKey: AppRouter.navigatorKey,
             onGenerateRoute: appRouter.generateRoute,

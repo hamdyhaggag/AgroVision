@@ -25,21 +25,17 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
   void initState() {
     super.initState();
     passwordController = context.read<LoginCubit>().passwordController;
-    setupPasswordControllerListener();
+    // setupPasswordControllerListener();
   }
 
-  void setupPasswordControllerListener() {
-    passwordController.addListener(() {
-      setState(() {
-        hasLowercase = AppRegex.hasLowerCase(passwordController.text);
-        // hasUppercase = AppRegex.hasUpperCase(passwordController.text);
-        // hasSpecialCharacters =
-        // AppRegex.hasSpecialCharacter(passwordController.text);
-        hasNumber = AppRegex.hasNumber(passwordController.text);
-        // hasMinLength = AppRegex.hasMinLength(passwordController.text);
-      });
-    });
-  }
+  // void setupPasswordControllerListener() {
+  //   passwordController.addListener(() {
+  //     setState(() {
+  //       hasLowercase = AppRegex.hasLowerCase(passwordController.text);
+  //       hasNumber = AppRegex.hasNumber(passwordController.text);
+  //     });
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +63,7 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
                 if (!AppRegex.isEmailValid(value)) {
                   return 'Please enter a valid email address';
                 }
-                return null; // Validation passed
+                return null;
               },
               controller: context.read<LoginCubit>().emailController,
             ),
@@ -112,7 +108,7 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
                 if (!AppRegex.hasMinLength(value)) {
                   return 'Password must be at least 8 characters long';
                 }
-                return null; // If all checks pass, no error message is returned
+                return null;
               },
               controller: context.read<LoginCubit>().passwordController,
             ),

@@ -21,7 +21,7 @@ class CustomTextField extends StatelessWidget {
     this.errorBorder,
     this.focusErrorBorder,
     this.keyboardType,
-    this.errorMessage, // New parameter
+    this.errorMessage,
   });
 
   final EdgeInsetsGeometry? contentPadding;
@@ -40,7 +40,7 @@ class CustomTextField extends StatelessWidget {
   final Function(String?) validator;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
-  final String? errorMessage; // Added field
+  final String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +57,7 @@ class CustomTextField extends StatelessWidget {
             controller: controller,
             onChanged: onChange,
             onSaved: onSaved,
+            cursorColor: AppColors.primaryColor,
             keyboardType: keyboardType,
             decoration: InputDecoration(
               isDense: true,
