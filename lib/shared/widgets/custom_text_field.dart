@@ -72,6 +72,7 @@ class CustomTextField extends StatelessWidget {
               hintStyle: TextStyle(
                 color: const Color(0xff929BAB),
                 fontSize: 14.sp,
+                fontFamily: 'SYNE',
                 fontWeight: FontWeight.normal,
               ),
               enabledBorder: enabledBorder ?? borderCustom(),
@@ -93,6 +94,7 @@ class CustomTextField extends StatelessWidget {
               errorMessage!,
               style: TextStyle(
                 color: Colors.red,
+                fontFamily: 'SYNE',
                 fontSize: 12.sp,
               ),
             ),
