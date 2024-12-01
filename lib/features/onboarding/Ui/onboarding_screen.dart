@@ -86,7 +86,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               contents[i].title,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontFamily: 'DIN',
+                                fontFamily: 'SYNE',
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.blackColor,
                                 fontSize: isSmallScreen ? 24 : 12,
@@ -99,7 +99,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 return Text(
                                   contents[i].desc,
                                   style: TextStyle(
-                                    fontFamily: 'DIN',
+                                    fontFamily: 'SYNE',
                                     fontWeight: FontWeight.w300,
                                     color: AppColors.blackColor,
                                     fontSize: fontSize,
@@ -157,13 +157,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     ),
                                     textStyle: TextStyle(
                                       fontSize: isSmallScreen ? 20 : 23,
-                                      fontFamily: 'DIN',
+                                      fontFamily: 'SYNE',
                                     ),
                                   ),
                                   child: const Text(
                                     "Back",
                                     style: TextStyle(
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight: FontWeight.w200,
                                       color: AppColors.greyColor,
                                     ),
                                   ),
@@ -199,7 +199,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   ),
                                   textStyle: TextStyle(
                                     fontSize: isSmallScreen ? 20 : 23,
-                                    fontFamily: 'DIN',
+                                    fontFamily: 'SYNE',
                                   ),
                                 ),
                                 child: Text(
@@ -208,7 +208,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       : "Next",
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w200,
                                   ),
                                 ),
                               ),
@@ -232,14 +232,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 style: TextButton.styleFrom(
                   elevation: 0,
                   textStyle: TextStyle(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w300,
                     fontSize: isSmallScreen ? 18 : 20,
-                    fontFamily: 'DIN',
+                    fontFamily: 'SYNE',
                   ),
                 ),
                 child: const Text(
                   "Skip",
-                  style: TextStyle(color: AppColors.primaryColor),
+                  style: TextStyle(
+                    color: AppColors.primaryColor,
+                    fontFamily: 'SYNE',
+                  ),
                 ),
               ),
             ),
