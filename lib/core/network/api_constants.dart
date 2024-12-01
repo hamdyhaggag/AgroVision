@@ -1,6 +1,7 @@
 class ApiConstants {
   static const String baseUrl = 'https://api.agrovision.ltd/api/';
   static const String login = 'login';
+  static const String logout = 'logout';
 }
 
 class ApiErrors {

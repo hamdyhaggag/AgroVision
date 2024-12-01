@@ -7,8 +7,9 @@ import 'core/routing/app_router.dart';
 import 'core/routing/app_routes.dart';
 import 'core/themes/app_colors.dart';
 import 'core/utils/utils.dart';
-import 'features/authentication/Logic/auth_cubit.dart';
-import 'features/authentication/Logic/login_cubit.dart';
+import 'features/authentication/Logic/auth cubit/auth_cubit.dart';
+import 'features/authentication/Logic/login cubit/login_cubit.dart';
+import 'features/authentication/Logic/logout cubit/logout_cubit.dart';
 
 class AgroVision extends StatelessWidget {
   final AppRouter appRouter;
@@ -28,7 +29,10 @@ class AgroVision extends StatelessWidget {
             ),
             BlocProvider(
               create: (BuildContext context) => LoginCubit(getIt()),
-            )
+            ),
+            BlocProvider(
+              create: (BuildContext context) => LogoutCubit(getIt()),
+            ),
           ],
           child: MaterialApp(
             title: 'AgroVision',

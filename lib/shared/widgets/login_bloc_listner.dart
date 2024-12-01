@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/routing/app_routes.dart';
-import '../../features/authentication/Logic/login_cubit.dart';
-import '../../features/authentication/Logic/login_state.dart';
+import '../../features/authentication/Logic/login cubit/login_cubit.dart';
+import '../../features/authentication/Logic/login cubit/login_state.dart';
 
 class LoginBlocListener extends StatelessWidget {
   const LoginBlocListener({super.key});

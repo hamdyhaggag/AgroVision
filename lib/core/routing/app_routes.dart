@@ -2,6 +2,7 @@ class AppRoutes {
   AppRoutes._();
   static const String onBoardingScreen = "/onBoardingScreen";
   static const String loginScreen = "/loginScreen";
+  static const String logout = "/logout";
   static const String splashScreen = "/splashScreen";
   static const String screenLayout = "/screenLayout";
   static const String homeScreen = "/homeScreen";

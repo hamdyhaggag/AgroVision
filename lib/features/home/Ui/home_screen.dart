@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../../../core/routing/app_routes.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../shared/widgets/fields_widget.dart';
 import '../../../shared/widgets/notes_list_widget.dart';
@@ -23,7 +24,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // AppBar Widget
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
@@ -37,9 +37,12 @@ class HomeScreen extends StatelessWidget {
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),
-          const CircleAvatar(
-            radius: 20,
-            backgroundImage: AssetImage('assets/images/user.png'),
+          InkWell(
+            onTap: () => Navigator.pushNamed(context, AppRoutes.logout),
+            child: const CircleAvatar(
+              radius: 20,
+              backgroundImage: AssetImage('assets/images/user.png'),
+            ),
           ),
         ],
       ),

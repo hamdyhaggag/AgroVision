@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../Data/model/login_request_body.dart';
-import '../Data/repos/login_repo.dart';
+import '../../Data/model/login_request_body.dart';
+import '../../Data/repos/login_repo.dart';
 import 'login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {

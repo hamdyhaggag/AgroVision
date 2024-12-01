@@ -1,4 +1,5 @@
 import 'package:agro_vision/features/authentication/UI/congratulation_screen.dart';
+import 'package:agro_vision/features/home/Ui/logout_screen.dart';
 import 'package:agro_vision/features/home/Ui/fields_screen.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/UI/create_password_screen.dart';
@@ -51,6 +52,10 @@ class AppRouter {
       case AppRoutes.congratulationsScreen:
         return MaterialPageRoute(
           builder: (_) => const CongratulationsScreen(),
+        );
+      case AppRoutes.logout:
+        return MaterialPageRoute(
+          builder: (_) => const LogoutScreen(),
         );
       case AppRoutes.seeAllFields:
         final fields = settings.arguments as List<Map<String, String>>;
