@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../core/utils/utils.dart';
 import '../../../shared/widgets/custom_botton.dart';
 import '../../../shared/widgets/emai_and_password.dart';
 import '../../../shared/widgets/show_custom_notification_error.dart';
@@ -76,6 +77,8 @@ class LoginScreen extends StatelessWidget {
                     return CustomBottom(
                       text: 'Log In',
                       onPressed: () {
+                        Utils.closeKeyboard(context);
+
                         if (kDebugMode) {
                           print(
                               context.read<LoginCubit>().emailController.text);
