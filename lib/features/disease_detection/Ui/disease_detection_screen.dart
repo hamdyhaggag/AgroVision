@@ -1,6 +1,5 @@
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
-import '../../../core/themes/text_styles.dart';
 import '../../../models/disease_model.dart';
 import '../../../shared/widgets/custom_appbar.dart';
 
