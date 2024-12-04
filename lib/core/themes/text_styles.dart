@@ -8,18 +8,21 @@ class TextStyles {
 
   static final TextStyle size12PrimaryRegular = TextStyle(
     fontSize: 12.sp,
+    fontFamily: 'SYNE',
     color: AppColors.primaryColor,
     fontWeight: FontWeights.regular,
   );
 
   static final TextStyle size14GreyDarkLight = TextStyle(
     fontSize: 14.sp,
+    fontFamily: 'SYNE',
     color: AppColors.greyColor,
     fontWeight: FontWeights.light,
   );
 
   static final TextStyle size16BlackRegular = TextStyle(
     fontSize: 16.sp,
+    fontFamily: 'SYNE',
     color: AppColors.blackColor,
     fontWeight: FontWeights.regular,
   );

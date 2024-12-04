@@ -15,5 +15,7 @@ class AppColors {
   static Color navBarColor = const Color(0xffE6E6E6);
   static const Color greyLight = Color(0xffe8e8e8);
   static const Color greyColor = Color(0xffa1a1a1);
+  static const Color completeColor = Color(0xffC0FCE3);
+  static const Color inCompleteColor = Color(0xfffebbbb);
   /////////////////////
 }
