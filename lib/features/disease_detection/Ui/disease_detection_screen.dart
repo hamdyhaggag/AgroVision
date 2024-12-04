@@ -55,8 +55,8 @@ class DiseaseDetectionScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 130,
-                    height: 100,
+                    width: 150,
+                    height: 115,
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage(disease.imageUrl),
@@ -64,7 +64,7 @@ class DiseaseDetectionScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 10),
                   // Text Section
                   Expanded(
                     child: Column(
@@ -79,7 +79,7 @@ class DiseaseDetectionScreen extends StatelessWidget {
                             color: AppColors.blackColor,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 2),
                         Text(
                           disease.status,
                           style: TextStyle(
@@ -97,7 +97,7 @@ class DiseaseDetectionScreen extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: 'SYNE',
                               fontWeight: FontWeight.w500,
-                              fontSize: 15,
+                              fontSize: 13,
                               color: disease.isComplete
                                   ? Colors.green
                                   : Colors.red,
