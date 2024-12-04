@@ -31,11 +31,21 @@ class HomeScreen extends StatelessWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu, color: Colors.white),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            ),
+          Row(
+            children: [
+              Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu, color: Colors.white),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.notifications_active_rounded,
+                    color: Colors.white),
+                onPressed: () =>
+                    Navigator.pushNamed(context, AppRoutes.notificationsScreen),
+              ),
+            ],
           ),
           InkWell(
             onTap: () => Navigator.pushNamed(context, AppRoutes.logout),

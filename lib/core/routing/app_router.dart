@@ -8,6 +8,7 @@ import '../../features/authentication/UI/forgot password/forgot_password_phone.d
 import '../../features/authentication/UI/otp/otp_email_screen.dart';
 import '../../features/authentication/UI/otp/otp_phone_screen.dart';
 import '../../features/home/Ui/notes_screen.dart';
+import '../../features/home/Ui/notifications_screen.dart';
 import '../../features/home/Ui/screen_layout.dart';
 import '../../features/monitoring/UI/field_detail_screen.dart';
 import '../../features/onboarding/Ui/onboarding_screen.dart';
@@ -56,6 +57,10 @@ class AppRouter {
       case AppRoutes.logout:
         return MaterialPageRoute(
           builder: (_) => const LogoutScreen(),
+        );
+      case AppRoutes.notificationsScreen:
+        return MaterialPageRoute(
+          builder: (_) => NotificationsScreen(),
         );
       case AppRoutes.seeAllFields:
         final fields = settings.arguments as List<Map<String, String>>;
