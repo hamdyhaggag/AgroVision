@@ -1,6 +1,8 @@
 import 'package:agro_vision/features/authentication/UI/congratulation_screen.dart';
+import 'package:agro_vision/features/home/Ui/add_new_note.dart';
 import 'package:agro_vision/features/home/Ui/logout_screen.dart';
 import 'package:agro_vision/features/home/Ui/fields_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/UI/create_password_screen.dart';
 import '../../features/authentication/UI/forgot password/forgot_password_email.dart';
@@ -76,10 +78,19 @@ class AppRouter {
         final field = settings.arguments as Map<String, String>;
 
         return MaterialPageRoute(
-          builder: (_) => FieldDetailScreen(
-              field: field), // Pass the field data to the screen
+          builder: (_) => FieldDetailScreen(field: field),
         );
 
+      case AppRoutes.addNewNote:
+        return MaterialPageRoute(
+          builder: (_) => AddNewNoteScreen(
+            onSave: (String title, String content) {
+              // Implement save logic here
+              debugPrint('Title: $title');
+              debugPrint('Content: $content');
+            },
+          ),
+        );
       default:
         return MaterialPageRoute(
           builder: (_) => const OnboardingScreen(),

@@ -16,4 +16,5 @@ class AppRoutes {
   static const String seeAllNotes = "/seeAllNotes";
   static const String seeAllFields = "/seeAllFields";
   static const String fieldDetailScreen = "/fieldDetailScreen";
+  static const String addNewNote = "/addNewNote";
 }

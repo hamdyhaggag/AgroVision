@@ -78,7 +78,13 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           const SizedBox(height: 5),
-          NotesListWidget(notes: notes, onAddNote: () => print('Add Note')),
+          Builder(builder: (context) {
+            return NotesListWidget(
+              notes: notes,
+              onAddNote: () =>
+                  Navigator.pushNamed(context, AppRoutes.addNewNote),
+            );
+          }),
           const SizedBox(height: 18),
           FieldsWidget(fields: fields),
         ],
