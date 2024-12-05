@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:ui'; // Import this to use ImageFilter
+import 'dart:ui';
+import '../../core/themes/app_colors.dart';
 
 class StatCard extends StatelessWidget {
   final String title;
@@ -16,16 +17,14 @@ class StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(
-          12), // Clip the border radius of the entire widget
+      borderRadius: BorderRadius.circular(12),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5), // Blur effect
+        filter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5),
         child: SizedBox(
           width: 170,
           height: 210,
           child: Card(
-            color: Colors.green.shade400.withOpacity(
-                0.1), // Set a transparent background with slight opacity
+            color: AppColors.greyColor.withOpacity(0.5),
             elevation: 5,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
