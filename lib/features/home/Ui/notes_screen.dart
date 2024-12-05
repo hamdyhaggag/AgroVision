@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../../../core/themes/app_colors.dart';
 import '../../../shared/widgets/custom_appbar.dart';
+import 'edit_note_screen.dart';
 
 class NotesScreen extends StatelessWidget {
   final List<Map<String, String>> notes;
@@ -114,7 +114,17 @@ class NotesScreen extends StatelessWidget {
                             color: AppColors.primaryColor,
                           ),
                           onPressed: () {
-                            // Handle edit action (e.g., navigate to edit screen)
+                            // Navigate to the EditNoteScreen when the edit icon is pressed
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditNoteScreen(
+                                  noteId:
+                                      note['id'] ?? 'unknown', // pass note ID
+                                  currentContent: note['content'] ?? '',
+                                ),
+                              ),
+                            );
                           },
                         ),
                       ),

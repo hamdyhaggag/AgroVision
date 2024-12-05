@@ -9,6 +9,7 @@ import '../../features/authentication/UI/forgot password/forgot_password_email.d
 import '../../features/authentication/UI/forgot password/forgot_password_phone.dart';
 import '../../features/authentication/UI/otp/otp_email_screen.dart';
 import '../../features/authentication/UI/otp/otp_phone_screen.dart';
+import '../../features/home/Ui/edit_note_screen.dart';
 import '../../features/home/Ui/notes_screen.dart';
 import '../../features/home/Ui/notifications_screen.dart';
 import '../../features/home/Ui/screen_layout.dart';
@@ -85,10 +86,16 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => AddNewNoteScreen(
             onSave: (String title, String content) {
-              // Implement save logic here
               debugPrint('Title: $title');
               debugPrint('Content: $content');
             },
+          ),
+        );
+      case AppRoutes.editNoteScreen:
+        return MaterialPageRoute(
+          builder: (_) => const EditNoteScreen(
+            noteId: '',
+            currentContent: '',
           ),
         );
       default:
