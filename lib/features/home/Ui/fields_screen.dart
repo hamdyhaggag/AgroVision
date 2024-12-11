@@ -9,10 +9,8 @@ class FieldsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use MediaQuery to get screen width for responsiveness
     double screenWidth = MediaQuery.of(context).size.width;
 
-    // Determine the number of columns based on screen size
     int crossAxisCount = screenWidth < 600
         ? 2
         : screenWidth < 1200
@@ -26,13 +24,10 @@ class FieldsScreen extends StatelessWidget {
       body: GridView.builder(
         padding: const EdgeInsets.all(16.0),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount:
-              crossAxisCount, // Responsive columns based on screen size
+          crossAxisCount: crossAxisCount,
           mainAxisSpacing: 16.0,
           crossAxisSpacing: 16.0,
-          childAspectRatio: screenWidth < 600
-              ? 0.7
-              : 0.8, // Adjust aspect ratio for small screens
+          childAspectRatio: screenWidth < 600 ? 0.7 : 0.8,
         ),
         itemCount: fields.length,
         itemBuilder: (context, index) {
@@ -48,13 +43,11 @@ class FieldsScreen extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(16)),
+                        const BorderRadius.vertical(top: Radius.circular(16)),
                     child: Image.asset(
                       field['image']!,
                       fit: BoxFit.cover,
-                      height: screenWidth < 600
-                          ? 150
-                          : 180, // Adjust image height for small screens
+                      height: screenWidth < 600 ? 150 : 180,
                     ),
                   ),
                   Padding(
@@ -66,9 +59,7 @@ class FieldsScreen extends StatelessWidget {
                           field['name']!,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: screenWidth < 600
-                                ? 16
-                                : 18, // Font size adjustment
+                            fontSize: screenWidth < 600 ? 16 : 18,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -77,9 +68,7 @@ class FieldsScreen extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.w400,
                             color: Colors.grey,
-                            fontSize: screenWidth < 600
-                                ? 12
-                                : 14, // Font size adjustment
+                            fontSize: screenWidth < 600 ? 12 : 14,
                           ),
                         ),
                       ],

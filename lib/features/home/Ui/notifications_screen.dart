@@ -19,7 +19,6 @@ class NotificationsScreen extends StatelessWidget {
       timeAgo: "10 Hrs ago",
       category: "Weeds",
     ),
-    // Add more notifications as needed
   ];
 
   NotificationsScreen({super.key});

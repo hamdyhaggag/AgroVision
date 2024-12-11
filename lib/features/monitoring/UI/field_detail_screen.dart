@@ -29,9 +29,6 @@ class FieldDetailScreen extends StatelessWidget {
                   child: const GrowthRateChart()),
             ),
           ),
-          // SliverToBoxAdapter(
-          //   child: NotesSection(),
-          // ),
         ],
       ),
     );
