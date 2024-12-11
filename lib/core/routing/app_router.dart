@@ -2,7 +2,6 @@ import 'package:agro_vision/features/authentication/UI/congratulation_screen.dar
 import 'package:agro_vision/features/home/Ui/add_new_note.dart';
 import 'package:agro_vision/features/home/Ui/logout_screen.dart';
 import 'package:agro_vision/features/home/Ui/fields_screen.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/UI/create_password_screen.dart';
 import '../../features/authentication/UI/forgot password/forgot_password_email.dart';
@@ -23,7 +22,6 @@ class AppRouter {
       GlobalKey<NavigatorState>();
   static BuildContext? currentContext = navigatorKey.currentContext;
   Route generateRoute(RouteSettings settings) {
-    // final arguments = settings.arguments;
     switch (settings.name) {
       case AppRoutes.splashScreen:
         return MaterialPageRoute(

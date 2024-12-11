@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/core/themes/text_styles.dart';
@@ -18,7 +17,6 @@ class PlantDetailsScreen extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Image Section
           Container(
             height: size.height * 0.3,
             decoration: BoxDecoration(
@@ -28,8 +26,6 @@ class PlantDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-
-          // Content Section (No Changes Needed)
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16.0),

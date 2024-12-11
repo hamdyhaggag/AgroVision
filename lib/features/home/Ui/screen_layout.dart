@@ -40,16 +40,63 @@ class ScreenLayout extends StatelessWidget {
             body: screens[appCubit.bottomNavIndex],
             floatingActionButton: FloatingActionButton(
               onPressed: () async {
-                final XFile? image = await picker.pickImage(
-                  source: ImageSource.gallery,
-                  imageQuality: 85,
-                );
+                final ImagePicker picker = ImagePicker();
 
-                if (image != null) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => PlantDetailsScreen(imagePath: image.path),
-                  ));
-                }
+                // Show a dialog to let the user choose between Gallery and Camera
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return SafeArea(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.photo_library),
+                            title: const Text('Pick from Gallery'),
+                            onTap: () async {
+                              final XFile? image = await picker.pickImage(
+                                source: ImageSource.gallery,
+                                imageQuality: 85,
+                              );
+                              if (image != null) {
+                                Navigator.pop(
+                                    context); // Close the bottom sheet
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PlantDetailsScreen(
+                                        imagePath: image.path),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.camera_alt),
+                            title: const Text('Take a Photo'),
+                            onTap: () async {
+                              final XFile? image = await picker.pickImage(
+                                source: ImageSource.camera,
+                                imageQuality: 85,
+                              );
+                              if (image != null) {
+                                Navigator.pop(
+                                    context); // Close the bottom sheet
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PlantDetailsScreen(
+                                        imagePath: image.path),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
               },
               backgroundColor: Colors.transparent,
               elevation: 0,
