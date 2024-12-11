@@ -1,8 +1,8 @@
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sliding_clipped_nav_bar/sliding_clipped_nav_bar.dart';
 import '../../disease_detection/Ui/plant_details_screen.dart';
 import '../../splash/Logic/app_cubit.dart';
 import '../../disease_detection/Ui/disease_detection_screen.dart';
@@ -14,6 +14,7 @@ import '../../splash/Logic/app_state.dart';
 class ScreenLayout extends StatelessWidget {
   ScreenLayout({super.key});
   final ImagePicker picker = ImagePicker();
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -21,13 +22,6 @@ class ScreenLayout extends StatelessWidget {
       child: BlocBuilder<AppCubit, AppStates>(
         builder: (context, state) {
           final appCubit = AppCubit.get(context);
-
-          final iconList = <IconData>[
-            Icons.home,
-            Icons.monitor_heart,
-            Icons.analytics,
-            Icons.settings,
-          ];
 
           final List<Widget> screens = [
             const HomeScreen(),
@@ -42,7 +36,6 @@ class ScreenLayout extends StatelessWidget {
               onPressed: () async {
                 final ImagePicker picker = ImagePicker();
 
-                // Show a dialog to let the user choose between Gallery and Camera
                 showModalBottomSheet(
                   context: context,
                   builder: (BuildContext context) {
@@ -52,20 +45,24 @@ class ScreenLayout extends StatelessWidget {
                         children: [
                           ListTile(
                             leading: const Icon(Icons.photo_library),
-                            title: const Text('Pick from Gallery'),
+                            title: const Text(
+                              'Pick from Gallery',
+                              style:
+                                  TextStyle(fontFamily: 'SYNE', fontSize: 15),
+                            ),
                             onTap: () async {
                               final XFile? image = await picker.pickImage(
                                 source: ImageSource.gallery,
                                 imageQuality: 85,
                               );
                               if (image != null) {
-                                Navigator.pop(
-                                    context); // Close the bottom sheet
+                                Navigator.pop(context);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => PlantDetailsScreen(
-                                        imagePath: image.path),
+                                      imagePath: image.path,
+                                    ),
                                   ),
                                 );
                               }
@@ -73,20 +70,24 @@ class ScreenLayout extends StatelessWidget {
                           ),
                           ListTile(
                             leading: const Icon(Icons.camera_alt),
-                            title: const Text('Take a Photo'),
+                            title: const Text(
+                              'Take a Photo',
+                              style:
+                                  TextStyle(fontFamily: 'SYNE', fontSize: 15),
+                            ),
                             onTap: () async {
                               final XFile? image = await picker.pickImage(
                                 source: ImageSource.camera,
                                 imageQuality: 85,
                               );
                               if (image != null) {
-                                Navigator.pop(
-                                    context); // Close the bottom sheet
+                                Navigator.pop(context);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => PlantDetailsScreen(
-                                        imagePath: image.path),
+                                      imagePath: image.path,
+                                    ),
                                   ),
                                 );
                               }
@@ -98,28 +99,41 @@ class ScreenLayout extends StatelessWidget {
                   },
                 );
               },
-              backgroundColor: Colors.transparent,
+              backgroundColor: AppColors.navBarColor,
               elevation: 0,
               child: Image.asset(
                 'assets/images/camera.png',
-                width: 50,
-                height: 50,
+                width: 45,
+                height: 45,
                 fit: BoxFit.contain,
               ),
             ),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
-            bottomNavigationBar: AnimatedBottomNavigationBar(
-              icons: iconList,
-              activeIndex: appCubit.bottomNavIndex,
-              gapLocation: GapLocation.center,
-              notchSmoothness: NotchSmoothness.smoothEdge,
-              onTap: (index) => appCubit.changeBottomNavIndex(index),
+            bottomNavigationBar: SlidingClippedNavBar(
               backgroundColor: AppColors.navBarColor,
               activeColor: Theme.of(context).primaryColor,
               inactiveColor: AppColors.greyColor,
-              leftCornerRadius: 0,
-              rightCornerRadius: 0,
+              barItems: [
+                BarItem(
+                  icon: Icons.home,
+                  title: 'Home',
+                ),
+                BarItem(
+                  icon: Icons.monitor_heart,
+                  title: 'Statistics',
+                ),
+                BarItem(
+                  icon: Icons.analytics,
+                  title: 'Detection',
+                ),
+                BarItem(
+                  icon: Icons.settings,
+                  title: 'Settings',
+                ),
+              ],
+              selectedIndex: appCubit.bottomNavIndex,
+              onButtonPressed: (index) => appCubit.changeBottomNavIndex(index),
             ),
           );
         },
