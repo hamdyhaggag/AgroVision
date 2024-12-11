@@ -33,20 +33,30 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     _messageController.clear();
   }
 
-  void _onMessageLongPress(BuildContext context, Message message) {
+  void _onMessageLongPress(Message message) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Wrap(
         children: [
           ListTile(
-            leading: const Icon(Icons.reply, color: Colors.green),
-            title: const Text('Reply'),
+            leading: const Icon(Icons.delete, color: Colors.red),
+            title: const Text('Delete'),
             onTap: () {
+              setState(() {
+                messages.remove(message);
+              });
               Navigator.pop(context);
             },
           ),
         ],
       ),
+    );
+  }
+
+  void _onMessageSwipe(Message message) {
+    // Implement your reply logic here, e.g., highlight the message or pre-fill the reply input
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Replying to: "${message.text}"')),
     );
   }
 
@@ -118,24 +128,35 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         itemCount: messages.length,
         itemBuilder: (context, index) {
           final message = messages[index];
-          return GestureDetector(
-            onLongPress: () => _onMessageLongPress(context, message),
-            child: Align(
-              alignment: message.isSentByMe
-                  ? Alignment.centerRight
-                  : Alignment.centerLeft,
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: message.isSentByMe
-                      ? Colors.green.shade100
-                      : Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  message.text,
-                  style: const TextStyle(fontSize: 14),
+          return Dismissible(
+            key: Key(message.text),
+            direction: DismissDirection.endToStart,
+            onDismissed: (direction) => _onMessageSwipe(message),
+            background: Container(
+              alignment: Alignment.centerRight,
+              color: Colors.blue.shade100,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: const Icon(Icons.reply, color: Colors.blue),
+            ),
+            child: GestureDetector(
+              onLongPress: () => _onMessageLongPress(message),
+              child: Align(
+                alignment: message.isSentByMe
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: message.isSentByMe
+                        ? Colors.green.shade100
+                        : Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    message.text,
+                    style: const TextStyle(fontSize: 14),
+                  ),
                 ),
               ),
             ),
