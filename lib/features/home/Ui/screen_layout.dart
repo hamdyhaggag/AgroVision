@@ -1,9 +1,9 @@
 import 'package:agro_vision/core/themes/app_colors.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
-import '../../monitoring/UI/plant_details_screen.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../disease_detection/Ui/plant_details_screen.dart';
 import '../../splash/Logic/app_cubit.dart';
 import '../../disease_detection/Ui/disease_detection_screen.dart';
 import 'home_screen.dart';
@@ -12,8 +12,8 @@ import '../../monitoring/UI/monitoring_screen.dart';
 import '../../splash/Logic/app_state.dart';
 
 class ScreenLayout extends StatelessWidget {
-  const ScreenLayout({super.key});
-
+  ScreenLayout({super.key});
+  final ImagePicker picker = ImagePicker();
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -39,9 +39,16 @@ class ScreenLayout extends StatelessWidget {
           return Scaffold(
             body: screens[appCubit.bottomNavIndex],
             floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                if (kDebugMode) {
-                  print("Floating Action Button Pressed!");
+              onPressed: () async {
+                final XFile? image = await picker.pickImage(
+                  source: ImageSource.gallery,
+                  imageQuality: 85,
+                );
+
+                if (image != null) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => PlantDetailsScreen(imagePath: image.path),
+                  ));
                 }
               },
               backgroundColor: Colors.transparent,

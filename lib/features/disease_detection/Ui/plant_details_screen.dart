@@ -1,10 +1,14 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/core/themes/text_styles.dart';
 import 'package:agro_vision/shared/widgets/custom_botton.dart';
-import 'package:flutter/material.dart';
 
 class PlantDetailsScreen extends StatelessWidget {
-  const PlantDetailsScreen({super.key});
+  final String imagePath;
+
+  const PlantDetailsScreen({super.key, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
@@ -17,15 +21,15 @@ class PlantDetailsScreen extends StatelessWidget {
           // Image Section
           Container(
             height: size.height * 0.3,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/plant_sample.png'),
+                image: FileImage(File(imagePath)),
                 fit: BoxFit.cover,
               ),
             ),
           ),
 
-          // Content Section
+          // Content Section (No Changes Needed)
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -33,7 +37,6 @@ class PlantDetailsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header with Status
                     Row(
                       children: [
                         const Icon(Icons.check_circle, color: Colors.green),
@@ -46,16 +49,11 @@ class PlantDetailsScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-
-                    // Plant Name
                     const Text(
                       'Pyrus Communis',
                       style: TextStyles.heading1,
                     ),
-
                     const SizedBox(height: 16),
-
-                    // Confidence Score
                     Row(
                       children: [
                         const Text(
@@ -76,17 +74,14 @@ class PlantDetailsScreen extends StatelessWidget {
                       backgroundColor: AppColors.greyLight,
                       color: AppColors.primaryColor,
                     ),
-
                     const SizedBox(height: 16),
-
-                    // Cause Description
                     const Text(
                       'Cause',
                       style: TextStyles.heading2,
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Pyrus cordata, the Heart-leaved pear or Plymouth pear, is a rare wild species of pear belonging to the family Rosaceae. It gets its name in Spanish, Portuguese, and French from the shape of its leaves. In the UK, it is known as Plymouth Pear after the city of Plymouth in Devon, where it was originally found in 1870.',
+                      'Pyrus cordata, the Heart-leaved pear or Plymouth pear...',
                       style: TextStyles.bodyText,
                       maxLines: 5,
                       overflow: TextOverflow.ellipsis,
@@ -100,10 +95,7 @@ class PlantDetailsScreen extends StatelessWidget {
                             .copyWith(color: AppColors.primaryColor),
                       ),
                     ),
-
                     const SizedBox(height: 100),
-
-                    // Button
                     CustomBottom(
                         text: 'Get Consultant', onPressed: () => print('Hi')),
                   ],
