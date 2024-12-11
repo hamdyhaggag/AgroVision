@@ -18,4 +18,8 @@ class AppRoutes {
   static const String fieldDetailScreen = "/fieldDetailScreen";
   static const String addNewNote = "/addNewNote";
   static const String editNoteScreen = "/editNoteScreen";
+  static const String chatList = '/chat-list';
+  static const String chatDetail = '/chat-detail';
+  static const String communityChat = '/community-chat';
+  static const String consultationChat = '/consultation-chat';
 }

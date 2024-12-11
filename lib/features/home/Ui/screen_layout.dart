@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sliding_clipped_nav_bar/sliding_clipped_nav_bar.dart';
+import '../../chat/Ui/chat_list_screen.dart';
 import '../../disease_detection/Ui/plant_details_screen.dart';
 import '../../splash/Logic/app_cubit.dart';
 import '../../disease_detection/Ui/disease_detection_screen.dart';
 import 'home_screen.dart';
-import 'settings_screen.dart';
 import '../../monitoring/UI/monitoring_screen.dart';
 import '../../splash/Logic/app_state.dart';
 
@@ -27,7 +27,7 @@ class ScreenLayout extends StatelessWidget {
             const HomeScreen(),
             const MonitoringScreen(),
             DiseaseDetectionScreen(),
-            const SettingsScreen(),
+            ChatListScreen(),
           ];
 
           return Scaffold(
@@ -128,8 +128,8 @@ class ScreenLayout extends StatelessWidget {
                   title: 'Detection',
                 ),
                 BarItem(
-                  icon: Icons.settings,
-                  title: 'Settings',
+                  icon: Icons.chat,
+                  title: 'Chat',
                 ),
               ],
               selectedIndex: appCubit.bottomNavIndex,

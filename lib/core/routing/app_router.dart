@@ -15,6 +15,10 @@ import '../../features/home/Ui/screen_layout.dart';
 import '../../features/monitoring/UI/field_detail_screen.dart';
 import '../../features/onboarding/Ui/onboarding_screen.dart';
 import '../../features/splash/Ui/splash_screen.dart';
+import '../../features/chat/ui/chat_list_screen.dart';
+import '../../features/chat/ui/chat_detail_screen.dart';
+import '../../features/chat/ui/community_chat_screen.dart';
+import '../../features/chat/ui/consultation_chat_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -95,6 +99,22 @@ class AppRouter {
             noteId: '',
             currentContent: '',
           ),
+        );
+      case AppRoutes.chatList:
+        return MaterialPageRoute(
+          builder: (_) => ChatListScreen(),
+        );
+      case AppRoutes.chatDetail:
+        return MaterialPageRoute(
+          builder: (_) => ChatDetailScreen(),
+        );
+      case AppRoutes.communityChat:
+        return MaterialPageRoute(
+          builder: (_) => const CommunityChatScreen(),
+        );
+      case AppRoutes.consultationChat:
+        return MaterialPageRoute(
+          builder: (_) => const ConsultationChatScreen(),
         );
       default:
         return MaterialPageRoute(
