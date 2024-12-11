@@ -26,4 +26,15 @@ class TextStyles {
     color: AppColors.blackColor,
     fontWeight: FontWeights.regular,
   );
+  static const TextStyle heading1 =
+      TextStyle(fontSize: 24, fontFamily: 'SYNE', fontWeight: FontWeight.bold);
+  static const TextStyle heading2 =
+      TextStyle(fontSize: 20, fontFamily: 'SYNE', fontWeight: FontWeight.bold);
+  static const TextStyle bodyText =
+      TextStyle(fontSize: 16, fontFamily: 'SYNE', color: Colors.black);
+  static const TextStyle buttonText = TextStyle(
+      fontSize: 16,
+      fontFamily: 'SYNE',
+      fontWeight: FontWeight.bold,
+      color: Colors.white);
 }

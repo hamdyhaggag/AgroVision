@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+import '../../monitoring/UI/plant_details_screen.dart';
 import '../../splash/Logic/app_cubit.dart';
 import '../../disease_detection/Ui/disease_detection_screen.dart';
 import 'home_screen.dart';
