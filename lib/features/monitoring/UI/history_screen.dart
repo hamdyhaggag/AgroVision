@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class MonitoringScreen extends StatelessWidget {
+class HistoryScreen extends StatelessWidget {
   static const String routeName = '/monitoring';
 
-  const MonitoringScreen({super.key});
+  const HistoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
