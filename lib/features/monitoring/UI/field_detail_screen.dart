@@ -107,24 +107,44 @@ class HeaderSection extends StatelessWidget {
                 child: Row(
                   children: [
                     StatCard(
-                      title: "Plant's health",
+                      title: "EC",
                       value: '93%',
-                      icon: Icons.local_florist,
+                      icon: Icons.electric_bolt,
                     ),
                     StatCard(
-                      title: "Water depth",
+                      title: "Fertility",
                       value: '85%',
+                      icon: Icons.park,
+                    ),
+                    StatCard(
+                      title: 'Hum',
+                      value: '74%',
                       icon: Icons.water_drop,
                     ),
                     StatCard(
-                      title: 'Soil',
+                      title: 'K',
                       value: '74%',
-                      icon: Icons.grass,
+                      icon: Icons.science,
                     ),
                     StatCard(
-                      title: 'Soil',
+                      title: 'N',
                       value: '74%',
-                      icon: Icons.grass,
+                      icon: Icons.science,
+                    ),
+                    StatCard(
+                      title: 'P',
+                      value: '74%',
+                      icon: Icons.science,
+                    ),
+                    StatCard(
+                      title: 'PH',
+                      value: '74%',
+                      icon: Icons.balance,
+                    ),
+                    StatCard(
+                      title: 'Temp',
+                      value: '74%',
+                      icon: Icons.thermostat,
                     ),
                   ],
                 ),
