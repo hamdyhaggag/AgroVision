@@ -4,10 +4,10 @@ import '../../../../core/themes/app_colors.dart';
 import '../../../../shared/widgets/stat_card.dart';
 import '../../../../shared/widgets/growth_rate_chart.dart';
 
-class FieldDetailScreen extends StatelessWidget {
+class SensorDataScreen extends StatelessWidget {
   final Map<String, String> field;
 
-  const FieldDetailScreen({super.key, required this.field});
+  const SensorDataScreen({super.key, required this.field});
 
   @override
   Widget build(BuildContext context) {
