@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'core/dependency_injection/di.dart';
+import 'core/network/dio_factory.dart';
 import 'core/routing/app_router.dart';
 import 'core/routing/app_routes.dart';
 import 'core/themes/app_colors.dart';
@@ -10,11 +11,16 @@ import 'core/utils/utils.dart';
 import 'features/authentication/Logic/auth cubit/auth_cubit.dart';
 import 'features/authentication/Logic/login cubit/login_cubit.dart';
 import 'features/authentication/Logic/logout cubit/logout_cubit.dart';
+import 'features/monitoring/Api/sensor_data_service.dart';
+import 'features/monitoring/Logic/sensor_data_cubit.dart';
+import 'features/monitoring/UI/sensor_data_screen.dart';
 
 class AgroVision extends StatelessWidget {
   final AppRouter appRouter;
+  final SensorDataService _sensorDataService =
+      SensorDataService(DioFactory.getDio());
 
-  const AgroVision({super.key, required this.appRouter});
+  AgroVision({super.key, required this.appRouter});
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +38,12 @@ class AgroVision extends StatelessWidget {
             ),
             BlocProvider(
               create: (BuildContext context) => LogoutCubit(getIt()),
+            ),
+            BlocProvider(
+              create: (_) => SensorDataCubit(_sensorDataService),
+              child: const SensorDataScreen(
+                field: {},
+              ),
             ),
           ],
           child: MaterialApp(

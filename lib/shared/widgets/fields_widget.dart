@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../features/home/Ui/fields_screen.dart';
-import '../../features/monitoring/UI/field_detail_screen.dart'; // Import the field detail screen
+import '../../features/monitoring/UI/sensor_data_screen.dart';
 
 class FieldsWidget extends StatelessWidget {
   final List<Map<String, String>> fields;
@@ -57,7 +57,9 @@ class FieldsWidget extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => FieldDetailScreen(field: field),
+                          builder: (context) => const SensorDataScreen(
+                            field: {},
+                          ),
                         ),
                       );
                     },

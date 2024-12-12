@@ -12,7 +12,7 @@ import '../../features/home/Ui/edit_note_screen.dart';
 import '../../features/home/Ui/notes_screen.dart';
 import '../../features/home/Ui/notifications_screen.dart';
 import '../../features/home/Ui/screen_layout.dart';
-import '../../features/monitoring/UI/field_detail_screen.dart';
+import '../../features/monitoring/UI/sensor_data_screen.dart';
 import '../../features/onboarding/Ui/onboarding_screen.dart';
 import '../../features/splash/Ui/splash_screen.dart';
 import '../../features/chat/ui/chat_list_screen.dart';
@@ -77,11 +77,11 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => NotesScreen(notes: notes),
         );
-      case AppRoutes.fieldDetailScreen:
-        final field = settings.arguments as Map<String, String>;
-
+      case AppRoutes.sensorDataScreen:
         return MaterialPageRoute(
-          builder: (_) => FieldDetailScreen(field: field),
+          builder: (_) => const SensorDataScreen(
+            field: {},
+          ),
         );
 
       case AppRoutes.addNewNote:
@@ -106,7 +106,7 @@ class AppRouter {
         );
       case AppRoutes.chatDetail:
         return MaterialPageRoute(
-          builder: (_) => ChatDetailScreen(),
+          builder: (_) => const ChatDetailScreen(),
         );
       case AppRoutes.communityChat:
         return MaterialPageRoute(
