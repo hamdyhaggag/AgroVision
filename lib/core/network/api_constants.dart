@@ -2,6 +2,7 @@ class ApiConstants {
   static const String baseUrl = 'https://api.agrovision.ltd/api/';
   static const String login = 'login';
   static const String logout = 'logout';
+  static const String firebaseRetrieve = 'firebase/retrieve';
 }
 
 class ApiErrors {
