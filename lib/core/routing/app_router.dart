@@ -8,6 +8,11 @@ import '../../features/authentication/UI/forgot password/forgot_password_email.d
 import '../../features/authentication/UI/forgot password/forgot_password_phone.dart';
 import '../../features/authentication/UI/otp/otp_email_screen.dart';
 import '../../features/authentication/UI/otp/otp_phone_screen.dart';
+import '../../features/home/Ui/drawer/crops_managment.dart';
+import '../../features/home/Ui/drawer/farm_analytics.dart';
+import '../../features/home/Ui/drawer/farm_inventory.dart';
+import '../../features/home/Ui/drawer/settings_screen.dart';
+import '../../features/home/Ui/drawer/team.dart';
 import '../../features/home/Ui/edit_note_screen.dart';
 import '../../features/home/Ui/notes_screen.dart';
 import '../../features/home/Ui/notifications_screen.dart';
@@ -25,6 +30,7 @@ class AppRouter {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
   static BuildContext? currentContext = navigatorKey.currentContext;
+
   Route generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.splashScreen:
@@ -83,7 +89,6 @@ class AppRouter {
             field: {},
           ),
         );
-
       case AppRoutes.addNewNote:
         return MaterialPageRoute(
           builder: (_) => AddNewNoteScreen(
@@ -116,6 +121,34 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => const ConsultationChatScreen(),
         );
+
+      case '/farmAnalytics-chat':
+        return MaterialPageRoute(
+          builder: (_) => const FarmAnalyticsScreen(),
+        );
+      case '/cropsManagment-chat':
+        return MaterialPageRoute(
+          builder: (_) => const CropsManagementScreen(),
+        );
+      case '/farmInventory-chat':
+        return MaterialPageRoute(
+          builder: (_) => const FarmInventoryScreen(),
+        );
+      case '/sensorData':
+        return MaterialPageRoute(
+          builder: (_) => const SensorDataScreen(
+            field: {},
+          ),
+        );
+      case '/team':
+        return MaterialPageRoute(
+          builder: (_) => const TeamScreen(),
+        );
+      case '/settingsScreen':
+        return MaterialPageRoute(
+          builder: (_) => const SettingsScreen(),
+        );
+
       default:
         return MaterialPageRoute(
           builder: (_) => const OnboardingScreen(),

@@ -22,4 +22,9 @@ class AppRoutes {
   static const String chatDetail = '/chat-detail';
   static const String communityChat = '/community-chat';
   static const String consultationChat = '/consultation-chat';
+  static const String farmAnalytics = '/farmAnalytics-chat';
+  static const String cropsManagment = '/cropsManagment-chat';
+  static const String farmInventory = '/farmInventory-chat';
+  static const String team = '/team';
+  static const String settingsScreen = '/settingsScreen';
 }

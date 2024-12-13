@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../../../core/helpers/shared_pref_helper.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../shared/widgets/fields_widget.dart';
@@ -144,20 +145,44 @@ class AppDrawer extends StatelessWidget {
       child: ListView(
         children: [
           const DrawerHeaderWidget(),
-          ..._buildDrawerItems(),
+          ..._buildDrawerItems(context),
         ],
       ),
     );
   }
 
-  List<Widget> _buildDrawerItems() {
-    return const [
-      DrawerItem(icon: Icons.dataset, label: 'Farm Analytics'),
-      DrawerItem(icon: Icons.grass, label: 'Crops Management'),
-      DrawerItem(icon: Icons.note_alt, label: 'Farm Inventory'),
-      DrawerItem(icon: Icons.data_thresholding, label: 'Sensor Data'),
-      DrawerItem(icon: Icons.people_alt_rounded, label: 'Team'),
-      DrawerItem(icon: Icons.settings, label: 'Settings'),
+  List<Widget> _buildDrawerItems(BuildContext context) {
+    return [
+      DrawerItem(
+        icon: Icons.dataset,
+        label: 'Farm Analytics',
+        onTap: () => Navigator.pushNamed(context, '/farmAnalytics-chat'),
+      ),
+      DrawerItem(
+        icon: Icons.grass,
+        label: 'Crops Management',
+        onTap: () => Navigator.pushNamed(context, '/cropsManagment-chat'),
+      ),
+      DrawerItem(
+        icon: Icons.note_alt,
+        label: 'Farm Inventory',
+        onTap: () => Navigator.pushNamed(context, '/farmInventory-chat'),
+      ),
+      DrawerItem(
+        icon: Icons.data_thresholding,
+        label: 'Sensor Data',
+        onTap: () => Navigator.pushNamed(context, '/sensorData'),
+      ),
+      DrawerItem(
+        icon: Icons.people_alt_rounded,
+        label: 'Team',
+        onTap: () => Navigator.pushNamed(context, '/team'),
+      ),
+      DrawerItem(
+        icon: Icons.settings,
+        label: 'Settings',
+        onTap: () => Navigator.pushNamed(context, '/settingsScreen'),
+      ),
     ];
   }
 }
@@ -167,10 +192,14 @@ class DrawerHeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String imagePath = CacheHelper.getString(key: 'drawerImagePath');
+
     return DrawerHeader(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage('assets/images/header_background.jpg'),
+          image: imagePath.isNotEmpty
+              ? AssetImage(imagePath)
+              : const AssetImage('assets/images/header_background.jpg'),
           fit: BoxFit.cover,
         ),
       ),
@@ -182,11 +211,11 @@ class DrawerHeaderWidget extends StatelessWidget {
               child: Container(color: Colors.black.withOpacity(0.1)),
             ),
           ),
-          Center(
+          const Center(
             child: Text(
               'AgroVision',
               style: TextStyle(
-                color: AppColors.whiteColor,
+                color: Colors.white,
                 fontSize: 45,
                 fontFamily: 'SYNE',
                 fontWeight: FontWeight.bold,
@@ -202,10 +231,12 @@ class DrawerHeaderWidget extends StatelessWidget {
 class DrawerItem extends StatelessWidget {
   final IconData icon;
   final String label;
+  final VoidCallback onTap;
 
   const DrawerItem({
     required this.icon,
     required this.label,
+    required this.onTap,
     super.key,
   });
 
@@ -221,6 +252,7 @@ class DrawerItem extends StatelessWidget {
           fontWeight: FontWeight.w400,
         ),
       ),
+      onTap: onTap,
     );
   }
 }
