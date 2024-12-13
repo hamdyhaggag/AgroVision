@@ -75,27 +75,37 @@ class FarmInventoryScreenState extends State<FarmInventoryScreen> {
   }
 
   Widget _buildSearchBar() {
-    return TextField(
-      controller: _searchController,
-      onChanged: _filterProducts,
-      decoration: InputDecoration(
-        hintText: 'Search product name',
-        prefixIcon: const Icon(Icons.search, color: AppColors.primaryColor),
-        suffixIcon: _searchController.text.isNotEmpty
-            ? IconButton(
-                icon: const Icon(Icons.clear, color: AppColors.primaryColor),
-                onPressed: () {
-                  _searchController.clear();
-                  _filterProducts('');
-                },
-              )
-            : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-          borderSide: const BorderSide(color: Colors.green, width: 1),
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade300,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _filterProducts,
+        decoration: InputDecoration(
+          hintText: 'Search member name',
+          prefixIcon: const Icon(Icons.search, color: AppColors.primaryColor),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, color: AppColors.primaryColor),
+                  onPressed: () {
+                    _searchController.clear();
+                    _filterProducts('');
+                  },
+                )
+              : null,
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide.none,
+          ),
         ),
       ),
     );
