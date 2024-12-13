@@ -173,14 +173,14 @@ class SensorDataScreenState extends State<SensorDataScreen> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _buildSensorChip('EC', Icons.ac_unit),
+          _buildSensorChip('EC', Icons.electric_bolt),
           _buildSensorChip('Fertility', Icons.eco),
           _buildSensorChip('Humidity', Icons.water_drop),
-          _buildSensorChip('PH', Icons.water_drop),
+          _buildSensorChip('PH', Icons.science),
           _buildSensorChip('Temp', Icons.local_florist),
           _buildSensorChip('K', Icons.local_florist),
-          _buildSensorChip('N', Icons.ac_unit),
-          _buildSensorChip('P', Icons.eco),
+          _buildSensorChip('N', Icons.forest),
+          _buildSensorChip('P', Icons.energy_savings_leaf),
         ],
       ),
     );

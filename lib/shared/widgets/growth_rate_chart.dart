@@ -131,21 +131,6 @@ class GrowthRateChart extends StatelessWidget {
                 ),
               ),
             ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) => Padding(
-                  padding: EdgeInsets.only(top: 8.h),
-                  child: Text(
-                    _getMonthLabel(value.toInt()),
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ),
           borderData: FlBorderData(
             show: true,
@@ -184,25 +169,6 @@ class GrowthRateChart extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  // Returns the month label based on the index.
-  String _getMonthLabel(int index) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
-    return months[index % months.length];
   }
 
   // Builds the bottom legend displaying growth rate labels.
