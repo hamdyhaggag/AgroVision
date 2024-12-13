@@ -144,7 +144,7 @@ class EditMemberScreenState extends State<EditMemberScreen> {
                       'position': _positionController.text,
                       'email': _emailController.text,
                       'phone': _phoneController.text,
-                      'type': widget.member['type'],
+                      'type': _isMale,
                       'image': widget.member['image'],
                     };
 
