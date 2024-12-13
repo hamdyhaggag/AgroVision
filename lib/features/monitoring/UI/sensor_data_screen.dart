@@ -1,29 +1,39 @@
-import 'package:agro_vision/shared/widgets/custom_botton.dart';
+import 'package:agro_vision/shared/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 import '../../../core/themes/app_colors.dart';
-import '../../../shared/widgets/custom_appbar.dart';
-import '../../../shared/widgets/stat_card.dart';
+import '../../../shared/widgets/custom_botton.dart';
 import '../../../shared/widgets/growth_rate_chart.dart';
 import '../Logic/sensor_data_cubit.dart';
 
-class SensorDataScreen extends StatelessWidget {
+class SensorDataScreen extends StatefulWidget {
   final Map<String, String> field;
 
   const SensorDataScreen({super.key, required this.field});
 
   @override
+  SensorDataScreenState createState() => SensorDataScreenState();
+}
+
+class SensorDataScreenState extends State<SensorDataScreen> {
+  String _selectedSensor = 'EC';
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
-      appBar: _buildCustomAppBar(),
+      appBar: const CustomAppBar(title: 'Sensor Data'),
       body: BlocBuilder<SensorDataCubit, SensorDataState>(
         builder: (context, state) {
           if (state is SensorDataInitial) {
             return _buildInitialState(context);
           } else if (state is SensorDataLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+                child: CircularProgressIndicator(
+              color: AppColors.primaryColor,
+            ));
           } else if (state is SensorDataLoaded) {
             return _buildLoadedState(context, state.data);
           } else if (state is SensorDataError) {
@@ -33,24 +43,7 @@ class SensorDataScreen extends StatelessWidget {
           }
         },
       ),
-      floatingActionButton: BlocBuilder<SensorDataCubit, SensorDataState>(
-        builder: (context, state) {
-          if (state is! SensorDataInitial) {
-            return CustomBottom(
-              text: 'Refresh',
-              onPressed: () {
-                context.read<SensorDataCubit>().loadSensorData();
-              },
-            );
-          }
-          return const SizedBox.shrink();
-        },
-      ),
     );
-  }
-
-  PreferredSizeWidget _buildCustomAppBar() {
-    return const CustomAppBar(title: 'Sensor Dashboard');
   }
 
   Widget _buildInitialState(BuildContext context) {
@@ -76,14 +69,32 @@ class SensorDataScreen extends StatelessWidget {
   }
 
   Widget _buildLoadedState(BuildContext context, Map<String, dynamic> data) {
+    String sensorKey;
+    if (_selectedSensor == 'Humidity') {
+      sensorKey = 'Hum';
+    } else {
+      sensorKey = _selectedSensor;
+    }
+
+    // Safely fetch the sensor value
+    final sensorValue =
+        data[sensorKey] ?? 0; // Fallback to 0 if the key is missing
+
     return SingleChildScrollView(
       child: Column(
         children: [
-          _buildHeaderSection(),
+          _buildCircularGauge(sensorValue),
           const SizedBox(height: 16),
-          _buildStatCards(data),
+          _buildSensorSelection(),
           const SizedBox(height: 16),
-          _buildChartSection(),
+          _buildChartSection(_selectedSensor),
+          const SizedBox(
+              height: 16), // Add space between the chart and the button
+          CustomBottom(
+            text: 'Refresh',
+            onPressed: () => context.read<SensorDataCubit>().loadSensorData(),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -99,113 +110,116 @@ class SensorDataScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Please check your internet connection ',
+              'Please check your internet connection',
               style: TextStyle(
                   fontFamily: 'SYNE',
                   fontSize: 18,
                   color: AppColors.blackColor),
             ),
           ),
-          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderSection() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF1D976C), Color(0xFF93F9B9)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Welcome to the Sensor Dashboard!',
-            style: TextStyle(
-              fontFamily: 'SYNE',
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+  Widget _buildCircularGauge(dynamic sensorValue) {
+    final double displayValue = sensorValue is String
+        ? double.tryParse(sensorValue) ?? 0
+        : (sensorValue ?? 0).toDouble();
+
+    return Column(
+      children: [
+        SfRadialGauge(
+          axes: <RadialAxis>[
+            RadialAxis(
+              minimum: 0,
+              maximum: 100,
+              ranges: <GaugeRange>[
+                GaugeRange(
+                  startValue: 0,
+                  endValue: 100,
+                  color: AppColors.primaryColor,
+                ),
+              ],
+              pointers: <GaugePointer>[
+                NeedlePointer(value: displayValue),
+              ],
+              annotations: <GaugeAnnotation>[
+                GaugeAnnotation(
+                  widget: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('${displayValue.toStringAsFixed(1)}°',
+                          style: const TextStyle(
+                              fontSize: 28, fontWeight: FontWeight.bold)),
+                      Text(_selectedSensor,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w500)),
+                    ],
+                  ),
+                  positionFactor: 0.5,
+                  angle: 90,
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildStatCards(Map<String, dynamic> data) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: GridView.count(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 1.2,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
+  Widget _buildSensorSelection() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
         children: [
-          StatCard(
-            title: 'EC',
-            value: data['EC']?.toString() ?? 'N/A',
-            icon: Icons.electric_bolt,
-          ),
-          StatCard(
-            title: 'Fertility',
-            value: data['Fertility']?.toString() ?? 'N/A',
-            icon: Icons.eco,
-          ),
-          StatCard(
-            title: 'Humidity',
-            value: data['Hum']?.toString() ?? 'N/A',
-            icon: Icons.water_drop,
-          ),
-          StatCard(
-            title: 'K',
-            value: data['K']?.toString() ?? 'N/A',
-            icon: Icons.local_florist,
-          ),
-          StatCard(
-            title: 'N',
-            value: data['N']?.toString() ?? 'N/A',
-            icon: Icons.forest,
-          ),
-          StatCard(
-            title: 'P',
-            value: data['P']?.toString() ?? 'N/A',
-            icon: Icons.energy_savings_leaf,
-          ),
-          StatCard(
-            title: 'PH',
-            value: data['PH']?.toString() ?? 'N/A',
-            icon: Icons.science,
-          ),
-          StatCard(
-            title: 'Temperature',
-            value: data['Temp']?.toString() ?? 'N/A',
-            icon: Icons.thermostat,
-          ),
+          _buildSensorChip('EC', Icons.ac_unit),
+          _buildSensorChip('Fertility', Icons.eco),
+          _buildSensorChip('Humidity', Icons.water_drop),
+          _buildSensorChip('PH', Icons.water_drop),
+          _buildSensorChip('Temp', Icons.local_florist),
+          _buildSensorChip('K', Icons.local_florist),
+          _buildSensorChip('N', Icons.ac_unit),
+          _buildSensorChip('P', Icons.eco),
         ],
       ),
     );
   }
 
-  Widget _buildChartSection() {
+  Widget _buildSensorChip(String label, IconData icon) {
+    final isSelected = _selectedSensor == label;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedSensor = label;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor:
+                  isSelected ? AppColors.primaryColor : Colors.grey[300],
+              child:
+                  Icon(icon, color: isSelected ? Colors.white : Colors.black),
+            ),
+            const SizedBox(height: 8),
+            Text(label, style: const TextStyle(fontSize: 14)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChartSection(String selectedSensor) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const GrowthRateChart(),
+        child: GrowthRateChart(selectedSensor: selectedSensor),
       ),
     );
   }
