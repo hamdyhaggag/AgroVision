@@ -1,8 +1,8 @@
+import 'package:agro_vision/features/home/Ui/drawer/edit_member_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:agro_vision/shared/widgets/custom_appbar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/themes/app_colors.dart';
-import 'edit_product_screen.dart';
 
 class TeamScreen extends StatefulWidget {
   const TeamScreen({super.key});
@@ -242,8 +242,8 @@ class TeamScreenState extends State<TeamScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditProductScreen(
-          product: member,
+        builder: (context) => EditMemberScreen(
+          member: member,
           index: index,
           onSave: (updatedMember) {
             setState(() {
