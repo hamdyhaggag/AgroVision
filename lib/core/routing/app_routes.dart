@@ -27,4 +27,6 @@ class AppRoutes {
   static const String farmInventory = '/farmInventory-chat';
   static const String team = '/team';
   static const String settingsScreen = '/settingsScreen';
+  static const String profileScreen = '/profileScreen';
+  static const String editProfileScreen = '/editProfileScreen';
 }

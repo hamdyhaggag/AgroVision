@@ -2,6 +2,7 @@ import 'package:agro_vision/features/authentication/UI/congratulation_screen.dar
 import 'package:agro_vision/features/home/Ui/add_new_note.dart';
 import 'package:agro_vision/features/home/Ui/logout_screen.dart';
 import 'package:agro_vision/features/home/Ui/fields_screen.dart';
+import 'package:agro_vision/features/home/Ui/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/UI/create_password_screen.dart';
 import '../../features/authentication/UI/forgot password/forgot_password_email.dart';
@@ -16,6 +17,7 @@ import '../../features/home/Ui/drawer/team.dart';
 import '../../features/home/Ui/edit_note_screen.dart';
 import '../../features/home/Ui/notes_screen.dart';
 import '../../features/home/Ui/notifications_screen.dart';
+import '../../features/home/Ui/profile/edit_profile_screen.dart';
 import '../../features/home/Ui/screen_layout.dart';
 import '../../features/monitoring/UI/sensor_data_screen.dart';
 import '../../features/onboarding/Ui/onboarding_screen.dart';
@@ -147,6 +149,14 @@ class AppRouter {
       case '/settingsScreen':
         return MaterialPageRoute(
           builder: (_) => const SettingsScreen(),
+        );
+      case '/profileScreen':
+        return MaterialPageRoute(
+          builder: (_) => const ProfileScreen(),
+        );
+      case '/editProfileScreen':
+        return MaterialPageRoute(
+          builder: (_) => const EditProfileScreen(),
         );
 
       default:

@@ -49,7 +49,7 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           InkWell(
-            onTap: () => Navigator.pushNamed(context, AppRoutes.logout),
+            onTap: () => Navigator.pushNamed(context, AppRoutes.profileScreen),
             child: const CircleAvatar(
               radius: 20,
               backgroundImage: AssetImage('assets/images/user.png'),
