@@ -36,7 +36,11 @@ class WeatherWidget extends StatelessWidget {
                 const SizedBox(width: 5),
                 Text(
                   location,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'SYNE',
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -48,7 +52,8 @@ class WeatherWidget extends StatelessWidget {
                   style: const TextStyle(
                       color: Colors.white,
                       fontSize: 32,
-                      fontWeight: FontWeight.bold),
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'SYNE'),
                 ),
                 const Spacer(),
                 Image.asset(weatherIcon, height: 50),
@@ -62,11 +67,16 @@ class WeatherWidget extends StatelessWidget {
                   children: [
                     Text(
                       entry.key,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'SYNE',
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       entry.value,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(
+                          color: Colors.white, fontFamily: 'SYNE'),
                     ),
                   ],
                 );

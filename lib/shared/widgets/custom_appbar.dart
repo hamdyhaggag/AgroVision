@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool isHome;
+  final List<Widget>? actions;
 
   const CustomAppBar({
     super.key,
     required this.title,
     this.isHome = false,
+    this.actions,
   });
 
   @override
@@ -35,6 +37,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       centerTitle: true,
+      actions: actions,
     );
   }
 

@@ -27,23 +27,22 @@ class FieldsScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => SensorDataScreen(
-                    field: field, // Pass the actual field data
+                    field: field,
                   ),
                 ),
               );
             },
             child: Card(
-              color: Colors.white, // White background for clean look
-              elevation: 5, // Subtle shadow for depth
+              color: Colors.white,
+              elevation: 5,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12), // Rounded corners
+                borderRadius: BorderRadius.circular(12),
               ),
-              margin: const EdgeInsets.only(bottom: 16), // Space between cards
+              margin: const EdgeInsets.only(bottom: 16),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Column(
                   children: [
-                    // Image Section
                     ClipRRect(
                       borderRadius:
                           const BorderRadius.vertical(top: Radius.circular(12)),
@@ -51,12 +50,9 @@ class FieldsScreen extends StatelessWidget {
                         field['image']!,
                         fit: BoxFit.cover,
                         width: double.infinity,
-                        height: screenWidth < 600
-                            ? 150
-                            : 200, // Adjust height based on screen size
+                        height: screenWidth < 600 ? 150 : 200,
                       ),
                     ),
-                    // Information Section
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -71,15 +67,14 @@ class FieldsScreen extends StatelessWidget {
                               color: Colors.black87,
                             ),
                             maxLines: 1,
-                            overflow: TextOverflow.ellipsis, // Handle overflow
+                            overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 8),
-                          // Field size and type (smaller text)
                           Text(
                             "${field['size']} • ${field['type']}",
                             style: TextStyle(
                               fontSize: screenWidth < 600 ? 12 : 14,
-                              color: Colors.grey[700], // Softer grey text
+                              color: Colors.grey[700],
                             ),
                           ),
                         ],

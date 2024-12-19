@@ -96,13 +96,18 @@ class HomeScreen extends StatelessWidget {
   // Dummy Data
   List<Map<String, String>> someNotesList() => [
         {
-          'image': 'assets/images/field.png',
-          'date': 'May 24 • 5:43 pm',
+          'image': 'assets/images/note1.jpg',
+          'date': 'Dec 24 • 5:43 pm',
           'content': 'Excellent harvest...',
         },
         {
-          'image': 'assets/images/field.png',
+          'image': 'assets/images/note2.jpg',
           'date': 'May 22 • 3:17 pm',
+          'content': 'I’ll be back in...',
+        },
+        {
+          'image': 'assets/images/note3.jpg',
+          'date': 'Jun 22 • 5:24 pm',
           'content': 'I’ll be back in...',
         },
       ];

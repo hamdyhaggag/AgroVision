@@ -89,9 +89,7 @@ class AddNewNoteScreen extends StatelessWidget {
 
             // Attach Image Button
             ElevatedButton.icon(
-              onPressed: () {
-                // Handle image attachment
-              },
+              onPressed: () {},
               icon: Icon(
                 Icons.attach_file,
                 color: AppColors.whiteColor,
