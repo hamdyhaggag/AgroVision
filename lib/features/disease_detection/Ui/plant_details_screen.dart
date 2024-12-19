@@ -105,7 +105,9 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryColor,
+                      ),
                     );
                   } else if (snapshot.hasError) {
                     return Center(
@@ -188,8 +190,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                             text: 'Get Consultant',
                             onPressed: () {
                               if (kDebugMode) {
-                                print(
-                                    'Hi'); // This will only print in debug mode
+                                print('Hi');
                               }
                             },
                           )
