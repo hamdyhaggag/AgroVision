@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'package:agro_vision/features/authentication/UI/login_screen.dart';
+import 'package:agro_vision/features/home/Ui/screen_layout.dart';
 import 'package:flutter/material.dart';
-import '../../../../core/helpers/shared_pref_helper.dart';
-import '../../../../core/utils/functions.dart';
-import '../../../../main.dart';
-import '../../onboarding/Ui/onboarding_screen.dart';
+import 'package:agro_vision/features/authentication/UI/login_screen.dart';
+import 'package:agro_vision/features/home/UI/home_screen.dart';
+import '../../../core/helpers/shared_pref_helper.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -35,11 +34,21 @@ class SplashScreenState extends State<SplashScreen>
     _animationController.forward();
 
     Timer(const Duration(seconds: 3), () {
-      if (isEnterBefore) {
-        navigateAndFinish(context, const LoginScreen());
+      // Check the login state from SharedPreferences
+      bool isLoggedIn = CacheHelper.getBoolean(key: 'isLoggedIn');
+
+      if (isLoggedIn) {
+        // If logged in, navigate to HomeScreen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ScreenLayout()),
+        );
       } else {
-        CacheHelper.saveData(key: 'isEnterBefore', value: true);
-        navigateAndFinish(context, const OnboardingScreen());
+        // If not logged in, navigate to LoginScreen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
       }
     });
   }
@@ -53,37 +62,39 @@ class SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                opacity: 0.09,
-                image: AssetImage('assets/images/App_Logo.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AnimatedBuilder(
-                    animation: _animation,
-                    builder: (context, child) {
-                      return Opacity(
-                        opacity: _animation.value,
-                        child: child,
-                      );
-                    },
-                    child: Transform.translate(
-                      offset: const Offset(-20.0, 0.0),
-                      child: const Image(
-                        image: AssetImage('assets/images/App_Logo.png'),
-                        height: 240.0,
-                        width: 270.0,
-                      ),
-                    ),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            opacity: 0.09,
+            image: AssetImage('assets/images/App_Logo.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedBuilder(
+                animation: _animation,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _animation.value,
+                    child: child,
+                  );
+                },
+                child: Transform.translate(
+                  offset: const Offset(-20.0, 0.0),
+                  child: const Image(
+                    image: AssetImage('assets/images/App_Logo.png'),
+                    height: 240.0,
+                    width: 270.0,
                   ),
-                ],
+                ),
               ),
-            )));
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

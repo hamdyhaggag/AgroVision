@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/helpers/shared_pref_helper.dart';
 import '../../Data/model/login_request_body.dart';
 import '../../Data/repos/login_repo.dart';
 import 'login_state.dart';
@@ -17,9 +18,17 @@ class LoginCubit extends Cubit<LoginState> {
     emit(const LoginState.loading());
     final response = await _loginRepo.login(loginRequestBody);
     response.when(success: (loginResponse) {
+      // Save the login state in CacheHelper after successful login
+      CacheHelper.saveData(key: 'isLoggedIn', value: true);
+
       emit(LoginState.success(loginResponse));
     }, failure: (error) {
       emit(LoginState.error(error: error.apiErrorModel.message ?? ''));
     });
+  }
+
+  void logout() {
+    // Clear the login state from SharedPreferences when logging out
+    CacheHelper.saveData(key: 'isLoggedIn', value: false);
   }
 }
