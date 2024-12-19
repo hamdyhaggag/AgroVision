@@ -1,7 +1,5 @@
 import 'dart:io';
 import 'package:agro_vision/features/chat/Ui/chat_list_screen.dart';
-import 'package:agro_vision/features/chat/Ui/consultation_chat_screen.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
