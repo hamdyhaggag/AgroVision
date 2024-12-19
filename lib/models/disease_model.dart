@@ -13,10 +13,10 @@ class DiseaseModel {
 
   factory DiseaseModel.fromJson(Map<String, dynamic> json) {
     return DiseaseModel(
-      date: json['date'],
-      status: json['status'],
-      isComplete: json['isComplete'],
-      imageUrl: json['imageUrl'],
+      date: json['date'] ?? '',
+      status: json['status'] ?? '',
+      isComplete: json['isComplete'] ?? false,
+      imageUrl: json['imageUrl'] ?? '',
     );
   }
 }

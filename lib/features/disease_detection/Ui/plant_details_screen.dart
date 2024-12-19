@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/core/themes/text_styles.dart';
 import 'package:agro_vision/shared/widgets/custom_botton.dart';
 
-class PlantDetailsScreen extends StatelessWidget {
+class PlantDetailsScreen extends StatefulWidget {
   final String? imagePath;
   final String? selectedPlant;
 
@@ -16,6 +19,56 @@ class PlantDetailsScreen extends StatelessWidget {
             'Either imagePath or selectedPlant must be provided.');
 
   @override
+  State<PlantDetailsScreen> createState() => _PlantDetailsScreenState();
+}
+
+class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
+  final Dio _dio = Dio()..interceptors.add(PrettyDioLogger());
+  Future<Map<String, dynamic>>? plantDetailsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.imagePath != null) {
+      plantDetailsFuture = fetchPlantDetails(
+        File(widget.imagePath!),
+        widget.selectedPlant ?? 'unknown',
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchPlantDetails(
+      File imageFile, String plantName) async {
+    const String apiUrl = 'https://1906-102-44-182-87.ngrok-free.app/predict';
+
+    try {
+      FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(imageFile.path,
+            filename: imageFile.path.split('/').last),
+        'plant': plantName,
+      });
+
+      final response = await _dio.post(
+        apiUrl,
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to load plant details');
+      }
+    } catch (e) {
+      throw Exception('Error fetching data: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
@@ -23,12 +76,12 @@ class PlantDetailsScreen extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (imagePath != null)
+          if (widget.imagePath != null)
             Container(
               height: size.height * 0.3,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: FileImage(File(imagePath!)),
+                  image: FileImage(File(widget.imagePath!)),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -39,7 +92,7 @@ class PlantDetailsScreen extends StatelessWidget {
               color: AppColors.greyLight,
               child: Center(
                 child: Text(
-                  selectedPlant ?? 'Unknown Plant',
+                  widget.selectedPlant ?? 'Unknown Plant',
                   style: TextStyles.heading1,
                 ),
               ),
@@ -47,81 +100,108 @@ class PlantDetailsScreen extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.check_circle, color: Colors.green),
-                        const SizedBox(width: 8),
-                        Text(
-                          selectedPlant != null
-                              ? 'We identified the plant: $selectedPlant!'
-                              : 'Hurray, we identified the plant!',
-                          style:
-                              TextStyles.bodyText.copyWith(color: Colors.green),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    if (selectedPlant != null)
-                      Text(
-                        selectedPlant!,
-                        style: TextStyles.heading1,
-                      )
-                    else
-                      const Text(
-                        'Pyrus Communis',
-                        style: TextStyles.heading1,
-                      ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        const Text(
-                          'Confidence Score',
-                          style: TextStyles.bodyText,
-                        ),
-                        const Spacer(),
-                        Text(
-                          '87%',
-                          style: TextStyles.bodyText
-                              .copyWith(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const LinearProgressIndicator(
-                      value: 0.87,
-                      backgroundColor: AppColors.greyLight,
-                      color: AppColors.primaryColor,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Cause',
-                      style: TextStyles.heading2,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Pyrus cordata, the Heart-leaved pear or Plymouth pear...',
-                      style: TextStyles.bodyText,
-                      maxLines: 5,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    InkWell(
-                      onTap: () {},
+              child: FutureBuilder<Map<String, dynamic>>(
+                future: plantDetailsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
                       child: Text(
-                        'Read more',
-                        style: TextStyles.bodyText
-                            .copyWith(color: AppColors.primaryColor),
+                        'Error: ${snapshot.error}',
+                        style: TextStyles.bodyText.copyWith(color: Colors.red),
                       ),
-                    ),
-                    const SizedBox(height: 100),
-                    CustomBottom(
-                        text: 'Get Consultant', onPressed: () => print('Hi')),
-                  ],
-                ),
+                    );
+                  } else if (snapshot.hasData) {
+                    final data = snapshot.data!;
+                    final plantClass =
+                        data['class'] as String? ?? 'Unknown Class';
+                    final confidence = data['confidence'] as double? ?? 0.0;
+
+                    return SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.check_circle,
+                                  color: Colors.green),
+                              const SizedBox(width: 8),
+                              Text(
+                                'We identified the plant!',
+                                style: TextStyles.bodyText
+                                    .copyWith(color: Colors.green),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            plantClass,
+                            style: TextStyles.heading1,
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              const Text(
+                                'Confidence Score',
+                                style: TextStyles.bodyText,
+                              ),
+                              const Spacer(),
+                              Text(
+                                '${confidence.toStringAsFixed(2)}%',
+                                style: TextStyles.bodyText
+                                    .copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          LinearProgressIndicator(
+                            value: confidence / 100,
+                            backgroundColor: AppColors.greyLight,
+                            color: AppColors.primaryColor,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Cause',
+                            style: TextStyles.heading2,
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'The plant identified is a specific type...',
+                            style: TextStyles.bodyText,
+                            maxLines: 5,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          InkWell(
+                            onTap: () {},
+                            child: Text(
+                              'Read more',
+                              style: TextStyles.bodyText
+                                  .copyWith(color: AppColors.primaryColor),
+                            ),
+                          ),
+                          const SizedBox(height: 100),
+                          CustomBottom(
+                            text: 'Get Consultant',
+                            onPressed: () {
+                              if (kDebugMode) {
+                                print(
+                                    'Hi'); // This will only print in debug mode
+                              }
+                            },
+                          )
+                        ],
+                      ),
+                    );
+                  } else {
+                    return const Center(
+                      child: Text('No data available'),
+                    );
+                  }
+                },
               ),
             ),
           ),

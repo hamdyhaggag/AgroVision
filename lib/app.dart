@@ -11,6 +11,8 @@ import 'core/utils/utils.dart';
 import 'features/authentication/Logic/auth cubit/auth_cubit.dart';
 import 'features/authentication/Logic/login cubit/login_cubit.dart';
 import 'features/authentication/Logic/logout cubit/logout_cubit.dart';
+import 'features/disease_detection/Api/disease_detection_service.dart';
+import 'features/disease_detection/Logic/disease_cubit.dart';
 import 'features/monitoring/Api/sensor_data_service.dart';
 import 'features/monitoring/Logic/sensor_data_cubit.dart';
 import 'features/monitoring/UI/sensor_data_screen.dart';
@@ -44,6 +46,10 @@ class AgroVision extends StatelessWidget {
               child: const SensorDataScreen(
                 field: {},
               ),
+            ),
+            BlocProvider(
+              create: (context) =>
+                  DiseaseDetectionCubit(DiseaseDetectionService()),
             ),
           ],
           child: MaterialApp(
