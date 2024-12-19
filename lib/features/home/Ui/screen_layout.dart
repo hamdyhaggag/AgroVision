@@ -26,7 +26,7 @@ class ScreenLayout extends StatelessWidget {
           final List<Widget> screens = [
             const HomeScreen(),
             const HistoryScreen(),
-            DiseaseDetectionReports(),
+            const DiseaseDetectionReports(),
             ChatListScreen(),
           ];
 

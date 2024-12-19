@@ -1,13 +1,15 @@
 import 'dart:io';
-import 'package:agro_vision/features/chat/Ui/chat_list_screen.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/core/themes/text_styles.dart';
 import 'package:agro_vision/shared/widgets/custom_botton.dart';
-
 import '../../../core/utils/functions.dart';
+import '../../../models/disease_model.dart';
+import '../../chat/Ui/chat_list_screen.dart';
 
 class PlantDetailsScreen extends StatefulWidget {
   final String? imagePath;
@@ -33,15 +35,14 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
     super.initState();
     if (widget.imagePath != null) {
       plantDetailsFuture = fetchPlantDetails(
-        File(widget.imagePath!),
-        widget.selectedPlant ?? 'unknown',
-      );
+          File(widget.imagePath!), widget.selectedPlant ?? 'Unknown');
     }
   }
 
   Future<Map<String, dynamic>> fetchPlantDetails(
       File imageFile, String plantName) async {
-    const String apiUrl = 'https://1906-102-44-182-87.ngrok-free.app/predict';
+    const String apiUrl =
+        'https://1906-102-44-182-87.ngrok-free.app/predict'; // Your API endpoint
 
     try {
       FormData formData = FormData.fromMap({
@@ -53,21 +54,32 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
       final response = await _dio.post(
         apiUrl,
         data: formData,
-        options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        ),
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
 
       if (response.statusCode == 200) {
-        return response.data;
+        final data = response.data;
+        await saveReport(data);
+        return data;
       } else {
         throw Exception('Failed to load plant details');
       }
     } catch (e) {
       throw Exception('Error fetching data: $e');
     }
+  }
+
+  Future<void> saveReport(Map<String, dynamic> report) async {
+    final prefs = await SharedPreferences.getInstance();
+    final existingReports = prefs.getStringList('diseaseReports') ?? [];
+    final newReport = DiseaseModel(
+      date: DateTime.now().toString(),
+      status: report['class'] ?? 'Unknown',
+      isComplete: true,
+      imageUrl: widget.imagePath!,
+    );
+    existingReports.add(jsonEncode(newReport.toJson()));
+    await prefs.setStringList('diseaseReports', existingReports);
   }
 
   @override

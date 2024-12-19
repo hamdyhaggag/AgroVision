@@ -19,4 +19,13 @@ class DiseaseModel {
       imageUrl: json['imageUrl'] ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'date': date,
+      'status': status,
+      'isComplete': isComplete,
+      'imageUrl': imageUrl,
+    };
+  }
 }
