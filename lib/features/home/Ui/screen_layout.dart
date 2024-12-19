@@ -160,7 +160,7 @@ class ScreenLayout extends StatelessWidget {
               ),
             ),
             floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
+                FloatingActionButtonLocation.miniCenterDocked,
             bottomNavigationBar: SlidingClippedNavBar(
               backgroundColor: AppColors.navBarColor,
               activeColor: Theme.of(context).primaryColor,
@@ -172,7 +172,7 @@ class ScreenLayout extends StatelessWidget {
                 ),
                 BarItem(
                   icon: Icons.monitor_heart,
-                  title: 'Statistics',
+                  title: 'Analytics',
                 ),
                 BarItem(
                   icon: Icons.analytics,
