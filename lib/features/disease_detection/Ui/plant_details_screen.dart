@@ -76,27 +76,53 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (widget.imagePath != null)
-            Container(
-              height: size.height * 0.3,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: FileImage(File(widget.imagePath!)),
-                  fit: BoxFit.cover,
+          Stack(
+            children: [
+              if (widget.imagePath != null)
+                Container(
+                  height: size.height * 0.45,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: FileImage(File(widget.imagePath!)),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                )
+              else
+                Container(
+                  height: size.height * 0.3,
+                  color: AppColors.greyLight,
+                  child: Center(
+                    child: Text(
+                      widget.selectedPlant ?? 'Unknown Plant',
+                      style: TextStyles.heading1,
+                    ),
+                  ),
+                ),
+              Positioned(
+                top: size.height * 0.43,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                  child: Container(
+                    width: size.width,
+                    color: Colors.white,
+                    child: const Padding(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          SizedBox(height: 14),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            )
-          else
-            Container(
-              height: size.height * 0.3,
-              color: AppColors.greyLight,
-              child: Center(
-                child: Text(
-                  widget.selectedPlant ?? 'Unknown Plant',
-                  style: TextStyles.heading1,
-                ),
-              ),
-            ),
+            ],
+          ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
