@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:agro_vision/features/chat/Ui/chat_list_screen.dart';
+import 'package:agro_vision/features/chat/Ui/consultation_chat_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
@@ -6,6 +8,8 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/core/themes/text_styles.dart';
 import 'package:agro_vision/shared/widgets/custom_botton.dart';
+
+import '../../../core/utils/functions.dart';
 
 class PlantDetailsScreen extends StatefulWidget {
   final String? imagePath;
@@ -147,6 +151,10 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                     final plantClass =
                         data['class'] as String? ?? 'Unknown Class';
                     final confidence = data['confidence'] as double? ?? 0.0;
+                    final reason =
+                        data['reason'] as String? ?? 'Reason not provided.';
+                    final control = data['control'] as String? ??
+                        'Control methods not provided.';
 
                     return SingleChildScrollView(
                       child: Column(
@@ -192,34 +200,35 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                           ),
                           const SizedBox(height: 16),
                           const Text(
-                            'Cause',
+                            'Reason',
                             style: TextStyles.heading2,
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'The plant identified is a specific type...',
+                          Text(
+                            reason,
                             style: TextStyles.bodyText,
                             maxLines: 5,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 8),
-                          InkWell(
-                            onTap: () {},
-                            child: Text(
-                              'Read more',
-                              style: TextStyles.bodyText
-                                  .copyWith(color: AppColors.primaryColor),
-                            ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Control',
+                            style: TextStyles.heading2,
                           ),
-                          const SizedBox(height: 100),
+                          const SizedBox(height: 8),
+                          Text(
+                            control,
+                            style: TextStyles.bodyText,
+                            maxLines: 5,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 16),
                           CustomBottom(
                             text: 'Get Consultant',
                             onPressed: () {
-                              if (kDebugMode) {
-                                print('Hi');
-                              }
+                              navigateTo(context, ChatListScreen());
                             },
-                          )
+                          ),
                         ],
                       ),
                     );

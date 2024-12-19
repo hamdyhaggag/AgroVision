@@ -8,11 +8,8 @@ class ConsultationChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Consultation'),
-      ),
-      body: const ChatDetailScreen(),
+    return const Scaffold(
+      body: ChatDetailScreen(),
     );
   }
 }
