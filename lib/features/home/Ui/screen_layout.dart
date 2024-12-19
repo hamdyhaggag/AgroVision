@@ -34,67 +34,104 @@ class ScreenLayout extends StatelessWidget {
             body: screens[appCubit.bottomNavIndex],
             floatingActionButton: FloatingActionButton(
               onPressed: () async {
-                final ImagePicker picker = ImagePicker();
-
                 showModalBottomSheet(
                   context: context,
                   builder: (BuildContext context) {
-                    return SafeArea(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ListTile(
-                            leading: const Icon(Icons.photo_library),
-                            title: const Text(
-                              'Pick from Gallery',
-                              style:
-                                  TextStyle(fontFamily: 'SYNE', fontSize: 15),
-                            ),
-                            onTap: () async {
-                              final XFile? image = await picker.pickImage(
-                                source: ImageSource.gallery,
-                                imageQuality: 85,
-                              );
-                              if (image != null) {
-                                Navigator.pop(context);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PlantDetailsScreen(
-                                      imagePath: image.path,
-                                    ),
+                    String? selectedPlant;
+
+                    return StatefulBuilder(
+                      builder: (context, setState) {
+                        return SafeArea(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (selectedPlant == null) ...[
+                                ListTile(
+                                  leading: const Icon(Icons.local_florist),
+                                  title: const Text(
+                                    'Tomato',
+                                    style: TextStyle(
+                                        fontFamily: 'SYNE', fontSize: 15),
                                   ),
-                                );
-                              }
-                            },
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.camera_alt),
-                            title: const Text(
-                              'Take a Photo',
-                              style:
-                                  TextStyle(fontFamily: 'SYNE', fontSize: 15),
-                            ),
-                            onTap: () async {
-                              final XFile? image = await picker.pickImage(
-                                source: ImageSource.camera,
-                                imageQuality: 85,
-                              );
-                              if (image != null) {
-                                Navigator.pop(context);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PlantDetailsScreen(
-                                      imagePath: image.path,
-                                    ),
+                                  onTap: () {
+                                    setState(() {
+                                      selectedPlant = 'Tomato';
+                                    });
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.local_florist),
+                                  title: const Text(
+                                    'Potato',
+                                    style: TextStyle(
+                                        fontFamily: 'SYNE', fontSize: 15),
                                   ),
-                                );
-                              }
-                            },
+                                  onTap: () {
+                                    setState(() {
+                                      selectedPlant = 'Potato';
+                                    });
+                                  },
+                                ),
+                              ] else ...[
+                                ListTile(
+                                  leading: const Icon(Icons.photo_library),
+                                  title: const Text(
+                                    'Pick from Gallery',
+                                    style: TextStyle(
+                                        fontFamily: 'SYNE', fontSize: 15),
+                                  ),
+                                  onTap: () async {
+                                    final XFile? image = await picker.pickImage(
+                                      source: ImageSource.gallery,
+                                      imageQuality: 85,
+                                    );
+                                    if (image != null) {
+                                      Navigator.pop(context);
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              PlantDetailsScreen(
+                                            imagePath: image.path,
+                                            selectedPlant: selectedPlant,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.camera_alt),
+                                  title: const Text(
+                                    'Take a Photo',
+                                    style: TextStyle(
+                                        fontFamily: 'SYNE', fontSize: 15),
+                                  ),
+                                  onTap: () async {
+                                    final XFile? image = await picker.pickImage(
+                                      source: ImageSource.camera,
+                                      imageQuality: 85,
+                                    );
+                                    if (image != null) {
+                                      Navigator.pop(context);
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              PlantDetailsScreen(
+                                            imagePath: image.path,
+                                            selectedPlant: selectedPlant,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     );
                   },
                 );

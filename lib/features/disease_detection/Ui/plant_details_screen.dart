@@ -5,9 +5,15 @@ import 'package:agro_vision/core/themes/text_styles.dart';
 import 'package:agro_vision/shared/widgets/custom_botton.dart';
 
 class PlantDetailsScreen extends StatelessWidget {
-  final String imagePath;
+  final String? imagePath;
+  final String? selectedPlant;
 
-  const PlantDetailsScreen({super.key, required this.imagePath});
+  const PlantDetailsScreen({
+    super.key,
+    this.imagePath,
+    this.selectedPlant,
+  }) : assert(imagePath != null || selectedPlant != null,
+            'Either imagePath or selectedPlant must be provided.');
 
   @override
   Widget build(BuildContext context) {
@@ -17,15 +23,27 @@ class PlantDetailsScreen extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            height: size.height * 0.3,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: FileImage(File(imagePath)),
-                fit: BoxFit.cover,
+          if (imagePath != null)
+            Container(
+              height: size.height * 0.3,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: FileImage(File(imagePath!)),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            )
+          else
+            Container(
+              height: size.height * 0.3,
+              color: AppColors.greyLight,
+              child: Center(
+                child: Text(
+                  selectedPlant ?? 'Unknown Plant',
+                  style: TextStyles.heading1,
+                ),
               ),
             ),
-          ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -38,17 +56,25 @@ class PlantDetailsScreen extends StatelessWidget {
                         const Icon(Icons.check_circle, color: Colors.green),
                         const SizedBox(width: 8),
                         Text(
-                          'Hurray, we identified the plant!',
+                          selectedPlant != null
+                              ? 'We identified the plant: $selectedPlant!'
+                              : 'Hurray, we identified the plant!',
                           style:
                               TextStyles.bodyText.copyWith(color: Colors.green),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Pyrus Communis',
-                      style: TextStyles.heading1,
-                    ),
+                    if (selectedPlant != null)
+                      Text(
+                        selectedPlant!,
+                        style: TextStyles.heading1,
+                      )
+                    else
+                      const Text(
+                        'Pyrus Communis',
+                        style: TextStyles.heading1,
+                      ),
                     const SizedBox(height: 16),
                     Row(
                       children: [
