@@ -47,7 +47,15 @@ class ScreenLayout extends StatelessWidget {
                             children: [
                               if (selectedPlant == null) ...[
                                 ListTile(
-                                  leading: const Icon(Icons.local_florist),
+                                  leading: CircleAvatar(
+                                    backgroundColor: Colors
+                                        .red[100], // Adjust color as needed
+                                    radius: 20, // Adjust size as needed
+                                    child: Image.asset(
+                                      'assets/images/tomato.png', // Replace with your image asset path
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
                                   title: const Text(
                                     'Tomato',
                                     style: TextStyle(
@@ -60,7 +68,15 @@ class ScreenLayout extends StatelessWidget {
                                   },
                                 ),
                                 ListTile(
-                                  leading: const Icon(Icons.local_florist),
+                                  leading: CircleAvatar(
+                                    backgroundColor: Colors
+                                        .brown[100], // Adjust color as needed
+                                    radius: 20, // Adjust size as needed
+                                    child: Image.asset(
+                                      'assets/images/potato.png',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
                                   title: const Text(
                                     'Potato',
                                     style: TextStyle(
