@@ -48,11 +48,10 @@ class ScreenLayout extends StatelessWidget {
                               if (selectedPlant == null) ...[
                                 ListTile(
                                   leading: CircleAvatar(
-                                    backgroundColor: Colors
-                                        .red[100], // Adjust color as needed
-                                    radius: 20, // Adjust size as needed
+                                    backgroundColor: Colors.red[100],
+                                    radius: 20,
                                     child: Image.asset(
-                                      'assets/images/tomato.png', // Replace with your image asset path
+                                      'assets/images/tomato.png',
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -69,9 +68,8 @@ class ScreenLayout extends StatelessWidget {
                                 ),
                                 ListTile(
                                   leading: CircleAvatar(
-                                    backgroundColor: Colors
-                                        .brown[100], // Adjust color as needed
-                                    radius: 20, // Adjust size as needed
+                                    backgroundColor: Colors.brown[100],
+                                    radius: 20,
                                     child: Image.asset(
                                       'assets/images/potato.png',
                                       fit: BoxFit.cover,
