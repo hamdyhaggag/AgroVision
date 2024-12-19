@@ -109,28 +109,28 @@ class HomeScreen extends StatelessWidget {
 
   List<Map<String, String>> someFieldsList() => [
         {
-          'image': 'assets/images/field.png',
+          'image': 'assets/images/field5.jpg',
           'name': 'Empty Fields',
           'size': '14 ha',
-          'type': 'Grapes',
+          'type': 'Tomato',
         },
         {
-          'image': 'assets/images/field.png',
-          'name': 'Grape Fields',
+          'image': 'assets/images/field4.jpg',
+          'name': 'Tomato Fields',
           'size': '11 ha',
-          'type': 'Grapes',
+          'type': 'Tomato',
         },
         {
-          'image': 'assets/images/field.png',
-          'name': 'Empty Fields',
+          'image': 'assets/images/field3.jpg',
+          'name': 'Potato Field 1',
           'size': '10 ha',
-          'type': 'Grapes',
+          'type': 'Potato',
         },
         {
-          'image': 'assets/images/field.png',
-          'name': 'Grape Fields',
+          'image': 'assets/images/field2.jpg',
+          'name': 'Potato Field 2',
           'size': '10 ha',
-          'type': 'Grapes',
+          'type': 'Potato',
         },
       ];
 }
