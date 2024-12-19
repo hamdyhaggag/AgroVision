@@ -37,13 +37,11 @@ class SplashScreenState extends State<SplashScreen>
       bool isLoggedIn = CacheHelper.getBoolean(key: 'isLoggedIn');
 
       if (isLoggedIn) {
-        // If logged in, navigate to HomeScreen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => ScreenLayout()),
         );
       } else {
-        // If not logged in, navigate to LoginScreen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const LoginScreen()),

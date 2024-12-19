@@ -7,8 +7,10 @@ import '../../../core/network/api_service.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../shared/widgets/custom_botton.dart';
+import '../../authentication/Logic/login cubit/login_cubit.dart';
 import '../../authentication/Logic/logout cubit/logout_cubit.dart';
 import '../../authentication/Logic/logout cubit/logout_state.dart';
+import '../../authentication/UI/login_screen.dart';
 
 class LogoutScreen extends StatelessWidget {
   const LogoutScreen({super.key});
@@ -55,7 +57,13 @@ class LogoutScreen extends StatelessWidget {
                       CustomBottom(
                         text: 'Yes, Log Out',
                         onPressed: () {
-                          context.read<LogoutCubit>().logout();
+                          context.read<LoginCubit>().logout();
+
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (context) => const LoginScreen()),
+                            (Route<dynamic> route) => false,
+                          );
                         },
                       ),
                       SizedBox(height: 10.h),
