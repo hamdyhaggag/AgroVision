@@ -18,7 +18,6 @@ class LoginCubit extends Cubit<LoginState> {
     emit(const LoginState.loading());
     final response = await _loginRepo.login(loginRequestBody);
     response.when(success: (loginResponse) {
-      // Save the login state in CacheHelper after successful login
       CacheHelper.saveData(key: 'isLoggedIn', value: true);
 
       emit(LoginState.success(loginResponse));
@@ -28,7 +27,6 @@ class LoginCubit extends Cubit<LoginState> {
   }
 
   void logout() {
-    // Clear the login state from SharedPreferences when logging out
     CacheHelper.saveData(key: 'isLoggedIn', value: false);
   }
 }

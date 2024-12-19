@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:agro_vision/features/home/Ui/screen_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:agro_vision/features/authentication/UI/login_screen.dart';
-import 'package:agro_vision/features/home/UI/home_screen.dart';
 import '../../../core/helpers/shared_pref_helper.dart';
 
 class SplashScreen extends StatefulWidget {
