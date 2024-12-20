@@ -9,6 +9,7 @@ import '../../features/authentication/UI/forgot password/forgot_password_email.d
 import '../../features/authentication/UI/forgot password/forgot_password_phone.dart';
 import '../../features/authentication/UI/otp/otp_email_screen.dart';
 import '../../features/authentication/UI/otp/otp_phone_screen.dart';
+import '../../features/chat/Ui/consultation_chat_screen.dart';
 import '../../features/home/Ui/drawer/crops_managment.dart';
 import '../../features/home/Ui/drawer/farm_analytics.dart';
 import '../../features/home/Ui/drawer/farm_inventory.dart';
@@ -25,7 +26,6 @@ import '../../features/splash/Ui/splash_screen.dart';
 import '../../features/chat/ui/chat_list_screen.dart';
 import '../../features/chat/ui/chat_detail_screen.dart';
 import '../../features/chat/ui/community_chat_screen.dart';
-import '../../features/chat/ui/consultation_chat_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -121,7 +121,7 @@ class AppRouter {
         );
       case AppRoutes.consultationChat:
         return MaterialPageRoute(
-          builder: (_) => const ConsultationChatScreen(),
+          builder: (_) => const ChatBotScreen(),
         );
 
       case '/farmAnalytics-chat':

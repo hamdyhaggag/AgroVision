@@ -44,7 +44,7 @@ class ChatListScreen extends StatelessWidget {
               tabs: [
                 Tab(text: 'Community'),
                 Tab(text: 'Chats'),
-                Tab(text: 'Consultation'),
+                Tab(text: 'Chat Bot'),
               ],
               labelColor: AppColors.primaryColor,
               unselectedLabelColor: Colors.grey,
@@ -54,7 +54,7 @@ class ChatListScreen extends StatelessWidget {
                 children: [
                   _buildChatList(context, 'Community User'),
                   _buildChatList(context, 'Chat User'),
-                  _buildChatList(context, 'Consultant User'),
+                  _buildChatList(context, 'Chat Bot'),
                 ],
               ),
             ),

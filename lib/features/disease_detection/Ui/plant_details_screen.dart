@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
@@ -226,15 +227,28 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                             style: TextStyles.heading2,
                           ),
                           const SizedBox(height: 8),
-                          Text(
-                            control,
-                            style: TextStyles.bodyText,
-                            maxLines: 5,
-                            overflow: TextOverflow.ellipsis,
+                          RichText(
+                            text: TextSpan(
+                              style: TextStyles.bodyText,
+                              children: [
+                                TextSpan(
+                                  text: control,
+                                ),
+                                TextSpan(
+                                  text: ' Read more',
+                                  style: const TextStyle(
+                                    color: AppColors.primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {},
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 16),
                           CustomBottom(
-                            text: 'Get Consultant',
+                            text: 'Talk to the Bot',
                             onPressed: () {
                               navigateTo(context, ChatListScreen());
                             },
