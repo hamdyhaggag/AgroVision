@@ -204,7 +204,7 @@ class DrawerHeaderWidget extends StatelessWidget {
         image: DecorationImage(
           image: imagePath.isNotEmpty
               ? AssetImage(imagePath)
-              : const AssetImage('assets/images/header_background.jpg'),
+              : const AssetImage('assets/images/field1.jpg'),
           fit: BoxFit.cover,
         ),
       ),

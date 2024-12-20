@@ -176,7 +176,7 @@ class ScreenLayout extends StatelessWidget {
                 ),
                 BarItem(
                   icon: Icons.analytics,
-                  title: 'Detection',
+                  title: 'Reports',
                 ),
                 BarItem(
                   icon: Icons.chat,
