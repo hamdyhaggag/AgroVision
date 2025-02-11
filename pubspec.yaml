@@ -53,6 +53,7 @@ dependencies:
   image_picker: ^1.1.2
   sliding_clipped_nav_bar: ^3.1.0+4
   syncfusion_flutter_gauges: ^28.1.33
+  shimmer: ^2.0.0
 
 
 

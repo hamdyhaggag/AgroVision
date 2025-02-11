@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../core/helpers/shared_pref_helper.dart';
 import '../../../core/routing/app_routes.dart';
@@ -192,28 +193,64 @@ class AppDrawer extends StatelessWidget {
   }
 }
 
-class DrawerHeaderWidget extends StatelessWidget {
+class DrawerHeaderWidget extends StatefulWidget {
   const DrawerHeaderWidget({super.key});
+
+  @override
+  DrawerHeaderWidgetState createState() => DrawerHeaderWidgetState();
+}
+
+class DrawerHeaderWidgetState extends State<DrawerHeaderWidget> {
+  bool _showShimmer = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _showShimmer = false;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     String imagePath = CacheHelper.getString(key: 'drawerImagePath');
+    ImageProvider backgroundImage = imagePath.isNotEmpty
+        ? AssetImage(imagePath)
+        : const AssetImage('assets/images/field1.jpg');
 
     return DrawerHeader(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: imagePath.isNotEmpty
-              ? AssetImage(imagePath)
-              : const AssetImage('assets/images/field1.jpg'),
-          fit: BoxFit.cover,
-        ),
-      ),
       child: Stack(
+        fit: StackFit.expand,
         children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: backgroundImage,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          AnimatedOpacity(
+            opacity: _showShimmer ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 500),
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                color: Colors.white.withOpacity(0.5),
+              ),
+            ),
+          ),
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 1.5),
-              child: Container(color: Colors.black.withOpacity(0.1)),
+              child: Container(
+                color: Colors.black.withOpacity(0.1),
+              ),
             ),
           ),
           const Center(
