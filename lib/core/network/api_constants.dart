@@ -1,5 +1,7 @@
 class ApiConstants {
   static const String baseUrl = 'https://api.agrovision.ltd/api/';
+  static const String openWeatherBaseUrl =
+      'https://api.openweathermap.org/data/2.5';
   static const String login = 'login';
   static const String logout = 'logout';
   static const String firebaseRetrieve = 'firebase/retrieve';

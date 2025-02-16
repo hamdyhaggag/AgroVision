@@ -1,0 +1,14 @@
+import 'package:agro_vision/core/network/dio_factory.dart';
+import 'package:agro_vision/models/weather_model.dart';
+
+class WeatherService {
+  Future<WeatherModel> getWeather(double lat, double lon) async {
+    final dio = DioFactory.getDio();
+    final response = await dio.get('/weather', queryParameters: {
+      'lat': lat,
+      'lon': lon,
+      'units': 'metric',
+    });
+    return WeatherModel.fromJson(response.data);
+  }
+}

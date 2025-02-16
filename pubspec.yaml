@@ -54,7 +54,10 @@ dependencies:
   sliding_clipped_nav_bar: ^3.1.0+4
   syncfusion_flutter_gauges: ^28.1.33
   shimmer: ^2.0.0
-
+  flutter_dotenv: ^5.2.1
+  geolocator: ^13.0.2
+  cached_network_image: ^3.4.1
+  meta: ^1.9.1
 
 
 
@@ -76,8 +79,9 @@ flutter:
     - assets/images/authentication/
     - assets/icon/
     - assets/animations/
+    - assets/icon/weather_icons/
     - shorebird.yaml
-
+    - .env
   fonts:
     - family: DIN
       fonts:

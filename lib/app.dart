@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'core/dependency_injection/di.dart';
+import 'core/helpers/location_helper.dart';
 import 'core/network/dio_factory.dart';
+import 'core/network/weather_service.dart';
 import 'core/routing/app_router.dart';
 import 'core/routing/app_routes.dart';
 import 'core/themes/app_colors.dart';
@@ -13,6 +15,7 @@ import 'features/authentication/Logic/login cubit/login_cubit.dart';
 import 'features/authentication/Logic/logout cubit/logout_cubit.dart';
 import 'features/disease_detection/Api/disease_detection_service.dart';
 import 'features/disease_detection/Logic/disease_cubit.dart';
+import 'features/home/Logic/home_cubit.dart';
 import 'features/monitoring/Api/sensor_data_service.dart';
 import 'features/monitoring/Logic/sensor_data_cubit.dart';
 import 'features/monitoring/UI/sensor_data_screen.dart';
@@ -50,6 +53,12 @@ class AgroVision extends StatelessWidget {
             BlocProvider(
               create: (context) =>
                   DiseaseDetectionCubit(DiseaseDetectionService()),
+            ),
+            BlocProvider(
+              create: (context) => HomeCubit(
+                weatherService: WeatherService(),
+                locationHelper: LocationHelper(),
+              ),
             ),
           ],
           child: MaterialApp(
