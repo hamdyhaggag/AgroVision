@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:lottie/lottie.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../shared/widgets/custom_appbar.dart';
 import 'edit_note_screen.dart';
 
 class NotesScreen extends StatefulWidget {
   final List<Map<String, String>> notes;
+  final VoidCallback onAddNote;
 
-  const NotesScreen({super.key, required this.notes});
+  const NotesScreen({
+    super.key,
+    required this.notes,
+    required this.onAddNote,
+  });
 
   @override
   State<NotesScreen> createState() => _NotesScreenState();
@@ -15,19 +22,194 @@ class NotesScreen extends StatefulWidget {
 class _NotesScreenState extends State<NotesScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'My Notes',
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: AppColors.primaryColor,
       ),
-      body: widget.notes.isEmpty
-          ? _buildEmptyNotesUI(context)
-          : ListView.builder(
-              itemCount: widget.notes.length,
-              itemBuilder: (context, index) {
-                final note = widget.notes[index];
-                return _buildNoteCard(context, note, index);
-              },
+      child: Scaffold(
+        appBar: const CustomAppBar(
+          title: 'My Notes',
+          isHome: true,
+        ),
+        floatingActionButton: _buildFloatingActionButton(),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.primaryColor, Colors.white],
             ),
+          ),
+          child: widget.notes.isEmpty
+              ? _buildEmptyNotesUI(context)
+              : _buildNotesList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingActionButton() {
+    return FloatingActionButton.extended(
+      onPressed: widget.onAddNote,
+      backgroundColor: AppColors.primaryColor,
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      icon: const Icon(Icons.add, color: Colors.white),
+      label: const Text('New Note', style: TextStyle(color: Colors.white)),
+    );
+  }
+
+  Widget _buildNotesList() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+          ),
+          child: ListView.builder(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.only(top: 24, bottom: 100),
+            itemCount: widget.notes.length,
+            itemBuilder: (context, index) => _buildNoteItem(index),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoteItem(int index) {
+    final note = widget.notes[index];
+    final noteId = note['id'] ?? 'note_$index';
+    final uniqueKey = Key('${noteId}_${note['date']}');
+
+    return Dismissible(
+      key: uniqueKey,
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        return await _confirmDelete(context, index);
+      },
+      background: _buildDismissibleBackground(),
+      onDismissed: (_) => _deleteNoteAtIndex(context, index),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Hero(
+          tag: noteId,
+          child: Material(
+            borderRadius: BorderRadius.circular(20),
+            elevation: 2,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primaryColor.withValues(alpha: 0.05),
+                    Colors.white
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () => _navigateToDetailScreen(context, note, index),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildNoteHeader(note),
+                      const SizedBox(height: 12),
+                      _buildNoteContent(note),
+                      const SizedBox(height: 8),
+                      _buildNoteFooter(note),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDismissibleBackground() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.redAccent,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 30),
+      child: const Icon(Icons.delete_forever, color: Colors.white, size: 36),
+    );
+  }
+
+  Widget _buildNoteHeader(Map<String, String> note) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.accentColor.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            note['category']?.toUpperCase() ?? 'PERSONAL',
+            style: TextStyle(
+              color: AppColors.accentColor,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        const Spacer(),
+        Text(
+          note['time'] ?? '10:00 AM',
+          style: const TextStyle(
+            color: Colors.grey,
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNoteContent(Map<String, String> note) {
+    return Text(
+      note['content'] ?? '',
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(
+        fontSize: 16,
+        height: 1.4,
+        color: Colors.black87,
+      ),
+    );
+  }
+
+  Widget _buildNoteFooter(Map<String, String> note) {
+    return Row(
+      children: [
+        Text(
+          note['date'] ?? 'Today',
+          style: TextStyle(
+            color: AppColors.primaryColor,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+        const Spacer(),
+        IconButton(
+          icon: Icon(Icons.edit, color: Colors.grey[600]),
+          onPressed: () => _navigateToEditScreen(context),
+        ),
+      ],
     );
   }
 
@@ -36,40 +218,38 @@ class _NotesScreenState extends State<NotesScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.notes_outlined,
-            size: 120,
-            color: Theme.of(context).primaryColor.withOpacity(0.7),
+          AnimatedOpacity(
+            opacity: 1,
+            duration: const Duration(milliseconds: 500),
+            child: Lottie.asset(
+              'assets/animations/empty_notes.json',
+              width: MediaQuery.of(context).size.width * 0.7,
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 40),
           Text(
-            'No notes available.',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.bold,
-                ),
+            'Start Your Journey',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  blurRadius: 4,
+                  color: Colors.black.withValues(alpha: 0.1),
+                  offset: const Offset(2, 2),
+                )
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
-            'Start adding your notes now!',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
-                  fontStyle: FontStyle.italic,
-                ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () {
-              // Action to add a new note
-            },
-            icon: const Icon(Icons.add),
-            label: const Text('Add Note'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+            'Capture ideas, moments, and to-dos\nwith beautiful notes',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.white.withValues(alpha: 0.9),
+              height: 1.4,
             ),
           ),
         ],
@@ -77,136 +257,65 @@ class _NotesScreenState extends State<NotesScreen> {
     );
   }
 
-  Widget _buildNoteCard(
+  void _navigateToDetailScreen(
       BuildContext context, Map<String, String> note, int index) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      elevation: 5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => NoteDetailsScreen(
-                note: note,
-                onDelete: () => _deleteNoteAtIndex(context, index),
-              ),
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 400),
+        pageBuilder: (_, __, ___) => NoteDetailsScreen(
+          note: note,
+          onDelete: () => _deleteNoteAtIndex(context, index),
+        ),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.1),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
             ),
           );
         },
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              colors: [
-                AppColors.primaryColor.withOpacity(0.3),
-                AppColors.primaryColor.withOpacity(0.1),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: ListTile(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            leading: _buildNoteImage(note),
-            title: Text(
-              note['date'] ?? 'No Date',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-            ),
-            subtitle: Text(
-              note['content'] ?? 'No Content',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.black54,
-                  ),
-            ),
-            trailing: _buildNoteActions(context, note, index),
-          ),
-        ),
       ),
     );
   }
 
-  Widget _buildNoteImage(Map<String, String> note) {
-    if (note['image']?.isNotEmpty == true) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.asset(
-          note['image']!,
-          width: 50,
-          height: 50,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-    return CircleAvatar(
-      radius: 25,
-      backgroundColor: AppColors.primaryColor.withOpacity(0.2),
-      child: const Icon(
-        Icons.note_alt,
-        color: AppColors.primaryColor,
+  void _navigateToEditScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            const EditNoteScreen(noteId: 'new', currentContent: ''),
+        fullscreenDialog: true,
       ),
     );
   }
 
-  Widget _buildNoteActions(
-      BuildContext context, Map<String, String> note, int index) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.edit),
-          color: AppColors.primaryColor,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => EditNoteScreen(
-                  noteId: note['id'] ?? 'unknown',
-                  currentContent: note['content'] ?? '',
-                ),
-              ),
-            );
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.delete),
-          color: Colors.redAccent,
-          onPressed: () => _confirmDelete(context, index),
-        ),
-      ],
-    );
-  }
-
-  void _confirmDelete(BuildContext context, int index) {
-    showDialog(
+  Future<bool?> _confirmDelete(BuildContext context, int index) async {
+    return await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Note'),
-        content: const Text('Are you sure you want to delete this note?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Confirm Delete'),
+        content: const Text('This note will be permanently removed'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context, false),
             child: const Text('Cancel'),
           ),
-          TextButton(
-            onPressed: () {
-              _deleteNoteAtIndex(context, index);
-              Navigator.pop(context);
-            },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -214,13 +323,36 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   void _deleteNoteAtIndex(BuildContext context, int index) {
+    final deletedNote = widget.notes[index];
+
     setState(() {
       widget.notes.removeAt(index);
     });
 
+    _showDeletionSnackbar(context, deletedNote, index);
+  }
+
+  void _showDeletionSnackbar(
+      BuildContext context, Map<String, String> deletedNote, int index) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Note deleted successfully!')),
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        backgroundColor: AppColors.primaryColor,
+        content: const Text('Note moved to trash'),
+        action: SnackBarAction(
+          label: 'Undo',
+          textColor: Colors.white,
+          onPressed: () => _undoDelete(deletedNote, index),
+        ),
+      ),
     );
+  }
+
+  void _undoDelete(Map<String, String> note, int index) {
+    setState(() {
+      widget.notes.insert(index, note);
+    });
   }
 }
 
@@ -234,124 +366,90 @@ class NoteDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'Note Details',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete, color: AppColors.primaryColor),
-            onPressed: () {
-              _showDeleteConfirmation(context);
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (note['image']?.isNotEmpty == true)
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(24),
-                    ),
-                    child: Image.asset(
-                      note['image']!,
-                      width: double.infinity,
-                      height: 250,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 16,
-                    left: 16,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        note['date'] ?? 'No Date',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            else
-              Container(
-                color: AppColors.primaryColor.withOpacity(0.1),
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  note['date'] ?? 'No Date',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: AppColors.primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 300,
+            stretch: true,
+            flexibleSpace: FlexibleSpaceBar(
+              background: _buildNoteImage(),
+              stretchModes: const [StretchMode.zoomBackground],
+            ),
+            leading: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                child: const Icon(Icons.arrow_back, color: Colors.white),
               ),
-            const SizedBox(height: 24),
-
-            // Content Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 5,
-                shadowColor: Colors.black26,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    note['content'] ?? 'No Content',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontSize: 18,
-                          height: 1.5,
-                          color: Colors.black87,
-                        ),
-                  ),
-                ),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildNoteMeta(),
+                  const SizedBox(height: 24),
+                  _buildNoteContent(),
+                  const SizedBox(height: 40),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Note'),
-        content: const Text('Are you sure you want to delete this note?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              onDelete();
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
+  Widget _buildNoteImage() {
+    final noteId = note['id'] ?? 'default_id';
+
+    return Hero(
+      tag: noteId,
+      child: note['image']?.isNotEmpty == true
+          ? Image.asset(note['image']!, fit: BoxFit.cover)
+          : Container(
+              color: AppColors.primaryColor,
+              child: Center(
+                child: Icon(Icons.note_alt,
+                    size: 100, color: Colors.white.withValues(alpha: 0.3)),
+              ),
             ),
-          ),
-        ],
-      ),
+    );
+  }
+
+  Widget _buildNoteMeta() {
+    return Row(
+      children: [
+        Chip(
+          backgroundColor: AppColors.accentColor.withValues(alpha: 0.2),
+          label: Text(note['category']?.toUpperCase() ?? 'GENERAL',
+              style: TextStyle(
+                  color: AppColors.accentColor, fontWeight: FontWeight.bold)),
+        ),
+        const Spacer(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(note['date'] ?? 'Today',
+                style: const TextStyle(color: Colors.grey)),
+            Text(note['time'] ?? '',
+                style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNoteContent() {
+    return Text(
+      note['content'] ?? '',
+      style: const TextStyle(fontSize: 18, height: 1.6),
     );
   }
 }

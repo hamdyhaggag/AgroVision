@@ -10,7 +10,7 @@ class AppColors {
   static final Color secondaryColor = HexColor.fromHex('#34C759');
   static const Color surfaceColor = Color(0xFFF9FAFB);
   static const Color secondaryText = Color(0xFF64748B);
-  static const Color accentColor = Color(0xFF5BE6AD);
+  static const Color accentColor = Color(0xff218838);
   static final Color background = HexColor.fromHex('#1A858D');
   static final Color error = HexColor.fromHex('#1A858D');
   static Color whiteColor = const Color(0xffffffff);

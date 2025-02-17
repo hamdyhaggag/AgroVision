@@ -81,9 +81,13 @@ class AppRouter {
           builder: (_) => FieldsScreen(fields: fields),
         );
       case AppRoutes.seeAllNotes:
-        final notes = settings.arguments as List<Map<String, String>>;
+        // Extract both notes and callback from arguments
+        final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
-          builder: (_) => NotesScreen(notes: notes),
+          builder: (_) => NotesScreen(
+            notes: args['notes'] as List<Map<String, String>>,
+            onAddNote: args['onAddNote'] as VoidCallback,
+          ),
         );
       case AppRoutes.sensorDataScreen:
         return MaterialPageRoute(
