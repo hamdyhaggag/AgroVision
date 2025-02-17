@@ -1,4 +1,3 @@
-import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/features/home/Ui/notes_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -124,8 +123,8 @@ class AnimatedNoteCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                colors.primaryContainer.withOpacity(0.8),
-                colors.primary.withOpacity(0.1),
+                colors.primaryContainer.withValues(alpha: 0.8),
+                colors.primary.withValues(alpha: 0.1),
               ],
             ),
           ),
@@ -145,7 +144,7 @@ class AnimatedNoteCard extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.7),
+                      Colors.black.withValues(alpha: 0.7),
                     ],
                   ),
                 ),
