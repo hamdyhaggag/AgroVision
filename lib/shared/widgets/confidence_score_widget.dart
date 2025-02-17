@@ -15,7 +15,7 @@ class ConfidenceScoreWidget extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Text(
+            Text(
               'Confidence Score',
               style: TextStyles.bodyText,
             ),

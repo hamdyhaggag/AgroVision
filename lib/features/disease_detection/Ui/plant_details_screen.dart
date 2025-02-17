@@ -191,7 +191,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                           const SizedBox(height: 16),
                           Row(
                             children: [
-                              const Text(
+                              Text(
                                 'Confidence Score',
                                 style: TextStyles.bodyText,
                               ),
@@ -210,7 +210,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                             color: AppColors.primaryColor,
                           ),
                           const SizedBox(height: 16),
-                          const Text(
+                          Text(
                             'Reason',
                             style: TextStyles.heading2,
                           ),
@@ -222,7 +222,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 16),
-                          const Text(
+                          Text(
                             'Control',
                             style: TextStyles.heading2,
                           ),

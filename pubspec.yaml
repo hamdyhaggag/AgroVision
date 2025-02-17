@@ -58,6 +58,7 @@ dependencies:
   geolocator: ^13.0.2
   cached_network_image: ^3.4.1
   meta: ^1.9.1
+  iconsax: ^0.0.8
 
 
 
@@ -78,7 +79,7 @@ flutter:
     - assets/images/onboarding/
     - assets/images/authentication/
     - assets/icon/
-    - assets/animations/
+    - assets/animations/weather/
     - assets/icon/weather_icons/
     - shorebird.yaml
     - .env

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import '../../features/home/Ui/fields_screen.dart';
 import '../../features/monitoring/UI/sensor_data_screen.dart';
 
@@ -13,18 +14,25 @@ class FieldsWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 0.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'My Fields',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Syne',
-                  color: Colors.grey[800],
-                ),
+              Row(
+                children: [
+                  Icon(Iconsax.airdrop, size: 25, color: Colors.grey[800]),
+                  const SizedBox(
+                    width: 12,
+                  ),
+                  Text(
+                    'My Fields',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                ],
               ),
               TextButton.icon(
                 icon: Icon(Icons.arrow_forward,
