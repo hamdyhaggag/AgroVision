@@ -12,103 +12,163 @@ class FieldsWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'My Fields',
-              style: TextStyle(
-                fontSize: 18,
-                fontFamily: 'Syne',
-                fontWeight: FontWeight.bold,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'My Fields',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Syne',
+                  color: Colors.grey[800],
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
+              TextButton.icon(
+                icon: Icon(Icons.arrow_forward,
+                    size: 18, color: Colors.grey[600]),
+                label: Text(
+                  'View All',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontFamily: 'Syne',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => FieldsScreen(fields: fields),
-                  ),
-                );
-              },
-              child: const Text(
-                'See All',
-                style: TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: 'SYNE'),
+                      builder: (context) => FieldsScreen(fields: fields)),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         SizedBox(
-          height: 200,
+          height: 220,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: fields.length,
+            padding: const EdgeInsets.symmetric(horizontal: 0.0),
             itemBuilder: (context, index) {
               final field = fields[index];
-              return SizedBox(
-                  width: 170,
-                  child: GestureDetector(
-                    onTap: () {
-                      // Navigate to the FieldDetailScreen and pass the selected field data
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SensorDataScreen(
-                            field: {},
-                          ),
+              return Container(
+                width: 260,
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SensorDataScreen(field: {}),
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Stack(
+                      children: [
+                        Image.asset(
+                          field['image']!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
                         ),
-                      );
-                    },
-                    child: Card(
-                      color: Colors.white,
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(16),
-                              ),
-                              child: Image.asset(
-                                field['image']!,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  field['name']!,
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  "${field['size']} • ${field['type']}",
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withValues(alpha: 0.7),
                               ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                field['name']!,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Syne',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  _buildInfoChip(
+                                    icon: Icons.crop_square,
+                                    text: field['size']!,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  _buildInfoChip(
+                                    icon: Icons.spa,
+                                    text: field['type']!,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.more_vert,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ));
+                  ),
+                ),
+              );
             },
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildInfoChip({required IconData icon, required String text}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
