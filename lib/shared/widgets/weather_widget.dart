@@ -66,7 +66,7 @@ class WeatherWidget extends StatelessWidget {
   Widget _buildMetric(String title, String value) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.1),
+        color: Colors.black.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(12),
