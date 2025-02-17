@@ -19,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<Map<String, String>> notes = someNotesList();
   final List<Map<String, String>> fields = someFieldsList();
   @override
@@ -30,8 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: _buildAppBar(context),
-      drawer: const AppDrawer(),
+      drawer: AppDrawer(),
       body: BlocBuilder<HomeCubit, HomeState>(
         builder: (context, state) {
           if (state is HomeLoading) return _buildSkeletonLoading();
@@ -56,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             IconButton(
               icon: const Icon(Icons.menu, color: AppColors.primaryColor),
-              onPressed: () => Scaffold.of(context).openDrawer(),
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
             ),
             _buildAppBarActions(),
           ],
@@ -70,8 +72,9 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         IconButton(
           icon: Badge(
-            smallSize: 8,
-            child: Icon(Icons.notifications_outlined, color: Colors.grey[800]),
+            smallSize: 10,
+            backgroundColor: AppColors.primaryColor,
+            child: Icon(Icons.notifications_active, color: Colors.grey[800]),
           ),
           onPressed: () =>
               Navigator.pushNamed(context, AppRoutes.notificationsScreen),
@@ -427,12 +430,14 @@ class AppDrawer extends StatelessWidget {
 
 class DrawerHeaderWidget extends StatefulWidget {
   const DrawerHeaderWidget({super.key});
+
   @override
   DrawerHeaderWidgetState createState() => DrawerHeaderWidgetState();
 }
 
 class DrawerHeaderWidgetState extends State<DrawerHeaderWidget> {
   bool _showShimmer = true;
+
   @override
   void initState() {
     super.initState();
