@@ -162,14 +162,14 @@ class _CustomBottomNavBar extends StatelessWidget {
                 isActive ? AppColors.primaryColor : AppColors.greyColor,
                 BlendMode.srcIn,
               ),
-              width: 24,
-              height: 24,
+              width: 30,
+              height: 30,
             ),
             if (isActive)
               Container(
                 margin: const EdgeInsets.only(top: 4),
-                width: 6,
-                height: 6,
+                width: 5,
+                height: 5,
                 decoration: const BoxDecoration(
                   color: AppColors.primaryColor,
                   shape: BoxShape.circle,
