@@ -16,17 +16,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: false,
       backgroundColor: AppColors.whiteColor,
-      leading: isHome == false
-          ? IconButton(
+      leading: isHome
+          ? null
+          : IconButton(
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
               onPressed: () {
                 if (Navigator.canPop(context)) {
                   Navigator.of(context).pop();
                 }
               },
-            )
-          : null,
+            ),
       title: Text(
         title,
         style: const TextStyle(
@@ -37,7 +38,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       centerTitle: true,
-      actions: actions,
+      actions: isHome ? [] : actions,
     );
   }
 
