@@ -89,12 +89,12 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _buildWeatherShimmer(),
           const SizedBox(height: 5),
-          NotesListWidget(
-              notes: notes,
-              onAddNote: () =>
-                  Navigator.pushNamed(context, AppRoutes.addNewNote)),
-          const SizedBox(height: 18),
           FieldsWidget(fields: fields),
+          const SizedBox(height: 18),
+          NotesListWidget(
+            notes: notes,
+            onAddNote: () => Navigator.pushNamed(context, AppRoutes.addNewNote),
+          ),
         ],
       ),
     );
@@ -107,12 +107,12 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           WeatherWidget(weather: weather),
           const SizedBox(height: 5),
-          NotesListWidget(
-              notes: notes,
-              onAddNote: () =>
-                  Navigator.pushNamed(context, AppRoutes.addNewNote)),
-          const SizedBox(height: 18),
           FieldsWidget(fields: fields),
+          const SizedBox(height: 18),
+          NotesListWidget(
+            notes: notes,
+            onAddNote: () => Navigator.pushNamed(context, AppRoutes.addNewNote),
+          ),
         ],
       ),
     );
