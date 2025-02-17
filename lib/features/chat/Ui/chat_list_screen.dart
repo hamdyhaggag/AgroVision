@@ -31,7 +31,7 @@ class ChatListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(
-        isHome: true,
+        isHome: false,
         title: 'Chats',
       ),
       body: DefaultTabController(
