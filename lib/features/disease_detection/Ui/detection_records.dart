@@ -1,24 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import '../../../models/disease_model.dart';
 import '../../../shared/widgets/custom_appbar.dart';
 
-class DiseaseDetectionReports extends StatefulWidget {
-  const DiseaseDetectionReports({super.key});
+class DetectionRecords extends StatefulWidget {
+  const DetectionRecords({super.key});
 
   @override
-  State<DiseaseDetectionReports> createState() =>
-      _DiseaseDetectionReportsState();
+  State<DetectionRecords> createState() => _DetectionRecordsState();
 }
 
-class _DiseaseDetectionReportsState extends State<DiseaseDetectionReports> {
+class _DetectionRecordsState extends State<DetectionRecords> {
   List<DiseaseModel> diseases = [];
-  Set<int> selectedReports = {}; // To track selected reports
-  bool isSelectionMode = false; // Track if selection mode is active
+  Set<int> selectedReports = {};
+  bool isSelectionMode = false;
 
   @override
   void initState() {
@@ -61,7 +59,7 @@ class _DiseaseDetectionReportsState extends State<DiseaseDetectionReports> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Reports deleted.'),
+        content: const Text('Records have been deleted.'),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(10),
         duration: const Duration(seconds: 5),
@@ -85,7 +83,7 @@ class _DiseaseDetectionReportsState extends State<DiseaseDetectionReports> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Reports',
+        title: 'Detection Records',
         isHome: true,
         actions: [
           if (isSelectionMode)
@@ -98,10 +96,10 @@ class _DiseaseDetectionReportsState extends State<DiseaseDetectionReports> {
       body: diseases.isEmpty
           ? const Center(
               child: Text(
-                'No reports available.',
+                'No records available.',
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w300,
                 ),
               ),
             )
