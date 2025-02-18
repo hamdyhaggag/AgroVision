@@ -6,6 +6,7 @@ import 'package:agro_vision/features/home/Ui/widgets/add_task_screen.dart';
 import 'package:agro_vision/features/home/Ui/logout_screen.dart';
 import 'package:agro_vision/features/home/Ui/fields_screen.dart';
 import 'package:agro_vision/features/home/Ui/profile/profile_screen.dart';
+import 'package:agro_vision/features/home/Ui/widgets/task_list_screen.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/UI/create_password_screen.dart';
 import '../../features/authentication/UI/forgot password/forgot_password_email.dart';
@@ -173,6 +174,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const CropHealth());
       case AppRoutes.addTask:
         return MaterialPageRoute(builder: (_) => const AddTaskScreen());
+      case AppRoutes.allTasks:
+        return MaterialPageRoute(builder: (_) => const TaskListScreen());
 
       default:
         return MaterialPageRoute(

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/routing/app_routes.dart';
+import '../../../../models/task_model.dart';
 import '../../Logic/task_cubit/task_cubit.dart';
 
 class AddTaskScreen extends StatefulWidget {
@@ -306,15 +308,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           backgroundColor: AppColors.primaryColor,
         ),
       );
-      Navigator.push(
-          context, MaterialPageRoute(builder: (_) => const TaskListScreen()));
+      Navigator.pushReplacementNamed(context, AppRoutes.allTasks);
     }
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _notesController.dispose();
-    super.dispose();
   }
 }

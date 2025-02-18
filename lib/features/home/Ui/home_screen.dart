@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:agro_vision/features/home/Logic/home_cubit.dart';
@@ -71,11 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Row(
       children: [
         IconButton(
-          icon: Badge(
-            smallSize: 10,
-            backgroundColor: AppColors.primaryColor,
-            child: Icon(Icons.notifications_active, color: Colors.grey[800]),
-          ),
+          icon: Icon(Icons.notifications_active, color: Colors.grey[800]),
           onPressed: () =>
               Navigator.pushNamed(context, AppRoutes.notificationsScreen),
         ),
@@ -123,12 +120,22 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child: Text('Quick Actions',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
-              )),
+          child: Row(
+            children: [
+              Icon(Iconsax.add5, size: 25, color: Colors.grey[800]),
+              const SizedBox(
+                width: 12,
+              ),
+              Text(
+                'Quick Actions',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
+          ),
         ),
         const QuickActionsGrid(
           actions: [
@@ -140,9 +147,9 @@ class _HomeScreenState extends State<HomeScreen> {
               'color2': '#3A8C47',
             },
             {
-              'title': 'Add Task',
+              'title': 'Tasks',
               'icon': Icons.task_alt,
-              'route': '/add-task',
+              'route': '/allTasks',
               'color1': '#5BAE6A',
               'color2': '#4C8C5A',
             },

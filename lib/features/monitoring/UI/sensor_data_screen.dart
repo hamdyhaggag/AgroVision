@@ -24,7 +24,10 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
-      appBar: const CustomAppBar(title: 'Sensor Data'),
+      appBar: const CustomAppBar(
+        title: 'Sensor Data',
+        isHome: true,
+      ),
       body: BlocBuilder<SensorDataCubit, SensorDataState>(
         builder: (context, state) {
           if (state is SensorDataInitial) {

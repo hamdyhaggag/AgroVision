@@ -31,6 +31,7 @@ class AppRoutes {
   static const String editProfileScreen = '/editProfileScreen';
   static const String cropHealth = '/crop-health';
   static const String addTask = '/add-task';
+  static const String allTasks = '/allTasks';
   static const String sensorData = '/sensor-data';
   static const String detectionRecords = '/detectionRecords';
 }

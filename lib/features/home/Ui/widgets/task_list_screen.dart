@@ -4,47 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/routing/app_routes.dart';
+import '../../../../models/task_model.dart';
 import '../../Logic/task_cubit/task_cubit.dart';
-
-class Task {
-  final String id;
-  final String title;
-  final DateTime dueDate;
-  final String priority;
-  final String notes;
-  bool isCompleted;
-
-  Task({
-    required this.id,
-    required this.title,
-    required this.dueDate,
-    required this.priority,
-    required this.notes,
-    this.isCompleted = false,
-  });
-}
-
-class TaskProvider with ChangeNotifier {
-  final List<Task> _tasks = [];
-
-  List<Task> get tasks => _tasks;
-
-  void addTask(Task newTask) {
-    _tasks.add(newTask);
-    notifyListeners();
-  }
-
-  void toggleTaskCompletion(String taskId) {
-    final index = _tasks.indexWhere((task) => task.id == taskId);
-    _tasks[index].isCompleted = !_tasks[index].isCompleted;
-    notifyListeners();
-  }
-
-  void deleteTask(String taskId) {
-    _tasks.removeWhere((task) => task.id == taskId);
-    notifyListeners();
-  }
-}
 
 class TaskListScreen extends StatelessWidget {
   const TaskListScreen({super.key});
@@ -52,20 +14,26 @@ class TaskListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'Task Manager', isHome: false, actions: [
-        IconButton(
-          icon: const Icon(Icons.search_rounded),
-          onPressed: () => showSearch(
-            context: context,
-            delegate: TaskSearchDelegate(),
+      appBar: CustomAppBar(
+        title: 'Task Manager',
+        isHome: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.addTask),
           ),
-        )
-      ]),
+          IconButton(
+            icon: const Icon(Icons.search_rounded),
+            onPressed: () => showSearch(
+              context: context,
+              delegate: TaskSearchDelegate(),
+            ),
+          ),
+        ],
+      ),
       body: BlocBuilder<TaskCubit, TaskState>(
         builder: (context, state) {
-          if (state.tasks.isEmpty) {
-            return _buildEmptyState();
-          }
+          if (state.tasks.isEmpty) return _buildEmptyState();
           final groupedTasks = _groupTasksByDate(state.tasks);
           return _buildTaskList(groupedTasks, context);
         },
@@ -95,7 +63,7 @@ class TaskListScreen extends StatelessWidget {
   }
 
   Map<String, List<Task>> _groupTasksByDate(List<Task> tasks) {
-    Map<String, List<Task>> groupedTasks = {};
+    final groupedTasks = <String, List<Task>>{};
     for (var task in tasks) {
       final dateKey = DateFormat('yyyy-MM-dd').format(task.dueDate);
       groupedTasks.putIfAbsent(dateKey, () => []).add(task);
@@ -223,64 +191,62 @@ class TaskListScreen extends StatelessWidget {
         color = Colors.green;
     }
     return Container(
-      width: 6,
-      height: 40,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(3),
-      ),
-    );
+        width: 6,
+        height: 40,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(3),
+        ));
   }
 
   void _showTaskDetails(BuildContext context, Task task) {
     showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2)),
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2)),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Text(task.title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                  )),
-              const SizedBox(height: 16),
-              _buildDetailItem(Icons.calendar_month_rounded,
-                  DateFormat('EEEE, MMM d, y').format(task.dueDate)),
-              _buildDetailItem(Icons.flag_rounded, task.priority),
-              if (task.notes.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text('Notes',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
+                const SizedBox(height: 24),
+                Text(task.title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
                     )),
-                const SizedBox(height: 8),
-                Text(task.notes, style: TextStyle(color: Colors.grey[700])),
+                const SizedBox(height: 16),
+                _buildDetailItem(Icons.calendar_month_rounded,
+                    DateFormat('EEEE, MMM d, y').format(task.dueDate)),
+                _buildDetailItem(Icons.flag_rounded, task.priority),
+                if (task.notes.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text('Notes',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      )),
+                  const SizedBox(height: 8),
+                  Text(task.notes, style: TextStyle(color: Colors.grey[700])),
+                ],
+                const SizedBox(height: 32),
               ],
-              const SizedBox(height: 32),
-            ],
-          ),
-        );
-      },
-    );
+            ),
+          );
+        });
   }
 
   Widget _buildDetailItem(IconData icon, String text) {

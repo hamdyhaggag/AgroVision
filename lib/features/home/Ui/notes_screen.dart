@@ -160,7 +160,7 @@ class _NotesScreenState extends State<NotesScreen> {
           ),
           child: Text(
             note['category']?.toUpperCase() ?? 'PERSONAL',
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.accentColor,
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -198,7 +198,7 @@ class _NotesScreenState extends State<NotesScreen> {
       children: [
         Text(
           note['date'] ?? 'Today',
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.primaryColor,
             fontWeight: FontWeight.w600,
             fontSize: 14,
@@ -429,7 +429,7 @@ class NoteDetailsScreen extends StatelessWidget {
         Chip(
           backgroundColor: AppColors.accentColor.withValues(alpha: 0.2),
           label: Text(note['category']?.toUpperCase() ?? 'GENERAL',
-              style: TextStyle(
+              style: const TextStyle(
                   color: AppColors.accentColor, fontWeight: FontWeight.bold)),
         ),
         const Spacer(),
