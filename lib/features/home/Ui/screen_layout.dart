@@ -4,9 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../chat/Ui/chat_list_screen.dart';
-import '../../disease_detection/Ui/disease_detection_report.dart';
+import '../../disease_detection/Ui/detection_records.dart';
 import '../../disease_detection/Ui/plant_details_screen.dart';
 import '../../monitoring/UI/monitor_screen.dart';
+import '../../monitoring/UI/sensor_data_screen.dart';
 import '../../splash/Logic/app_cubit.dart';
 import '../../splash/Logic/app_state.dart';
 import 'home_screen.dart';
@@ -66,9 +67,11 @@ class ScreenLayout extends StatelessWidget {
   Widget _buildScreen(int index) {
     final screens = [
       const HomeScreen(),
-      const DiseaseDetectionReports(),
-      const HistoryScreen(),
-      const DiseaseDetectionReports(),
+      const DetectionRecords(),
+      const SensorDataScreen(
+        field: {},
+      ),
+      const DetectionRecords(),
       ChatListScreen(),
     ];
     return IndexedStack(index: index, children: screens);

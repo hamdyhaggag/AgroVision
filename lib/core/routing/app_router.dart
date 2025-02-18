@@ -1,5 +1,8 @@
+// import 'package:agro_vision/features/home/Ui/add_new_note.dart';
+// import '../../features/home/Ui/edit_note_screen.dart';
+// // import '../../features/home/Ui/notes_screen.dart';
 import 'package:agro_vision/features/authentication/UI/congratulation_screen.dart';
-import 'package:agro_vision/features/home/Ui/add_new_note.dart';
+import 'package:agro_vision/features/home/Ui/widgets/add_task_screen.dart';
 import 'package:agro_vision/features/home/Ui/logout_screen.dart';
 import 'package:agro_vision/features/home/Ui/fields_screen.dart';
 import 'package:agro_vision/features/home/Ui/profile/profile_screen.dart';
@@ -10,13 +13,14 @@ import '../../features/authentication/UI/forgot password/forgot_password_phone.d
 import '../../features/authentication/UI/otp/otp_email_screen.dart';
 import '../../features/authentication/UI/otp/otp_phone_screen.dart';
 import '../../features/chat/Ui/consultation_chat_screen.dart';
+import '../../features/disease_detection/Ui/detection_records.dart';
+import '../../features/home/Ui/crop_health.dart';
 import '../../features/home/Ui/drawer/crops_managment.dart';
 import '../../features/home/Ui/drawer/farm_analytics.dart';
 import '../../features/home/Ui/drawer/farm_inventory.dart';
 import '../../features/home/Ui/drawer/settings_screen.dart';
 import '../../features/home/Ui/drawer/team.dart';
-import '../../features/home/Ui/edit_note_screen.dart';
-import '../../features/home/Ui/notes_screen.dart';
+
 import '../../features/home/Ui/notifications_screen.dart';
 import '../../features/home/Ui/profile/edit_profile_screen.dart';
 import '../../features/home/Ui/screen_layout.dart';
@@ -41,7 +45,7 @@ class AppRouter {
         );
       case AppRoutes.screenLayout:
         return MaterialPageRoute(
-          builder: (_) => ScreenLayout(),
+          builder: (_) => const ScreenLayout(),
         );
       case AppRoutes.forgotPasswordPhone:
         return MaterialPageRoute(
@@ -80,40 +84,43 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => FieldsScreen(fields: fields),
         );
-      case AppRoutes.seeAllNotes:
-        // Extract both notes and callback from arguments
-        final args = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(
-          builder: (_) => NotesScreen(
-            notes: args['notes'] as List<Map<String, String>>,
-            onAddNote: args['onAddNote'] as VoidCallback,
-          ),
-        );
+      // case AppRoutes.seeAllNotes:
+      //   final args = settings.arguments as Map<String, dynamic>;
+      //   return MaterialPageRoute(
+      //     builder: (_) => NotesScreen(
+      //       notes: args['notes'] as List<Map<String, String>>,
+      //       onAddNote: args['onAddNote'] as VoidCallback,
+      //     ),
+      //   );
       case AppRoutes.sensorDataScreen:
         return MaterialPageRoute(
           builder: (_) => const SensorDataScreen(
             field: {},
           ),
         );
-      case AppRoutes.addNewNote:
-        return MaterialPageRoute(
-          builder: (_) => AddNewNoteScreen(
-            onSave: (String title, String content) {
-              debugPrint('Title: $title');
-              debugPrint('Content: $content');
-            },
-          ),
-        );
-      case AppRoutes.editNoteScreen:
-        return MaterialPageRoute(
-          builder: (_) => const EditNoteScreen(
-            noteId: '',
-            currentContent: '',
-          ),
-        );
+      // case AppRoutes.addNewNote:
+      //   return MaterialPageRoute(
+      //     builder: (_) => AddNewNoteScreen(
+      //       onSave: (String title, String content) {
+      //         debugPrint('Title: $title');
+      //         debugPrint('Content: $content');
+      //       },
+      //     ),
+      //   );
+      // case AppRoutes.editNoteScreen:
+      //   return MaterialPageRoute(
+      //     builder: (_) => const EditNoteScreen(
+      //       noteId: '',
+      //       currentContent: '',
+      //     ),
+      //   );
       case AppRoutes.chatList:
         return MaterialPageRoute(
           builder: (_) => ChatListScreen(),
+        );
+      case AppRoutes.detectionRecords:
+        return MaterialPageRoute(
+          builder: (_) => const DetectionRecords(),
         );
       case AppRoutes.chatDetail:
         return MaterialPageRoute(
@@ -162,6 +169,10 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => const EditProfileScreen(),
         );
+      case AppRoutes.cropHealth:
+        return MaterialPageRoute(builder: (_) => const CropHealth());
+      case AppRoutes.addTask:
+        return MaterialPageRoute(builder: (_) => const AddTaskScreen());
 
       default:
         return MaterialPageRoute(
