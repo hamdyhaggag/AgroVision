@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
@@ -442,31 +444,60 @@ class DrawerHeaderWidgetState extends State<DrawerHeaderWidget> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _showShimmer = false);
+      if (mounted) {
+        setState(() {
+          _showShimmer = false;
+        });
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final imagePath = CacheHelper.getString(key: 'drawerImagePath');
-    final backgroundImage = imagePath.isNotEmpty
+    String imagePath = CacheHelper.getString(key: 'drawerImagePath');
+    ImageProvider backgroundImage = imagePath.isNotEmpty
         ? AssetImage(imagePath)
         : const AssetImage('assets/images/field1.jpg');
+
     return DrawerHeader(
       child: Stack(
         fit: StackFit.expand,
         children: [
           Container(
             decoration: BoxDecoration(
-                image:
-                    DecorationImage(image: backgroundImage, fit: BoxFit.cover)),
-            child: AnimatedOpacity(
-              opacity: _showShimmer ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 500),
-              child: Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
-                child: Container(color: Colors.white.withValues(alpha: 0.5)),
+              image: DecorationImage(
+                image: backgroundImage,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          AnimatedOpacity(
+            opacity: _showShimmer ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 500),
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                color: Colors.white.withValues(alpha: 0.5),
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 1.5),
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.1),
+              ),
+            ),
+          ),
+          const Center(
+            child: Text(
+              'AgroVision',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 45,
+                fontFamily: 'SYNE',
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -480,28 +511,27 @@ class DrawerItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const DrawerItem(
-      {required this.icon,
-      required this.label,
-      required this.onTap,
-      super.key});
+
+  const DrawerItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    super.key,
+  });
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        hoverColor: Colors.black.withValues(alpha: 0.05),
-        highlightColor: Colors.black.withValues(alpha: 0.1),
-        child: ListTile(
-          leading: Icon(icon, color: AppColors.primaryColor),
-          title: Text(label,
-              style: const TextStyle(
-                  color: AppColors.primaryColor,
-                  fontFamily: 'SYNE',
-                  fontWeight: FontWeight.w500)),
+    return ListTile(
+      leading: Icon(icon, color: AppColors.primaryColor),
+      title: Text(
+        label,
+        style: const TextStyle(
+          color: AppColors.primaryColor,
+          fontFamily: 'SYNE',
+          fontWeight: FontWeight.w400,
         ),
       ),
+      onTap: onTap,
     );
   }
 }
