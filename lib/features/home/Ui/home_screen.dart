@@ -5,10 +5,10 @@ import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:agro_vision/features/home/Logic/home_cubit.dart';
+
 import '../../../core/routing/app_routes.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../models/weather_model.dart';
-import '../../../shared/widgets/fields_widget.dart';
 import '../Logic/home_state.dart';
 import 'widgets/quick_actions_grid.dart';
 
@@ -21,7 +21,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final List<Map<String, String>> fields = someFieldsList();
 
   @override
   void initState() {
@@ -104,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
             delegate: SliverChildListDelegate([
               _buildWeatherSection(weather),
               const SizedBox(height: 24),
-              FieldsWidget(fields: fields),
+              DevicesCard(sensors: sensors),
               const SizedBox(height: 24),
               _buildQuickActionsSection(),
             ]),
@@ -123,9 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             children: [
               Icon(Iconsax.add5, size: 25, color: Colors.grey[800]),
-              const SizedBox(
-                width: 12,
-              ),
+              const SizedBox(width: 12),
               Text(
                 'Quick Actions',
                 style: TextStyle(
@@ -386,93 +383,189 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-List<Map<String, String>> someFieldsList() => [
-      {
-        'image': 'assets/images/field5.jpg',
-        'name': 'Empty Fields',
-        'size': '14 ha',
-        'type': 'Tomato'
-      },
-      {
-        'image': 'assets/images/field4.jpg',
-        'name': 'Tomato Fields',
-        'size': '11 ha',
-        'type': 'Tomato'
-      },
-      {
-        'image': 'assets/images/field3.jpg',
-        'name': 'Potato Field 1',
-        'size': '10 ha',
-        'type': 'Potato'
-      },
-      {
-        'image': 'assets/images/field2.jpg',
-        'name': 'Potato Field 2',
-        'size': '10 ha',
-        'type': 'Potato'
-      },
-    ];
+class DevicesCard extends StatelessWidget {
+  final List<Map<String, dynamic>> sensors;
+
+  const DevicesCard({super.key, required this.sensors});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Devices",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          const SizedBox(height: 16),
+          ...sensors.map((sensor) => _buildSensorRow(sensor)).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSensorRow(Map<String, dynamic> sensor) {
+    final status = sensor['status']?.toString() ?? '';
+    final isActive = status.toLowerCase() == 'active';
+    final statusColor = isActive ? Colors.green : Colors.red;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  "${sensor['name']} ${sensor['id']}",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Text(
+                status,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                  color: statusColor,
+                ),
+              ),
+            ],
+          ),
+          if (!isActive && sensor['issue'] != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    size: 16,
+                    color: Colors.orange.shade400,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    sensor['issue'],
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange.shade400,
+                    ),
+                  ),
+                ],
+              ),
+            )
+        ],
+      ),
+    );
+  }
+}
+
+final List<Map<String, dynamic>> sensors = [
+  {
+    'id': '#SM201',
+    'name': 'Soil Moisture Sensor',
+    'type': 'moisture',
+    'status': 'Active',
+    // 'issue': 'Signal issue since 08:02 AM',
+  },
+];
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       backgroundColor: Colors.white,
-      child: ListView(children: [
-        const DrawerHeaderWidget(),
-        ..._buildDrawerItems(context)
-      ]),
+      child: ListView(
+        children: [
+          const DrawerHeaderWidget(),
+          ListTile(
+            leading: const Icon(Icons.dataset, color: AppColors.primaryColor),
+            title: const Text(
+              'Farm Analytics',
+              style: TextStyle(
+                color: AppColors.primaryColor,
+                fontFamily: 'SYNE',
+              ),
+            ),
+            onTap: () => Navigator.pushNamed(context, '/farmAnalytics'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.grass, color: AppColors.primaryColor),
+            title: const Text(
+              'Crops Management',
+              style: TextStyle(
+                color: AppColors.primaryColor,
+                fontFamily: 'SYNE',
+              ),
+            ),
+            onTap: () => Navigator.pushNamed(context, '/cropsManagment'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.note_alt, color: AppColors.primaryColor),
+            title: const Text(
+              'Farm Inventory',
+              style: TextStyle(
+                color: AppColors.primaryColor,
+                fontFamily: 'SYNE',
+              ),
+            ),
+            onTap: () => Navigator.pushNamed(context, '/farmInventory'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.data_thresholding,
+                color: AppColors.primaryColor),
+            title: const Text(
+              'Sensor Data',
+              style: TextStyle(
+                color: AppColors.primaryColor,
+                fontFamily: 'SYNE',
+              ),
+            ),
+            onTap: () => Navigator.pushNamed(context, '/sensorData'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.people_alt_rounded,
+                color: AppColors.primaryColor),
+            title: const Text(
+              'Team',
+              style: TextStyle(
+                color: AppColors.primaryColor,
+                fontFamily: 'SYNE',
+              ),
+            ),
+            onTap: () => Navigator.pushNamed(context, '/team'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings, color: AppColors.primaryColor),
+            title: const Text(
+              'Settings',
+              style: TextStyle(
+                color: AppColors.primaryColor,
+                fontFamily: 'SYNE',
+              ),
+            ),
+            onTap: () => Navigator.pushNamed(context, '/settingsScreen'),
+          ),
+        ],
+      ),
     );
-  }
-
-  List<Widget> _buildDrawerItems(BuildContext context) {
-    return [
-      ListTile(
-        leading: const Icon(Icons.dataset, color: AppColors.primaryColor),
-        title: const Text('Farm Analytics',
-            style:
-                TextStyle(color: AppColors.primaryColor, fontFamily: 'SYNE')),
-        onTap: () => Navigator.pushNamed(context, '/farmAnalytics'),
-      ),
-      ListTile(
-        leading: const Icon(Icons.grass, color: AppColors.primaryColor),
-        title: const Text('Crops Management',
-            style:
-                TextStyle(color: AppColors.primaryColor, fontFamily: 'SYNE')),
-        onTap: () => Navigator.pushNamed(context, '/cropsManagment'),
-      ),
-      ListTile(
-        leading: const Icon(Icons.note_alt, color: AppColors.primaryColor),
-        title: const Text('Farm Inventory',
-            style:
-                TextStyle(color: AppColors.primaryColor, fontFamily: 'SYNE')),
-        onTap: () => Navigator.pushNamed(context, '/farmInventory'),
-      ),
-      ListTile(
-        leading:
-            const Icon(Icons.data_thresholding, color: AppColors.primaryColor),
-        title: const Text('Sensor Data',
-            style:
-                TextStyle(color: AppColors.primaryColor, fontFamily: 'SYNE')),
-        onTap: () => Navigator.pushNamed(context, '/sensorData'),
-      ),
-      ListTile(
-        leading:
-            const Icon(Icons.people_alt_rounded, color: AppColors.primaryColor),
-        title: const Text('Team',
-            style:
-                TextStyle(color: AppColors.primaryColor, fontFamily: 'SYNE')),
-        onTap: () => Navigator.pushNamed(context, '/team'),
-      ),
-      ListTile(
-        leading: const Icon(Icons.settings, color: AppColors.primaryColor),
-        title: const Text('Settings',
-            style:
-                TextStyle(color: AppColors.primaryColor, fontFamily: 'SYNE')),
-        onTap: () => Navigator.pushNamed(context, '/settingsScreen'),
-      ),
-    ];
   }
 }
 
@@ -524,13 +617,15 @@ class DrawerHeaderWidgetState extends State<DrawerHeaderWidget> {
             ),
           ),
           const Center(
-            child: Text('AgroVision',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 45,
-                  fontFamily: 'SYNE',
-                  fontWeight: FontWeight.bold,
-                )),
+            child: Text(
+              'AgroVision',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 45,
+                fontFamily: 'SYNE',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
