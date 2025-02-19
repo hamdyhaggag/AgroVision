@@ -1,8 +1,8 @@
+import 'dart:math';
 import 'package:agro_vision/shared/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../shared/widgets/custom_botton.dart';
 import '../../../shared/widgets/growth_rate_chart.dart';
@@ -10,9 +10,7 @@ import '../Logic/sensor_data_cubit.dart';
 
 class SensorDataScreen extends StatefulWidget {
   final Map<String, String> field;
-
   const SensorDataScreen({super.key, required this.field});
-
   @override
   SensorDataScreenState createState() => SensorDataScreenState();
 }
@@ -23,20 +21,14 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F8),
-      appBar: const CustomAppBar(
-        title: 'Sensor Data',
-        isHome: true,
-      ),
+      backgroundColor: AppColors.scaffoldBackground,
+      appBar: const CustomAppBar(title: 'Sensor Data', isHome: true),
       body: BlocBuilder<SensorDataCubit, SensorDataState>(
         builder: (context, state) {
           if (state is SensorDataInitial) {
             return _buildInitialState(context);
           } else if (state is SensorDataLoading) {
-            return const Center(
-                child: CircularProgressIndicator(
-              color: AppColors.primaryColor,
-            ));
+            return _buildLoadingState();
           } else if (state is SensorDataLoaded) {
             return _buildLoadedState(context, state.data);
           } else if (state is SensorDataError) {
@@ -51,166 +43,224 @@ class SensorDataScreenState extends State<SensorDataScreen> {
 
   Widget _buildInitialState(BuildContext context) {
     return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset('assets/images/empty_state.svg', height: 200),
+            const SizedBox(height: 32),
+            Text(
+              'No Sensor Data Available',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'SYNE',
+                  ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Get started by loading sensor data',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppColors.textTertiary,
+                fontFamily: 'SYNE',
+              ),
+            ),
+            const SizedBox(height: 32),
+            CustomBottom(
+              text: 'LOAD DATA',
+              onPressed: () => context.read<SensorDataCubit>().loadSensorData(),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgPicture.asset('assets/images/empty_state.svg', height: 300),
-          const SizedBox(height: 20),
-          const Text(
-            'No data available yet!',
-            style:
-                TextStyle(fontSize: 18, color: Colors.grey, fontFamily: 'SYNE'),
+          const CircularProgressIndicator.adaptive(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation(AppColors.primaryColor),
           ),
-          const SizedBox(height: 20),
-          CustomBottom(
-            text: 'Load Data',
-            onPressed: () => context.read<SensorDataCubit>().loadSensorData(),
-          )
+          const SizedBox(height: 24),
+          Text(
+            'Fetching Sensor Data',
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: 'SYNE',
+              color: AppColors.textSecondary.withValues(alpha: 0.8),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildLoadedState(BuildContext context, Map<String, dynamic> data) {
-    String sensorKey;
-    if (_selectedSensor == 'Humidity') {
-      sensorKey = 'Hum';
-    } else {
-      sensorKey = _selectedSensor;
-    }
-
-    // Safely fetch the sensor value
-    final sensorValue =
-        data[sensorKey] ?? 0; // Fallback to 0 if the key is missing
-
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _buildCircularGauge(sensorValue),
-          const SizedBox(height: 16),
-          _buildSensorSelection(),
-          const SizedBox(height: 16),
-          _buildChartSection(_selectedSensor),
-          const SizedBox(
-              height: 16), // Add space between the chart and the button
-          CustomBottom(
-            text: 'Refresh',
-            onPressed: () => context.read<SensorDataCubit>().loadSensorData(),
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState(BuildContext context, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SvgPicture.asset('assets/images/error_state.svg', height: 300),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Please check your internet connection',
-              style: TextStyle(
-                  fontFamily: 'SYNE',
-                  fontSize: 18,
-                  color: AppColors.blackColor),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCircularGauge(dynamic sensorValue) {
-    final double displayValue = sensorValue is String
-        ? double.tryParse(sensorValue) ?? 0
-        : (sensorValue ?? 0).toDouble();
-
+    final sensorValue = _getSensorValue(data, _selectedSensor);
     return Column(
       children: [
-        SfRadialGauge(
-          axes: <RadialAxis>[
-            RadialAxis(
-              minimum: 0,
-              maximum: 100,
-              ranges: <GaugeRange>[
-                GaugeRange(
-                  startValue: 0,
-                  endValue: 100,
-                  color: AppColors.primaryColor,
-                ),
-              ],
-              pointers: <GaugePointer>[
-                NeedlePointer(value: displayValue),
-              ],
-              annotations: <GaugeAnnotation>[
-                GaugeAnnotation(
-                  widget: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('${displayValue.toStringAsFixed(1)}°',
-                          style: const TextStyle(
-                              fontSize: 28, fontWeight: FontWeight.bold)),
-                      Text(_selectedSensor,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500)),
-                    ],
-                  ),
-                  positionFactor: 0.5,
-                  angle: 90,
-                ),
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                _buildGaugeCard(sensorValue),
+                const SizedBox(height: 24),
+                _buildSensorGrid(),
+                const SizedBox(height: 24),
+                _buildChartSection(_selectedSensor),
+                const SizedBox(height: 32),
               ],
             ),
-          ],
+          ),
         ),
+        _buildRefreshButton(context),
       ],
     );
   }
 
-  Widget _buildSensorSelection() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _buildSensorChip('EC', Icons.electric_bolt),
-          _buildSensorChip('Fertility', Icons.eco),
-          _buildSensorChip('Humidity', Icons.water_drop),
-          _buildSensorChip('PH', Icons.science),
-          _buildSensorChip('Temp', Icons.local_florist),
-          _buildSensorChip('K', Icons.local_florist),
-          _buildSensorChip('N', Icons.forest),
-          _buildSensorChip('P', Icons.energy_savings_leaf),
-        ],
+  Widget _buildGaugeCard(double value) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Text(
+              'Current Reading',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                    fontFamily: 'SYNE',
+                  ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 220,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: value / 100),
+                duration: const Duration(milliseconds: 800),
+                builder: (context, normalizedValue, child) {
+                  return CustomPaint(
+                    painter: _GaugePainter(normalizedValue),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            value.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontFamily: 'SYNE',
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            _selectedSensor,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color:
+                                  AppColors.textPrimary.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSensorChip(String label, IconData icon) {
-    final isSelected = _selectedSensor == label;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedSensor = label;
-        });
+  Widget _buildSensorGrid() {
+    const sensors = [
+      {'label': 'EC', 'icon': Icons.electric_bolt},
+      {'label': 'Fertility', 'icon': Icons.eco},
+      {'label': 'Humidity', 'icon': Icons.water_drop},
+      {'label': 'PH', 'icon': Icons.science},
+      {'label': 'Temp', 'icon': Icons.thermostat},
+      {'label': 'K', 'icon': Icons.leak_add},
+      {'label': 'N', 'icon': Icons.nature},
+      {'label': 'P', 'icon': Icons.energy_savings_leaf},
+    ];
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        childAspectRatio: 1,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+      ),
+      itemCount: sensors.length,
+      itemBuilder: (context, index) {
+        final sensor = sensors[index];
+        return _buildSensorItem(
+          label: sensor['label'] as String,
+          icon: sensor['icon'] as IconData,
+        );
       },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor:
-                  isSelected ? AppColors.primaryColor : Colors.grey[300],
-              child:
-                  Icon(icon, color: isSelected ? Colors.white : Colors.black),
+    );
+  }
+
+  Widget _buildSensorItem({required String label, required IconData icon}) {
+    final isSelected = _selectedSensor == label;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        color: isSelected ? AppColors.primaryColor : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          if (isSelected)
+            BoxShadow(
+              color: AppColors.primaryColor.withValues(alpha: 0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            const SizedBox(height: 8),
-            Text(label, style: const TextStyle(fontSize: 14)),
-          ],
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => setState(() => _selectedSensor = label),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon,
+                    color: isSelected ? Colors.white : AppColors.textSecondary),
+                const SizedBox(height: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : AppColors.textPrimary,
+                    fontSize: 12,
+                    fontFamily: 'SYNE',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -219,11 +269,119 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   Widget _buildChartSection(String selectedSensor) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: GrowthRateChart(selectedSensor: selectedSensor),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: GrowthRateChart(selectedSensor: selectedSensor),
+            ),
+          ),
+        ],
       ),
     );
   }
+
+  Widget _buildRefreshButton(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: CustomBottom(
+          text: 'Refresh Data',
+          onPressed: () => context.read<SensorDataCubit>().loadSensorData(),
+          icon: Icons.refresh_rounded,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, String error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset('assets/images/error_state.svg', height: 200),
+            const SizedBox(height: 32),
+            Text(
+              'Connection Error',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: AppColors.errorColor,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'SYNE',
+                  ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Failed to fetch sensor data. Please check your internet connection',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppColors.textTertiary,
+                fontFamily: 'SYNE',
+              ),
+            ),
+            const SizedBox(height: 32),
+            CustomBottom(
+              text: 'Retry',
+              onPressed: () => context.read<SensorDataCubit>().loadSensorData(),
+              color: AppColors.errorColor,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  double _getSensorValue(Map<String, dynamic> data, String sensor) {
+    final sensorKey = sensor == 'Humidity' ? 'Hum' : sensor;
+    final value = data[sensorKey] ?? 0;
+    return value is String ? double.tryParse(value) ?? 0 : value.toDouble();
+  }
+}
+
+class _GaugePainter extends CustomPainter {
+  final double progress;
+  _GaugePainter(this.progress);
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (min(size.width, size.height) / 2) * 0.8;
+    final backgroundPaint = Paint()
+      ..color = AppColors.gaugeBackground
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 20;
+    canvas.drawCircle(center, radius, backgroundPaint);
+    final actualValue = progress * 100;
+    final arcColor = actualValue < 40
+        ? AppColors.warningColor
+        : actualValue < 80
+            ? AppColors.primaryColor
+            : AppColors.successColor;
+    final progressPaint = Paint()
+      ..color = arcColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 20
+      ..strokeCap = StrokeCap.round;
+    const startAngle = -pi / 2;
+    final sweepAngle = 2 * pi * progress;
+    canvas.drawArc(Rect.fromCircle(center: center, radius: radius), startAngle,
+        sweepAngle, false, progressPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

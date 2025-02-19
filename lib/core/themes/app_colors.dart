@@ -20,5 +20,14 @@ class AppColors {
   static const Color greyColor = Color(0xffa1a1a1);
   static const Color completeColor = Color(0xffC0FCE3);
   static const Color inCompleteColor = Color(0xfffebbbb);
+
   /////////////////////
+  static const Color scaffoldBackground = Color(0xFFF4F6F8);
+  static const Color textPrimary = Color(0xFF1A1A1A);
+  static const Color textSecondary = Color(0xFF666666);
+  static const Color textTertiary = Color(0xFF999999);
+  static const Color gaugeBackground = Color(0xFFEAECF0);
+  static const Color warningColor = Color(0xFFFFC107);
+  static const Color successColor = Color(0xFF8BC34A);
+  static const Color errorColor = Color(0xFFEF5350);
 }
