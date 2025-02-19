@@ -79,6 +79,7 @@ flutter:
     - assets/images/onboarding/
     - assets/images/authentication/
     - assets/icon/
+    - assets/animations/
     - assets/animations/weather/
     - assets/icon/weather_icons/
     - shorebird.yaml
