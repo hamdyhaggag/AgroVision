@@ -46,7 +46,7 @@ class AppRouter {
         );
       case AppRoutes.screenLayout:
         return MaterialPageRoute(
-          builder: (_) => const ScreenLayout(),
+          builder: (_) => ScreenLayout(),
         );
       case AppRoutes.forgotPasswordPhone:
         return MaterialPageRoute(

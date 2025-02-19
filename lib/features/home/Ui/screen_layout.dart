@@ -6,37 +6,31 @@ import '../../../core/themes/app_colors.dart';
 import '../../chat/Ui/chat_list_screen.dart';
 import '../../disease_detection/Ui/detection_records.dart';
 import '../../disease_detection/Ui/plant_details_screen.dart';
-import '../../monitoring/UI/monitor_screen.dart';
 import '../../monitoring/UI/sensor_data_screen.dart';
 import '../../splash/Logic/app_cubit.dart';
 import '../../splash/Logic/app_state.dart';
 import 'home_screen.dart';
 
 class ScreenLayout extends StatelessWidget {
-  const ScreenLayout({super.key});
-  final _navItems = const [
-    BottomNavItem(
+  ScreenLayout({super.key});
+  final _navItems = [
+    const BottomNavItem(
       type: NavItem.home,
       iconPath: 'assets/icon/home_icon.svg',
       label: 'Home',
     ),
-    BottomNavItem(
+    const BottomNavItem(
       type: NavItem.detect,
       iconPath: 'assets/icon/camera.svg',
       label: 'Detect',
       hasAction: true,
     ),
-    BottomNavItem(
-      type: NavItem.history,
+    const BottomNavItem(
+      type: NavItem.sensor,
       iconPath: 'assets/icon/history_icon.svg',
       label: 'History',
     ),
-    BottomNavItem(
-      type: NavItem.analytics,
-      iconPath: 'assets/icon/analytics_icon.svg',
-      label: 'Analytics',
-    ),
-    BottomNavItem(
+    const BottomNavItem(
       type: NavItem.chat,
       iconPath: 'assets/icon/chat_icon.svg',
       label: 'Chat',
@@ -71,7 +65,6 @@ class ScreenLayout extends StatelessWidget {
       const SensorDataScreen(
         field: {},
       ),
-      const DetectionRecords(),
       ChatListScreen(),
     ];
     return IndexedStack(index: index, children: screens);
@@ -89,26 +82,24 @@ class ScreenLayout extends StatelessWidget {
 
   void _showImagePickerBottomSheet(BuildContext context) {
     showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) => PlantSelectionFlow(
-        onImageSelected: (path, plant) {
-          Navigator.pop(sheetContext);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => PlantDetailsScreen(
-                imagePath: path,
-                selectedPlant: plant,
-              ),
-            ),
-          );
-        },
-      ),
-    );
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (sheetContext) =>
+            PlantSelectionFlow(onImageSelected: (path, plant) {
+              Navigator.pop(sheetContext);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PlantDetailsScreen(
+                    imagePath: path,
+                    selectedPlant: plant,
+                  ),
+                ),
+              );
+            }));
   }
 }
 
@@ -128,7 +119,7 @@ class _CustomBottomNavBar extends StatelessWidget {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withAlpha(15),
             blurRadius: 16,
             offset: const Offset(0, -4),
           )
@@ -218,9 +209,8 @@ class _PlantSelectionFlowState extends State<PlantSelectionFlow> {
       child: _selectedPlant == null
           ? _PlantSelectionGrid(
               key: const ValueKey("grid"),
-              onPlantSelected: (plant) {
-                setState(() => _selectedPlant = plant);
-              },
+              onPlantSelected: (plant) =>
+                  setState(() => _selectedPlant = plant),
             )
           : _ImageSourcePicker(
               key: const ValueKey("picker"),
@@ -286,11 +276,12 @@ class _ImageSourcePicker extends StatelessWidget {
   final String plant;
   final Function(ImageSource) onSourceSelected;
   final VoidCallback onBack;
-  const _ImageSourcePicker(
-      {super.key,
-      required this.plant,
-      required this.onSourceSelected,
-      required this.onBack});
+  const _ImageSourcePicker({
+    super.key,
+    required this.plant,
+    required this.onSourceSelected,
+    required this.onBack,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -428,4 +419,4 @@ class _SourceButton extends StatelessWidget {
   }
 }
 
-enum NavItem { home, detect, history, analytics, chat }
+enum NavItem { home, detect, sensor, chat }
