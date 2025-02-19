@@ -14,7 +14,7 @@ class AppRoutes {
   static const String congratulationsScreen = "/congratulationsScreen";
   static const String notificationsScreen = "/notificationsScreen";
   // static const String seeAllNotes = "/seeAllNotes";
-  static const String seeAllFields = "/seeAllFields";
+  // static const String seeAllFields = "/seeAllFields";
   static const String sensorDataScreen = "/sensorDataScreen";
   // static const String addNewNote = "/addNewNote";
   // static const String editNoteScreen = "/editNoteScreen";

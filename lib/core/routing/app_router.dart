@@ -4,7 +4,7 @@
 import 'package:agro_vision/features/authentication/UI/congratulation_screen.dart';
 import 'package:agro_vision/features/home/Ui/widgets/add_task_screen.dart';
 import 'package:agro_vision/features/home/Ui/logout_screen.dart';
-import 'package:agro_vision/features/home/Ui/fields_screen.dart';
+// import 'package:agro_vision/features/home/Ui/fields_screen.dart';
 import 'package:agro_vision/features/home/Ui/profile/profile_screen.dart';
 import 'package:agro_vision/features/home/Ui/widgets/task_list_screen.dart';
 import 'package:flutter/material.dart';
@@ -80,11 +80,11 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => NotificationsScreen(),
         );
-      case AppRoutes.seeAllFields:
-        final fields = settings.arguments as List<Map<String, String>>;
-        return MaterialPageRoute(
-          builder: (_) => FieldsScreen(fields: fields),
-        );
+      // case AppRoutes.seeAllFields:
+      //   final fields = settings.arguments as List<Map<String, String>>;
+      //   return MaterialPageRoute(
+      //     builder: (_) => FieldsScreen(fields: fields),
+      //   );
       // case AppRoutes.seeAllNotes:
       //   final args = settings.arguments as Map<String, dynamic>;
       //   return MaterialPageRoute(
