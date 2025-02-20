@@ -45,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
                         style: TextStyle(
                             fontSize: 14,
                             fontFamily: 'SYNE',
-                            color: Colors.white.withOpacity(0.7))),
+                            color: Colors.white.withValues(alpha: 0.7))),
                     const SizedBox(height: 5),
                     const Text('Dedicated Farmer | Agriculture Advocate',
                         style: TextStyle(

@@ -40,8 +40,8 @@ class CustomBottom extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14.r),
           side: BorderSide(
-            color: color?.withOpacity(0.2) ??
-                AppColors.primaryColor.withOpacity(0.2),
+            color: color?.withValues(alpha: 0.2) ??
+                AppColors.primaryColor.withValues(alpha: 0.2),
             width: 1.r,
           ),
         ),

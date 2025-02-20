@@ -50,7 +50,7 @@ class GrowthRateChart extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
       decoration: BoxDecoration(
-        color: Colors.green.withOpacity(0.05),
+        color: Colors.green.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: Colors.green.shade300, width: 1),
       ),
@@ -83,7 +83,7 @@ class GrowthRateChart extends StatelessWidget {
               // TODO: Implement toggle functionality
             },
             borderRadius: BorderRadius.circular(8.r),
-            fillColor: Colors.green.withOpacity(0.2),
+            fillColor: Colors.green.withValues(alpha: 0.2),
             selectedColor: Colors.green.shade900,
             color: Colors.black54,
             constraints: BoxConstraints(

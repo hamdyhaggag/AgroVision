@@ -40,7 +40,7 @@ class QuickActionsGrid extends StatelessWidget {
                 BoxShadow(
                   color: Color(int.parse(
                           (action['color1'] as String).replaceAll('#', '0xFF')))
-                      .withOpacity(0.2),
+                      .withValues(alpha: 0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 )
@@ -67,7 +67,7 @@ class QuickActionsGrid extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(Icons.arrow_forward,

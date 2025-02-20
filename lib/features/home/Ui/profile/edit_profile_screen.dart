@@ -68,7 +68,7 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                             blurRadius: 5,
                             spreadRadius: 1,
                           ),
@@ -129,8 +129,8 @@ class EditProfileScreenState extends State<EditProfileScreen> {
       decoration: InputDecoration(
         focusColor: AppColors.primaryColor,
         labelText: label,
-        labelStyle: TextStyle(color: Colors.black.withOpacity(0.6)),
-        prefixIcon: Icon(icon, color: Colors.black.withOpacity(0.6)),
+        labelStyle: TextStyle(color: Colors.black.withValues(alpha: 0.6)),
+        prefixIcon: Icon(icon, color: Colors.black.withValues(alpha: 0.6)),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.grey.shade300),
           borderRadius: BorderRadius.circular(10),

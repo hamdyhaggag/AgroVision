@@ -33,7 +33,7 @@ void showCustomNotification(
                 borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 16.r,
                     offset: const Offset(0, 4),
                   )
@@ -65,7 +65,7 @@ void showCustomNotification(
                                 message,
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.onSurface
-                                      .withOpacity(0.9),
+                                      .withValues(alpha: 0.9),
                                 ),
                               ),
                             ],
@@ -73,7 +73,8 @@ void showCustomNotification(
                         ),
                         IconButton(
                           icon: Icon(Icons.close, size: 20.r),
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.6),
                           onPressed: () => overlayEntry.remove(),
                         ),
                       ],
