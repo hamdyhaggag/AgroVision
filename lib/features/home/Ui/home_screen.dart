@@ -15,6 +15,7 @@ import 'widgets/quick_actions_grid.dart';
 class HomeScreen extends StatefulWidget {
   static const String routeName = '/home';
   const HomeScreen({super.key});
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -28,19 +29,49 @@ class _HomeScreenState extends State<HomeScreen> {
     context.read<HomeCubit>().getWeatherData();
   }
 
+  Future<bool> _onWillPop() async {
+    final shouldPop = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Confirm Exit'),
+          content: const Text('Do you really want to exit the app?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+    return shouldPop ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: _buildAppBar(context),
-      drawer: const AppDrawer(),
-      body: BlocBuilder<HomeCubit, HomeState>(
-        builder: (context, state) {
-          if (state is HomeLoading) return _buildSkeletonLoading();
-          if (state is HomeLoaded) return _buildBody(state.weather);
-          if (state is HomeError) return _buildErrorState(state.message);
-          return const SizedBox.shrink();
-        },
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: _buildAppBar(context),
+        drawer: const AppDrawer(),
+        body: BlocBuilder<HomeCubit, HomeState>(
+          builder: (BuildContext context, HomeState state) {
+            if (state is HomeLoading) {
+              return _buildSkeletonLoading();
+            } else if (state is HomeLoaded) {
+              return _buildBody(state.weather);
+            } else if (state is HomeError) {
+              return _buildErrorState(state.message);
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }

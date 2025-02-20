@@ -136,7 +136,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               ? MainAxisAlignment.center
                               : MainAxisAlignment.spaceBetween,
                           children: [
-                            // Back button (only shows if _currentPage > 0)
                             if (_currentPage > 0)
                               Expanded(
                                 child: ElevatedButton(
@@ -169,16 +168,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   ),
                                 ),
                               ),
-
-                            // Spacer between buttons for both 'Back, Next' and 'Back, Start'
                             if (_currentPage > 0) const SizedBox(width: 10),
-
-                            // Next or Start Now button
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: () {
                                   if (_currentPage + 1 == contents.length) {
-                                    navigateTo(context, const LoginScreen());
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const LoginScreen()),
+                                    );
                                     CacheHelper.saveData(
                                         key: 'isEnterBefore', value: true);
                                   } else {

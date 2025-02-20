@@ -20,7 +20,7 @@ void showCustomNotification(BuildContext context, String message, Color color) {
                 child: Text(
                   message,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.red,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                   ),

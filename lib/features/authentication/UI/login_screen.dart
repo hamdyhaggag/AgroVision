@@ -8,6 +8,7 @@ import '../../../core/utils/utils.dart';
 import '../../../shared/widgets/custom_botton.dart';
 import '../../../shared/widgets/emai_and_password.dart';
 import '../../../shared/widgets/show_custom_notification_error.dart';
+import '../../home/Ui/screen_layout.dart';
 import '../Data/model/login_request_body.dart';
 import '../Logic/login cubit/login_cubit.dart';
 import '../Logic/login cubit/login_state.dart';
@@ -23,12 +24,15 @@ class LoginScreen extends StatelessWidget {
           child: BlocListener<LoginCubit, LoginState>(
         listener: (context, state) {
           if (state is Success) {
-            Navigator.pushReplacementNamed(context, '/screenLayout');
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => ScreenLayout()),
+              (route) => false,
+            );
           } else if (state is Error) {
             final errorMessage = state.error == 'Unauthorized'
                 ? 'Invalid email or password. Please try again.'
                 : state.error;
-
             showCustomNotification(context, errorMessage, AppColors.greyColor);
           }
         },
