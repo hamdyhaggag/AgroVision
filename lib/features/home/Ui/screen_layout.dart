@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -190,15 +192,11 @@ class _PlantSelectionFlowState extends State<PlantSelectionFlow> {
   final _picker = ImagePicker();
 
   void _handleImagePick(ImageSource source) async {
-    try {
-      final image = await _picker.pickImage(source: source, imageQuality: 85);
-      if (image != null && _selectedPlant != null && context.mounted) {
-        widget.onImageSelected(image.path, _selectedPlant!);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error selecting image: ${e.toString()}')),
-      );
+    final image = await _picker.pickImage(source: source);
+    if (image != null) {
+      final file = File(image.path);
+      widget.onImageSelected(file.path, _selectedPlant!);
+      file.delete();
     }
   }
 

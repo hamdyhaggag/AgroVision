@@ -44,6 +44,10 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => const SplashScreen(),
         );
+      case AppRoutes.onBoardingScreen:
+        return MaterialPageRoute(
+          builder: (_) => const OnboardingScreen(),
+        );
       case AppRoutes.screenLayout:
         return MaterialPageRoute(
           builder: (_) => ScreenLayout(),

@@ -48,9 +48,6 @@ class AgroVision extends StatelessWidget {
             ),
             BlocProvider(
               create: (_) => SensorDataCubit(_sensorDataService),
-              child: const SensorDataScreen(
-                field: {},
-              ),
             ),
             BlocProvider(
               create: (context) =>
@@ -64,9 +61,6 @@ class AgroVision extends StatelessWidget {
             ),
             BlocProvider(
               create: (context) => TaskCubit(),
-              child: const MaterialApp(
-                home: TaskListScreen(),
-              ),
             ),
           ],
           child: MaterialApp(

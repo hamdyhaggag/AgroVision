@@ -3,6 +3,7 @@ import 'package:agro_vision/features/home/Ui/screen_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:agro_vision/features/authentication/UI/login_screen.dart';
 import '../../../core/helpers/shared_pref_helper.dart';
+import '../../onboarding/Ui/onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -33,18 +34,21 @@ class SplashScreenState extends State<SplashScreen>
     _animationController.forward();
 
     Timer(const Duration(seconds: 3), () {
-      // Check the login state from SharedPreferences
-      bool isLoggedIn = CacheHelper.getBoolean(key: 'isLoggedIn');
+      bool hasCompletedOnboarding =
+          CacheHelper.getBoolean(key: 'isEnterBefore');
 
-      if (isLoggedIn) {
+      if (!hasCompletedOnboarding) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => ScreenLayout()),
+          MaterialPageRoute(builder: (context) => const OnboardingScreen()),
         );
       } else {
+        bool isLoggedIn = CacheHelper.getBoolean(key: 'isLoggedIn');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          MaterialPageRoute(
+              builder: (context) =>
+                  isLoggedIn ? ScreenLayout() : const LoginScreen()),
         );
       }
     });
