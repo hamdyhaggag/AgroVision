@@ -30,10 +30,15 @@ class LoginScreen extends StatelessWidget {
               (route) => false,
             );
           } else if (state is Error) {
-            final errorMessage = state.error == 'Unauthorized'
-                ? 'Invalid email or password. Please try again.'
-                : state.error;
-            showCustomNotification(context, errorMessage, AppColors.greyColor);
+            if (context.mounted) {
+              context.read<LoginCubit>().passwordController.clear();
+              showCustomNotification(
+                context,
+                'Invalid username or password',
+                type: NotificationType.error,
+                durationSeconds: 3,
+              );
+            }
           }
         },
         child: Padding(
@@ -120,13 +125,12 @@ class LoginScreen extends StatelessWidget {
   }
 
   void validateThenDoLogin(BuildContext context) {
-    if (context.read<LoginCubit>().formKey.currentState!.validate()) {
-      context.read<LoginCubit>().emitLoginStates(
-            LoginRequestBody(
-              email: context.read<LoginCubit>().emailController.text,
-              password: context.read<LoginCubit>().passwordController.text,
-            ),
-          );
+    final cubit = context.read<LoginCubit>();
+    if (cubit.formKey.currentState!.validate()) {
+      cubit.emitLoginStates(LoginRequestBody(
+        email: cubit.emailController.text,
+        password: cubit.passwordController.text,
+      ));
     }
   }
 }

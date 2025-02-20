@@ -91,22 +91,22 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a password';
+                  return 'Password is required';
+                }
+                if (!AppRegex.hasMinLength(value)) {
+                  return 'Password must be at least 8 characters';
                 }
                 // if (!AppRegex.hasLowerCase(value)) {
-                //   return 'Password must contain at least one lowercase letter';
+                //   return 'Include a lowercase letter';
                 // }
                 // if (!AppRegex.hasUpperCase(value)) {
-                //   return 'Password must contain at least one uppercase letter';
+                //   return 'Include an uppercase letter';
                 // }
                 // if (!AppRegex.hasNumber(value)) {
-                //   return 'Password must contain at least one number';
+                //   return 'Include a number';
                 // }
                 // if (!AppRegex.hasSpecialCharacter(value)) {
-                //   return 'must contain at least one special character (@, #, !, etc.)';
-                // }
-                // if (!AppRegex.hasMinLength(value)) {
-                //   return 'Password must be at least 8 characters long';
+                //   return 'Include a special character';
                 // }
                 return null;
               },
