@@ -13,14 +13,14 @@ import 'core/utils/utils.dart';
 import 'features/authentication/Logic/auth cubit/auth_cubit.dart';
 import 'features/authentication/Logic/login cubit/login_cubit.dart';
 import 'features/authentication/Logic/logout cubit/logout_cubit.dart';
+import 'features/chat/Logic/chat_cubit.dart';
+import 'features/chat/chat_repository.dart';
 import 'features/disease_detection/Api/disease_detection_service.dart';
 import 'features/disease_detection/Logic/disease_cubit.dart';
 import 'features/home/Logic/home_cubit.dart';
 import 'features/home/Logic/task_cubit/task_cubit.dart';
-import 'features/home/Ui/widgets/task_list_screen.dart';
 import 'features/monitoring/Api/sensor_data_service.dart';
 import 'features/monitoring/Logic/sensor_data_cubit.dart';
-import 'features/monitoring/UI/sensor_data_screen.dart';
 
 class AgroVision extends StatelessWidget {
   final AppRouter appRouter;
@@ -67,6 +67,9 @@ class AgroVision extends StatelessWidget {
             title: 'AgroVision',
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
+              colorScheme: const ColorScheme.light(
+                primary: AppColors.primaryColor,
+              ),
               primaryColor: AppColors.primaryColor,
               scaffoldBackgroundColor: Colors.white,
               textSelectionTheme: const TextSelectionThemeData(
