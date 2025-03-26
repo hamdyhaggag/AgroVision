@@ -16,7 +16,8 @@ class ChatCubit extends Cubit<ChatState> {
       isSentByMe: true,
     );
 
-    emit(ChatLoading(messages: [...state.messages, newMessage]));
+    final loadingMessages = [...state.messages, newMessage];
+    emit(ChatLoading(messages: loadingMessages));
 
     try {
       final response = await repository.sendText(text);
@@ -24,7 +25,8 @@ class ChatCubit extends Cubit<ChatState> {
         text: response.answer,
         isSentByMe: false,
       );
-      emit(ChatSuccess(messages: [...state.messages, newMessage, botMessage]));
+
+      emit(ChatSuccess(messages: [...loadingMessages, botMessage]));
     } catch (e) {
       emit(ChatError(messages: state.messages, error: e.toString()));
     }
