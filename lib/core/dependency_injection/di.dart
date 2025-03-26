@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import '../../features/authentication/Data/repos/login_repo.dart';
 import '../../features/authentication/Logic/login cubit/login_cubit.dart';

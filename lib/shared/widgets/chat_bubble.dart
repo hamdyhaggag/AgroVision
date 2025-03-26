@@ -40,12 +40,19 @@ class ChatBubble extends StatelessWidget {
                 children: [
                   if (message.imageUrl != null)
                     _buildImagePreview(message.imageUrl!),
-                  Text(message.text),
+                  Text(
+                    message.text,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'SYNE',
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     DateFormat('HH:mm').format(message.timestamp),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontSize: 10,
+                          fontFamily: 'SYNE',
                           color: Colors.grey,
                         ),
                   ),

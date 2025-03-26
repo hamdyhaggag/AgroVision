@@ -37,7 +37,7 @@ class _ChatbotService implements ChatbotService {
     )
         .compose(
           _dio.options,
-          'text-convo',
+          'text_convo',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -119,7 +119,7 @@ class _ChatbotService implements ChatbotService {
     )
         .compose(
           _dio.options,
-          'voice-convo',
+          'voice_convo',
           queryParameters: queryParameters,
           data: _data,
         )
