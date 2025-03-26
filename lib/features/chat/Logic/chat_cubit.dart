@@ -21,7 +21,7 @@ class ChatCubit extends Cubit<ChatState> {
     try {
       final response = await repository.sendText(text);
       final botMessage = Message(
-        text: response.response,
+        text: response.answer,
         isSentByMe: false,
       );
       emit(ChatSuccess(messages: [...state.messages, newMessage, botMessage]));

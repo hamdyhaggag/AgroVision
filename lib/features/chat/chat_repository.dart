@@ -11,7 +11,7 @@ class ChatRepository {
   Future<ChatResponse> sendText(String text) async {
     try {
       final response =
-          await chatbotService.sendTextMessage(ChatRequestBody(text: text));
+          await chatbotService.sendTextMessage(ChatRequestBody(query: text));
       return response;
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {

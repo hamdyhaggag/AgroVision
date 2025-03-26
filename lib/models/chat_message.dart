@@ -1,18 +1,20 @@
 class ChatRequestBody {
-  final String text;
+  final String query;
 
-  ChatRequestBody({required this.text});
+  ChatRequestBody({required this.query});
 
-  Map<String, dynamic> toJson() => {'text': text};
+  Map<String, dynamic> toJson() => {'query': query};
 }
 
 class ChatResponse {
-  final String response;
+  final String answer;
 
-  ChatResponse({required this.response});
+  ChatResponse({required this.answer});
 
   factory ChatResponse.fromJson(Map<String, dynamic> json) {
-    return ChatResponse(response: json['response'] ?? '');
+    return ChatResponse(
+      answer: json['Answer'] ?? 'No response available',
+    );
   }
 }
 
