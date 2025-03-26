@@ -62,6 +62,8 @@ class AgroVision extends StatelessWidget {
             BlocProvider(
               create: (context) => TaskCubit(),
             ),
+            BlocProvider(
+                create: (context) => ChatCubit(getIt<ChatRepository>()))
           ],
           child: MaterialApp(
             title: 'AgroVision',

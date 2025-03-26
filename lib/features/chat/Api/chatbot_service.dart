@@ -1,0 +1,23 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
+import 'package:agro_vision/models/chat_message.dart';
+
+part 'chatbot_service.g.dart';
+
+@RestApi(baseUrl: 'https://7aff-156-211-133-253.ngrok-free.app/')
+abstract class ChatbotService {
+  factory ChatbotService(Dio dio) = _ChatbotService;
+
+  @POST('text_convo')
+  Future<ChatResponse> sendTextMessage(@Body() ChatRequestBody body);
+
+  @POST('image_convo')
+  @MultiPart()
+  Future<ChatResponse> sendImageMessage(@Part(name: 'file') File image);
+
+  @POST('voice_convo')
+  @MultiPart()
+  Future<ChatResponse> sendVoiceMessage(@Part(name: 'file') File voiceFile);
+}

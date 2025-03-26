@@ -1,39 +1,111 @@
 import 'package:agro_vision/core/themes/app_colors.dart';
+import 'package:agro_vision/models/chat_message.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ChatDetailScreen extends StatefulWidget {
+import '../../../core/dependency_injection/di.dart';
+import '../../../shared/widgets/chat_bubble.dart';
+import '../Logic/chat_cubit.dart';
+import '../chat_repository.dart';
+
+class ChatDetailScreen extends StatelessWidget {
   const ChatDetailScreen({super.key});
 
   @override
-  State<ChatDetailScreen> createState() => _ChatDetailScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => ChatCubit(getIt<ChatRepository>()),
+      child: const _ChatDetailView(),
+    );
+  }
 }
 
-class _ChatDetailScreenState extends State<ChatDetailScreen> {
-  final List<Message> messages = [
-    Message(
-        text: 'The wheat leaves have unusual spots, could it be a disease?',
-        isSentByMe: false),
-    Message(text: 'Let me check the crop monitoring app.', isSentByMe: true),
-    Message(text: 'Great idea! Let me know what you find.', isSentByMe: false),
-  ];
+class _ChatDetailView extends StatefulWidget {
+  const _ChatDetailView();
 
-  final TextEditingController _messageController = TextEditingController();
+  @override
+  State<_ChatDetailView> createState() => __ChatDetailViewState();
+}
+
+class __ChatDetailViewState extends State<_ChatDetailView> {
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void dispose() {
-    _messageController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
-  void _onMessageSend(String text) {
-    if (text.trim().isEmpty) return;
-    setState(() {
-      messages.add(Message(text: text, isSentByMe: true));
-    });
-    _messageController.clear();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('AI Assistant'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () => _showCapabilitiesDialog(),
+          ),
+        ],
+      ),
+      // Update the body in ChatDetailScreen
+      body: Column(
+        children: [
+          Expanded(
+            child: BlocBuilder<ChatCubit, ChatState>(
+              builder: (context, state) {
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: state.messages.length,
+                  itemBuilder: (context, index) {
+                    final message = state.messages[index];
+                    return ChatBubble(
+                      message: message,
+                      onLongPress: () => _showMessageOptions(message),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          _ChatInputField(controller: _controller),
+        ],
+      ),
+    );
   }
 
-  void _onMessageLongPress(Message message) {
+  void _showCapabilitiesDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Assistant Capabilities'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildCapabilityItem(Icons.text_fields, 'Text Analysis'),
+            _buildCapabilityItem(Icons.image, 'Image Recognition'),
+            _buildCapabilityItem(Icons.mic, 'Voice Commands'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCapabilityItem(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.primaryColor),
+          const SizedBox(width: 12),
+          Text(text),
+        ],
+      ),
+    );
+  }
+
+  void _showMessageOptions(Message message) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Wrap(
@@ -42,10 +114,57 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             leading: const Icon(Icons.delete, color: Colors.red),
             title: const Text('Delete'),
             onTap: () {
-              setState(() {
-                messages.remove(message);
-              });
+              context.read<ChatCubit>().deleteMessage(message);
               Navigator.pop(context);
+            },
+          ),
+          if (!message.isSentByMe)
+            ListTile(
+              leading: const Icon(Icons.content_copy),
+              title: const Text('Copy'),
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: message.text));
+                Navigator.pop(context);
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChatInputField extends StatelessWidget {
+  final TextEditingController controller;
+
+  const _ChatInputField({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          _AttachmentButton(),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: 'Ask about crops...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+              ),
+              onSubmitted: (text) => _handleSend(text, context),
+            ),
+          ),
+          BlocBuilder<ChatCubit, ChatState>(
+            builder: (context, state) {
+              return IconButton(
+                icon: state is ChatLoading
+                    ? const CircularProgressIndicator()
+                    : const Icon(Icons.send),
+                onPressed: () => _handleSend(controller.text, context),
+              );
             },
           ),
         ],
@@ -53,161 +172,53 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     );
   }
 
-  void _onMessageSwipe(Message message) {
-    // Implement your reply logic here, e.g., highlight the message or pre-fill the reply input
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Replying to: "${message.text}"')),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final arguments = ModalRoute.of(context)?.settings.arguments as Map?;
-    final title = arguments != null ? arguments['title'] as String : 'Chat';
-
-    return Scaffold(
-      appBar: _buildAppBar(title),
-      body: Column(
-        children: [
-          _buildChatMessages(),
-          const Divider(height: 1),
-          _buildInputBar(),
-        ],
-      ),
-    );
-  }
-
-  AppBar _buildAppBar(String title) {
-    return AppBar(
-      backgroundColor: AppColors.primaryColor,
-      title: Row(
-        children: [
-          const CircleAvatar(
-            radius: 20,
-            backgroundImage: AssetImage('assets/images/user.png'),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Text(
-                'Online',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white70,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      actions: [
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.search),
-        ),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.more_vert),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildChatMessages() {
-    return Expanded(
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: messages.length,
-        itemBuilder: (context, index) {
-          final message = messages[index];
-          return Dismissible(
-            key: Key(message.text),
-            direction: DismissDirection.endToStart,
-            onDismissed: (direction) => _onMessageSwipe(message),
-            background: Container(
-              alignment: Alignment.centerRight,
-              color: Colors.blue.shade100,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: const Icon(Icons.reply, color: Colors.blue),
-            ),
-            child: GestureDetector(
-              onLongPress: () => _onMessageLongPress(message),
-              child: Align(
-                alignment: message.isSentByMe
-                    ? Alignment.centerRight
-                    : Alignment.centerLeft,
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: message.isSentByMe
-                        ? Colors.green.shade100
-                        : Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    message.text,
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildInputBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.add_circle, color: Colors.green),
-          ),
-          Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: InputDecoration(
-                hintText: 'Type a message...',
-                hintStyle: const TextStyle(color: Colors.grey),
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(25)),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.grey.shade200,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-              ),
-              onSubmitted: _onMessageSend,
-            ),
-          ),
-          IconButton(
-            onPressed: () => _onMessageSend(_messageController.text),
-            icon: const Icon(Icons.send, color: Colors.green),
-          ),
-        ],
-      ),
-    );
+  void _handleSend(String text, BuildContext context) {
+    if (text.trim().isEmpty) return;
+    context.read<ChatCubit>().sendTextMessage(text);
+    controller.clear();
   }
 }
 
-class Message {
-  final String text;
-  final bool isSentByMe;
+class _AttachmentButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton(
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'image',
+          child: ListTile(
+            leading: Icon(Icons.image),
+            title: Text('Send Image'),
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'voice',
+          child: ListTile(
+            leading: Icon(Icons.mic),
+            title: Text('Record Voice'),
+          ),
+        ),
+      ],
+      onSelected: (value) => _handleAttachment(value, context),
+    );
+  }
 
-  Message({required this.text, required this.isSentByMe});
+  void _handleAttachment(String value, BuildContext context) {
+    switch (value) {
+      case 'image':
+        _pickImage(context);
+        break;
+      case 'voice':
+        _recordVoice(context);
+        break;
+    }
+  }
+
+  void _pickImage(BuildContext context) async {
+    // Implement image picker
+  }
+
+  void _recordVoice(BuildContext context) {
+    // Implement voice recording
+  }
 }
