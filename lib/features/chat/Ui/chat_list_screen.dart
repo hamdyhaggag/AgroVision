@@ -8,8 +8,34 @@ import '../../../models/chat_session.dart';
 import '../../../shared/widgets/custom_appbar.dart';
 import '../Logic/chat_cubit.dart';
 
-class ChatListScreen extends StatelessWidget {
+class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
+
+  @override
+  State<ChatListScreen> createState() => _ChatListScreenState();
+}
+
+class _ChatListScreenState extends State<ChatListScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  int _currentTabIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {
+        _currentTabIndex = _tabController.index;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   void _showSessionOptions(BuildContext context, ChatSession session) {
     showModalBottomSheet(
@@ -42,32 +68,32 @@ class ChatListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(isHome: true, title: 'Chats'),
-      body: DefaultTabController(
-        length: 2,
-        child: Column(
-          children: [
-            _buildEnhancedTabBar(),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildChatList(context),
-                  BlocBuilder<ChatCubit, ChatState>(
-                    builder: (context, state) {
-                      return state.sessions.isEmpty
-                          ? _buildChatbotWelcome(context)
-                          : _buildSessionList(context, state.sessions);
-                    },
-                  ),
-                ],
-              ),
+      body: Column(
+        children: [
+          _buildEnhancedTabBar(_tabController),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildChatList(context),
+                BlocBuilder<ChatCubit, ChatState>(
+                  builder: (context, state) {
+                    return state.sessions.isEmpty
+                        ? _buildChatbotWelcome(context)
+                        : _buildSessionList(context, state.sessions);
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.read<ChatCubit>().createNewSession(),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _currentTabIndex == 1
+          ? FloatingActionButton(
+              onPressed: () => context.read<ChatCubit>().createNewSession(),
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 
@@ -224,13 +250,13 @@ class ChatListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEnhancedTabBar() {
+  Widget _buildEnhancedTabBar(TabController controller) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: Colors.grey.withAlpha(0x1A),
             blurRadius: 8,
             offset: const Offset(0, 2),
           )
@@ -242,19 +268,21 @@ class ChatListScreen extends StatelessWidget {
           color: AppColors.surfaceColor,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const SizedBox(
+        child: SizedBox(
           height: 50,
           child: TabBar(
+            controller: controller,
             unselectedLabelColor: AppColors.greyColor,
             labelColor: AppColors.primaryColor,
             splashFactory: NoSplash.splashFactory,
-            overlayColor: WidgetStatePropertyAll(Colors.transparent),
+            overlayColor: const WidgetStatePropertyAll(Colors.transparent),
             dividerColor: Colors.transparent,
-            labelStyle: TextStyle(
+            labelStyle: const TextStyle(
                 fontFamily: 'SYNE', fontSize: 14, fontWeight: FontWeight.w500),
-            unselectedLabelStyle: TextStyle(fontFamily: 'SYNE', fontSize: 14),
+            unselectedLabelStyle:
+                const TextStyle(fontFamily: 'SYNE', fontSize: 14),
             indicatorColor: AppColors.primaryColor,
-            tabs: [
+            tabs: const [
               Tab(
                   text: 'Chats',
                   icon: SvgIcon(AppIcons.chatBubbleOutline, size: 20)),
