@@ -65,6 +65,7 @@ class ChatListScreen extends StatelessWidget {
             ),
             unselectedLabelStyle: const TextStyle(
               fontSize: 14,
+              fontFamily: 'SYNE',
             ),
             indicatorColor: AppColors.primaryColor,
             tabs: const [
