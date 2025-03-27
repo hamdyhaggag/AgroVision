@@ -7,7 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'app.dart';
 import 'core/dependency_injection/di.dart';
 import 'core/helpers/app_localizations.dart';
-import 'core/helpers/shared_pref_helper.dart';
+import 'core/helpers/cache_helper.dart';
 import 'core/routing/app_router.dart';
 import 'bloc_observer_checker.dart';
 

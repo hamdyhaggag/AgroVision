@@ -1,5 +1,7 @@
+// chat_cubit.dart
 import 'package:meta/meta.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/helpers/cache_helper.dart';
 import '../../../models/chat_message.dart';
 import '../chat_repository.dart';
 
@@ -8,7 +10,24 @@ part 'chat_state.dart';
 class ChatCubit extends Cubit<ChatState> {
   final ChatRepository repository;
 
-  ChatCubit(this.repository) : super(const ChatInitial());
+  ChatCubit(this.repository) : super(const ChatInitial()) {
+    _loadCachedMessages();
+  }
+
+  void _loadCachedMessages() {
+    final cachedMessages = CacheHelper.getMessages();
+    if (cachedMessages.isNotEmpty) {
+      emit(ChatSuccess(messages: cachedMessages));
+    }
+  }
+
+  @override
+  void emit(ChatState state) {
+    if (state is ChatSuccess) {
+      CacheHelper.saveMessages(state.messages);
+    }
+    super.emit(state);
+  }
 
   Future<void> sendTextMessage(String text) async {
     final newMessage = Message(

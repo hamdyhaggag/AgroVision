@@ -32,4 +32,20 @@ class Message {
     this.imageUrl,
     this.audioUrl,
   }) : timestamp = timestamp ?? DateTime.now();
+
+  Map<String, dynamic> toJson() => {
+        'text': text,
+        'isSentByMe': isSentByMe,
+        'timestamp': timestamp.toIso8601String(),
+        'imageUrl': imageUrl,
+        'audioUrl': audioUrl,
+      };
+
+  factory Message.fromJson(Map<String, dynamic> json) => Message(
+        text: json['text'],
+        isSentByMe: json['isSentByMe'],
+        timestamp: DateTime.parse(json['timestamp']),
+        imageUrl: json['imageUrl'],
+        audioUrl: json['audioUrl'],
+      );
 }
