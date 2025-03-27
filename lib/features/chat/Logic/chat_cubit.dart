@@ -83,10 +83,22 @@ class ChatCubit extends Cubit<ChatState> {
       orElse: () => state.sessions.last,
     );
 
-    final updatedSession = currentSession.copyWith(messages: [
-      ...currentSession.messages,
-      Message(text: text, isSentByMe: true)
-    ]);
+    var updatedSession = currentSession.copyWith(
+      messages: [
+        ...currentSession.messages,
+        Message(text: text, isSentByMe: true)
+      ],
+    );
+
+    if (updatedSession.title == null) {
+      final userMessages = updatedSession.messages.where((m) => m.isSentByMe);
+      if (userMessages.isNotEmpty) {
+        updatedSession = updatedSession.copyWith(
+          title: userMessages.first.text,
+        );
+      }
+    }
+
     final updatedSessions = _updateSessions(updatedSession);
 
     emit(ChatLoading(
