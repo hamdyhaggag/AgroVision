@@ -29,8 +29,8 @@ class ChatListScreen extends StatelessWidget {
             leading: const Icon(Icons.edit),
             title: const Text('Rename Session'),
             onTap: () {
-              ///Todo Implement rename functionality
               Navigator.pop(context);
+              _showRenameDialog(context, session);
             },
           ),
         ],
@@ -264,6 +264,124 @@ class ChatListScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _showRenameDialog(BuildContext context, ChatSession session) {
+    final controller = TextEditingController(text: session.title);
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(24),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 4,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Rename Session',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w600, fontFamily: 'SYNE'),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 24),
+                    onPressed: () => Navigator.pop(context),
+                    splashRadius: 20,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Form(
+                key: formKey,
+                child: TextFormField(
+                  style: const TextStyle(fontFamily: 'SYNE'),
+                  controller: controller,
+                  autofocus: true,
+                  textInputAction: TextInputAction.done,
+                  maxLength: 30,
+                  decoration: InputDecoration(
+                    labelText: 'Session name',
+                    hintText: 'Enter new session name',
+                    labelStyle: const TextStyle(fontFamily: 'SYNE'),
+                    hintStyle: const TextStyle(fontFamily: 'SYNE'),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).dividerColor,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
+                    ),
+                    counter: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        '${controller.text.length}/30',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).hintColor,
+                            ),
+                      ),
+                    ),
+                  ),
+                  onChanged: (value) => formKey.currentState?.validate(),
+                  validator: (value) {
+                    final trimmed = value?.trim() ?? '';
+                    if (trimmed.isEmpty) {
+                      return 'Please enter a session name';
+                    }
+                    return null;
+                  },
+                  onFieldSubmitted: (_) =>
+                      _saveName(context, session, controller),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FilledButton.tonal(
+                    onPressed: () => _saveName(context, session, controller),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      minimumSize: const Size(100, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Save Changes',
+                      style: TextStyle(color: Colors.white, fontFamily: 'SYNE'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _saveName(BuildContext context, ChatSession session,
+      TextEditingController controller) {
+    final trimmed = controller.text.trim();
+    if (trimmed.isNotEmpty) {
+      context.read<ChatCubit>().renameSession(session.id, trimmed);
+      Navigator.pop(context);
+    }
   }
 }
 

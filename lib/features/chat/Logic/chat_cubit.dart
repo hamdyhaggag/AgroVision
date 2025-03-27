@@ -54,6 +54,20 @@ class ChatCubit extends Cubit<ChatState> {
     ));
   }
 
+  void renameSession(String sessionId, String newTitle) {
+    final updatedSessions = state.sessions.map((session) {
+      if (session.id == sessionId) {
+        return session.copyWith(title: newTitle);
+      }
+      return session;
+    }).toList();
+
+    emit(ChatSuccess(
+      sessions: updatedSessions,
+      currentSessionId: state.currentSessionId,
+    ));
+  }
+
   void setCurrentSession(String sessionId) {
     emit(ChatSuccess(
       sessions: state.sessions,
