@@ -1,32 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../core/constants/app_assets.dart';
+import '../../../models/chat_message.dart';
+import '../../../shared/widgets/custom_appbar.dart';
+import '../Logic/chat_cubit.dart';
 
 class ChatListScreen extends StatelessWidget {
   const ChatListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: DefaultTabController(
-          length: 2,
-          child: Column(
-            children: [
-              _buildEnhancedTabBar(),
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    _buildChatList(context),
-                    _buildChatbotWelcome(context),
-                  ],
-                ),
+    return Scaffold(
+      appBar: const CustomAppBar(isHome: true, title: 'Chats'),
+      body: DefaultTabController(
+        length: 2,
+        child: Column(
+          children: [
+            _buildEnhancedTabBar(),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _buildChatList(context),
+                  // Conditional rendering for Chatbot tab
+                  BlocBuilder<ChatCubit, ChatState>(
+                    builder: (context, state) {
+                      if (state.messages.isEmpty) {
+                        return _buildChatbotWelcome(context);
+                      } else {
+                        return _buildChatHistory(context, state.messages);
+                      }
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildChatHistory(BuildContext context, List<Message> messages) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: messages.length,
+      itemBuilder: (context, index) {
+        final message = messages[index];
+        return ListTile(
+          leading: CircleAvatar(
+            backgroundColor: message.isSentByMe
+                ? AppColors.primaryColor
+                : AppColors.accentColor,
+            child: Icon(
+              message.isSentByMe ? Icons.person : Icons.android,
+              color: Colors.white,
+            ),
+          ),
+          title: Text(
+            message.text,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontFamily: 'SYNE',
+            ),
+          ),
+          subtitle: Text(
+            message.timestamp.toString(),
+            style: const TextStyle(color: Colors.grey),
+          ),
+        );
+      },
     );
   }
 
