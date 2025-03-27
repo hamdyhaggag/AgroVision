@@ -61,7 +61,7 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
         ),
         centerTitle: false,
         elevation: 2,
-        shadowColor: AppColors.primaryColor.withOpacity(0.1),
+        shadowColor: AppColors.primaryColor.withValues(alpha: 0.1),
         actions: [
           IconButton(
             icon: const Icon(Icons.help_outline, color: AppColors.primaryColor),
@@ -136,7 +136,7 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
           const SizedBox(height: 8),
           Text('Ask about crops, weather, or soil analysis',
               style: TextStyle(
-                color: AppColors.textSecondary.withOpacity(0.7),
+                color: AppColors.textSecondary.withValues(alpha: 0.7),
                 fontSize: 14,
                 fontFamily: 'SYNE',
               )),
@@ -151,7 +151,7 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
         color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, -4),
           ),
@@ -262,7 +262,7 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.1),
+              color: AppColors.primaryColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 20, color: AppColors.primaryColor),
@@ -365,7 +365,7 @@ class _AttachmentButton extends StatelessWidget {
       icon: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.primaryColor.withOpacity(0.1),
+          color: AppColors.primaryColor.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: const Icon(Icons.add, color: AppColors.primaryColor),
@@ -378,7 +378,7 @@ class _AttachmentButton extends StatelessWidget {
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.1),
+                color: AppColors.primaryColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.image, color: AppColors.primaryColor),
@@ -397,7 +397,7 @@ class _AttachmentButton extends StatelessWidget {
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.1),
+                color: AppColors.primaryColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.mic, color: AppColors.primaryColor),

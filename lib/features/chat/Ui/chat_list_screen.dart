@@ -36,7 +36,7 @@ class ChatListScreen extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -132,17 +132,17 @@ class ChatListScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: AppColors.primaryColor.withOpacity(0.03),
+        color: AppColors.primaryColor.withValues(alpha: 0.03),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryColor.withOpacity(0.05),
+            color: AppColors.primaryColor.withValues(alpha: 0.05),
             blurRadius: 32,
             spreadRadius: 2,
             offset: const Offset(0, 12),
           ),
         ],
         border: Border.all(
-          color: AppColors.primaryColor.withOpacity(0.1),
+          color: AppColors.primaryColor.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -153,12 +153,12 @@ class ChatListScreen extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppColors.primaryColor.withOpacity(0.1),
+                color: AppColors.primaryColor.withValues(alpha: 0.1),
                 width: 2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryColor.withOpacity(0.1),
+                  color: AppColors.primaryColor.withValues(alpha: 0.1),
                   blurRadius: 24,
                   spreadRadius: 2,
                 ),
@@ -198,8 +198,8 @@ class ChatListScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(2),
                     gradient: LinearGradient(
                       colors: [
-                        AppColors.accentColor.withOpacity(0.4),
-                        AppColors.primaryColor.withOpacity(0.2),
+                        AppColors.accentColor.withValues(alpha: 0.4),
+                        AppColors.primaryColor.withValues(alpha: 0.2),
                       ],
                     ),
                   ),
@@ -237,7 +237,7 @@ class ChatListScreen extends StatelessWidget {
                         fontSize: 20.0,
                         fontWeight: FontWeight.w500,
                         fontFamily: 'SYNE',
-                        color: AppColors.primaryColor.withOpacity(0.9),
+                        color: AppColors.primaryColor.withValues(alpha: 0.9),
                         letterSpacing: 0.3,
                         height: 1.2,
                       ),
@@ -251,9 +251,9 @@ class ChatListScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(2),
                       gradient: LinearGradient(
                         colors: [
-                          AppColors.primaryColor.withOpacity(0.2),
-                          AppColors.accentColor.withOpacity(0.4),
-                          AppColors.primaryColor.withOpacity(0.2),
+                          AppColors.primaryColor.withValues(alpha: 0.2),
+                          AppColors.accentColor.withValues(alpha: 0.4),
+                          AppColors.primaryColor.withValues(alpha: 0.2),
                         ],
                       ),
                     ),
@@ -268,7 +268,8 @@ class ChatListScreen extends StatelessWidget {
                           height: 1.7,
                           fontFamily: 'SYNE',
                           fontWeight: FontWeight.w400,
-                          color: AppColors.textSecondary.withOpacity(0.95),
+                          color:
+                              AppColors.textSecondary.withValues(alpha: 0.95),
                           letterSpacing: 0.15,
                         ),
                         children: const [
@@ -324,7 +325,7 @@ class ChatListScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                    color: AppColors.primaryColor.withOpacity(0.2),
+                    color: AppColors.primaryColor.withValues(alpha: 0.2),
                     blurRadius: 12,
                     offset: const Offset(0, 4))
               ],
@@ -339,7 +340,7 @@ class ChatListScreen extends StatelessWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(24),
                 onTap: () => Navigator.pushNamed(context, '/chat-detail'),
-                splashColor: Colors.white.withOpacity(0.2),
+                splashColor: Colors.white.withValues(alpha: 0.2),
                 highlightColor: Colors.transparent,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -438,21 +439,24 @@ class _FeatureChipState extends State<FeatureChip> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.primaryColor.withOpacity(_isHovered ? 0.12 : 0.06),
-              AppColors.primaryColor.withOpacity(_isHovered ? 0.18 : 0.10),
+              AppColors.primaryColor
+                  .withValues(alpha: _isHovered ? 0.12 : 0.06),
+              AppColors.primaryColor
+                  .withValues(alpha: _isHovered ? 0.18 : 0.10),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: AppColors.primaryColor.withOpacity(_isHovered ? 0.25 : 0.12),
+            color: AppColors.primaryColor
+                .withValues(alpha: _isHovered ? 0.25 : 0.12),
             width: _isHovered ? 1.2 : 0.8,
           ),
           boxShadow: _isHovered
               ? [
                   BoxShadow(
-                    color: AppColors.primaryColor.withOpacity(0.1),
+                    color: AppColors.primaryColor.withValues(alpha: 0.1),
                     blurRadius: 12,
                     spreadRadius: 2,
                     offset: const Offset(0, 3),
@@ -460,7 +464,7 @@ class _FeatureChipState extends State<FeatureChip> {
                 ]
               : [
                   BoxShadow(
-                    color: AppColors.primaryColor.withOpacity(0.05),
+                    color: AppColors.primaryColor.withValues(alpha: 0.05),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   )
@@ -471,16 +475,16 @@ class _FeatureChipState extends State<FeatureChip> {
           children: [
             Icon(_getIcon(),
                 size: 18,
-                color:
-                    AppColors.primaryColor.withOpacity(_isHovered ? 0.9 : 0.7)),
+                color: AppColors.primaryColor
+                    .withValues(alpha: _isHovered ? 0.9 : 0.7)),
             const SizedBox(width: 10),
             Text(
               widget.text,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color:
-                    AppColors.primaryColor.withOpacity(_isHovered ? 0.95 : 0.8),
+                color: AppColors.primaryColor
+                    .withValues(alpha: _isHovered ? 0.95 : 0.8),
                 letterSpacing: 0.3,
               ),
             ),
@@ -519,8 +523,8 @@ class _FeatureCardState extends State<_FeatureCard> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color:
-                  AppColors.primaryColor.withOpacity(_isHovered ? 0.1 : 0.05),
+              color: AppColors.primaryColor
+                  .withValues(alpha: _isHovered ? 0.1 : 0.05),
               blurRadius: _isHovered ? 16 : 8,
               offset: const Offset(0, 4),
             ),
@@ -565,7 +569,7 @@ class _FeatureCardState extends State<_FeatureCard> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.textSecondary.withOpacity(0.9),
+                    color: AppColors.textSecondary.withValues(alpha: 0.9),
                     fontFamily: 'SYNE',
                     height: 1.4,
                   ),
