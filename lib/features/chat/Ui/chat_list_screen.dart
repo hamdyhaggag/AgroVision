@@ -2,29 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../core/constants/app_assets.dart';
-import '../../../shared/widgets/custom_appbar.dart';
 
 class ChatListScreen extends StatelessWidget {
   const ChatListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(isHome: true, title: 'Chats'),
-      body: DefaultTabController(
-        length: 2,
-        child: Column(
-          children: [
-            _buildEnhancedTabBar(),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildChatList(context),
-                  _buildChatbotWelcome(context),
-                ],
+    return SafeArea(
+      child: Scaffold(
+        body: DefaultTabController(
+          length: 2,
+          child: Column(
+            children: [
+              _buildEnhancedTabBar(),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    _buildChatList(context),
+                    _buildChatbotWelcome(context),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
