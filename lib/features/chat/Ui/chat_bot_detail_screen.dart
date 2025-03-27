@@ -5,14 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../shared/widgets/chat_bubble.dart';
 import '../Logic/chat_cubit.dart';
 
-class ChatDetailScreen extends StatefulWidget {
-  const ChatDetailScreen({super.key});
+class ChatBotDetailScreen extends StatefulWidget {
+  const ChatBotDetailScreen({super.key});
 
   @override
-  State<ChatDetailScreen> createState() => _ChatDetailScreenState();
+  State<ChatBotDetailScreen> createState() => _ChatBotDetailScreenState();
 }
 
-class _ChatDetailScreenState extends State<ChatDetailScreen> {
+class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 

@@ -13,7 +13,8 @@ import '../../features/authentication/UI/forgot password/forgot_password_email.d
 import '../../features/authentication/UI/forgot password/forgot_password_phone.dart';
 import '../../features/authentication/UI/otp/otp_email_screen.dart';
 import '../../features/authentication/UI/otp/otp_phone_screen.dart';
-import '../../features/chat/Ui/consultation_chat_screen.dart';
+import '../../features/chat/Ui/chat_bot_detail_screen.dart';
+import '../../features/chat/Ui/chat_screen.dart';
 import '../../features/disease_detection/Ui/detection_records.dart';
 import '../../features/home/Ui/crop_health.dart';
 import '../../features/home/Ui/drawer/crops_managment.dart';
@@ -29,7 +30,6 @@ import '../../features/monitoring/UI/sensor_data_screen.dart';
 import '../../features/onboarding/Ui/onboarding_screen.dart';
 import '../../features/splash/Ui/splash_screen.dart';
 import '../../features/chat/ui/chat_list_screen.dart';
-import '../../features/chat/ui/chat_detail_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -49,7 +49,7 @@ class AppRouter {
         );
       case AppRoutes.screenLayout:
         return MaterialPageRoute(
-          builder: (_) => ScreenLayout(),
+          builder: (_) => const ScreenLayout(),
         );
       case AppRoutes.forgotPasswordPhone:
         return MaterialPageRoute(
@@ -83,57 +83,30 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => NotificationsScreen(),
         );
-      // case AppRoutes.seeAllFields:
-      //   final fields = settings.arguments as List<Map<String, String>>;
-      //   return MaterialPageRoute(
-      //     builder: (_) => FieldsScreen(fields: fields),
-      //   );
-      // case AppRoutes.seeAllNotes:
-      //   final args = settings.arguments as Map<String, dynamic>;
-      //   return MaterialPageRoute(
-      //     builder: (_) => NotesScreen(
-      //       notes: args['notes'] as List<Map<String, String>>,
-      //       onAddNote: args['onAddNote'] as VoidCallback,
-      //     ),
-      //   );
+
       case AppRoutes.sensorDataScreen:
         return MaterialPageRoute(
           builder: (_) => const SensorDataScreen(
             field: {},
           ),
         );
-      // case AppRoutes.addNewNote:
-      //   return MaterialPageRoute(
-      //     builder: (_) => AddNewNoteScreen(
-      //       onSave: (String title, String content) {
-      //         debugPrint('Title: $title');
-      //         debugPrint('Content: $content');
-      //       },
-      //     ),
-      //   );
-      // case AppRoutes.editNoteScreen:
-      //   return MaterialPageRoute(
-      //     builder: (_) => const EditNoteScreen(
-      //       noteId: '',
-      //       currentContent: '',
-      //     ),
-      //   );
+
       case AppRoutes.chatList:
         return MaterialPageRoute(
-          builder: (_) => ChatListScreen(),
+          builder: (_) => const ChatListScreen(),
         );
       case AppRoutes.detectionRecords:
         return MaterialPageRoute(
           builder: (_) => const DetectionRecords(),
         );
-      case AppRoutes.chatDetail:
+      case AppRoutes.chatBotDetail:
         return MaterialPageRoute(
-          builder: (_) => const ChatDetailScreen(),
+          builder: (_) => const ChatBotDetailScreen(),
         );
 
-      case AppRoutes.consultationChat:
+      case AppRoutes.farmerChatScreen:
         return MaterialPageRoute(
-          builder: (_) => const ChatBotScreen(),
+          builder: (_) => const FarmerChatScreen(),
         );
 
       case '/farmAnalytics-chat':
@@ -179,7 +152,7 @@ class AppRouter {
 
       default:
         return MaterialPageRoute(
-          builder: (_) => const OnboardingScreen(),
+          builder: (_) => const ScreenLayout(),
         );
     }
   }

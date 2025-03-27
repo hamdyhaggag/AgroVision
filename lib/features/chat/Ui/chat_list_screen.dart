@@ -130,7 +130,7 @@ class _ChatListScreenState extends State<ChatListScreen>
               borderRadius: BorderRadius.circular(16),
               onTap: () {
                 context.read<ChatCubit>().setCurrentSession(session.id);
-                Navigator.pushNamed(context, '/chat-detail');
+                Navigator.pushNamed(context, '/chatBotDetail');
               },
               child: Container(
                 padding: const EdgeInsets.all(12),
@@ -688,7 +688,7 @@ Widget _buildChatList(BuildContext context) {
             overflow: TextOverflow.ellipsis),
         trailing: const Text('2h', style: TextStyle(color: Colors.grey)),
         contentPadding: const EdgeInsets.symmetric(vertical: 8),
-        onTap: () => Navigator.pushNamed(context, '/chat-detail'),
+        onTap: () => Navigator.pushNamed(context, '/farmerChatScreen'),
       );
     },
   );

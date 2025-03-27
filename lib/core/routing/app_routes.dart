@@ -13,13 +13,10 @@ class AppRoutes {
   static const String createNewPassword = "/CreateNewPassword";
   static const String congratulationsScreen = "/congratulationsScreen";
   static const String notificationsScreen = "/notificationsScreen";
-  // static const String seeAllNotes = "/seeAllNotes";
-  // static const String seeAllFields = "/seeAllFields";
+
   static const String sensorDataScreen = "/sensorDataScreen";
-  // static const String addNewNote = "/addNewNote";
-  // static const String editNoteScreen = "/editNoteScreen";
+
   static const String chatList = '/chat-list';
-  static const String chatDetail = '/chat-detail';
   static const String communityChat = '/community-chat';
   static const String consultationChat = '/consultation-chat';
   static const String farmAnalytics = '/farmAnalytics';
@@ -34,4 +31,6 @@ class AppRoutes {
   static const String allTasks = '/allTasks';
   static const String sensorData = '/sensor-data';
   static const String detectionRecords = '/detectionRecords';
+  static const String chatBotDetail = '/chatBotDetail';
+  static const String farmerChatScreen = '/farmerChatScreen';
 }
