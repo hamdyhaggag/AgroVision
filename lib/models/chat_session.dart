@@ -5,12 +5,13 @@ class ChatSession {
   final List<Message> messages;
   final DateTime createdAt;
   final String? title;
-
+  final int unreadCount;
   ChatSession({
     required this.id,
     required this.messages,
     required this.createdAt,
     this.title,
+    this.unreadCount = 0,
   });
 
   ChatSession copyWith({
@@ -18,12 +19,14 @@ class ChatSession {
     List<Message>? messages,
     DateTime? createdAt,
     String? title,
+    int? unreadCount,
   }) {
     return ChatSession(
       id: id ?? this.id,
       messages: messages ?? this.messages,
       createdAt: createdAt ?? this.createdAt,
       title: title ?? this.title,
+      unreadCount: unreadCount ?? this.unreadCount,
     );
   }
 

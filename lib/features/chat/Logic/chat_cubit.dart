@@ -42,6 +42,18 @@ class ChatCubit extends Cubit<ChatState> {
     ));
   }
 
+  void deleteSession(String sessionId) {
+    final updatedSessions =
+        state.sessions.where((s) => s.id != sessionId).toList();
+    final newCurrentSessionId =
+        updatedSessions.isNotEmpty ? updatedSessions.last.id : null;
+
+    emit(ChatSuccess(
+      sessions: updatedSessions,
+      currentSessionId: newCurrentSessionId,
+    ));
+  }
+
   void setCurrentSession(String sessionId) {
     emit(ChatSuccess(
       sessions: state.sessions,

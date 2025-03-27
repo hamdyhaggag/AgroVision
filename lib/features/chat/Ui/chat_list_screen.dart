@@ -11,6 +11,33 @@ import '../Logic/chat_cubit.dart';
 class ChatListScreen extends StatelessWidget {
   const ChatListScreen({super.key});
 
+  void _showSessionOptions(BuildContext context, ChatSession session) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.delete),
+            title: const Text('Delete Session'),
+            onTap: () {
+              context.read<ChatCubit>().deleteSession(session.id);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text('Rename Session'),
+            onTap: () {
+              ///Todo Implement rename functionality
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,25 +72,155 @@ class ChatListScreen extends StatelessWidget {
   }
 
   Widget _buildSessionList(BuildContext context, List<ChatSession> sessions) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      physics: const BouncingScrollPhysics(),
       itemCount: sessions.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final session = sessions[index];
         final lastMessage = session.messages.isNotEmpty
             ? session.messages.last.text
-            : 'No messages yet';
-        return ListTile(
-          leading: CircleAvatar(child: Text('${index + 1}')),
-          title: Text(session.title ?? 'Session ${index + 1}'),
-          subtitle: Text(lastMessage),
-          trailing: Text(DateFormat('MMM dd').format(session.createdAt)),
-          onTap: () {
-            context.read<ChatCubit>().setCurrentSession(session.id);
-            Navigator.pushNamed(context, '/chat-detail');
-          },
+            : 'Start the conversation';
+        final hasUnread = session.unreadCount > 0;
+
+        return Dismissible(
+          key: Key(session.id),
+          background: Container(color: AppColors.errorColor),
+          secondaryBackground: Container(color: AppColors.primaryColor),
+          confirmDismiss: (direction) async => false,
+          child: Material(
+            borderRadius: BorderRadius.circular(16),
+            color: AppColors.surfaceColor,
+            elevation: 1,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                context.read<ChatCubit>().setCurrentSession(session.id);
+                Navigator.pushNamed(context, '/chat-detail');
+              },
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: hasUnread
+                      ? Border(
+                          left: BorderSide(
+                              color: AppColors.primaryColor, width: 4))
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    _buildLeadingAvatar(context, index, hasUnread),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  session.title ?? 'Session ${index + 1}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Text(
+                                DateFormat('HH:mm').format(session.createdAt),
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            lastMessage,
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 14,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (hasUnread)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryColor,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '${session.unreadCount} new',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon:
+                          Icon(Icons.more_vert, color: AppColors.textSecondary),
+                      onPressed: () => _showSessionOptions(context, session),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildLeadingAvatar(BuildContext context, int index, bool hasUnread) {
+    return Stack(
+      alignment: Alignment.bottomRight,
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.primaryColor, AppColors.accentColor],
+            ),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              '${index + 1}',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+        if (hasUnread)
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: AppColors.errorColor,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.surfaceColor, width: 2),
+            ),
+          ),
+      ],
     );
   }
 
@@ -73,7 +230,7 @@ class ChatListScreen extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: Colors.grey.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           )
@@ -82,7 +239,7 @@ class ChatListScreen extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: Colors.grey[100],
+          color: AppColors.surfaceColor,
           borderRadius: BorderRadius.circular(16),
         ),
         child: const SizedBox(
@@ -129,17 +286,17 @@ Widget _buildHeaderSection(BuildContext context) {
     padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 6),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(24),
-      color: AppColors.primaryColor.withValues(alpha: 0.03),
+      color: AppColors.primaryColor.withOpacity(0.03),
       boxShadow: [
         BoxShadow(
-          color: AppColors.primaryColor.withValues(alpha: 0.05),
+          color: AppColors.primaryColor.withOpacity(0.05),
           blurRadius: 32,
           spreadRadius: 2,
           offset: const Offset(0, 12),
         ),
       ],
       border: Border.all(
-        color: AppColors.primaryColor.withValues(alpha: 0.1),
+        color: AppColors.primaryColor.withOpacity(0.1),
         width: 1,
       ),
     ),
@@ -150,12 +307,12 @@ Widget _buildHeaderSection(BuildContext context) {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: AppColors.primaryColor.withValues(alpha: 0.1),
+              color: AppColors.primaryColor.withOpacity(0.1),
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryColor.withValues(alpha: 0.1),
+                color: AppColors.primaryColor.withOpacity(0.1),
                 blurRadius: 24,
                 spreadRadius: 2,
               ),
@@ -195,8 +352,8 @@ Widget _buildHeaderSection(BuildContext context) {
                   borderRadius: BorderRadius.circular(2),
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.accentColor.withValues(alpha: 0.4),
-                      AppColors.primaryColor.withValues(alpha: 0.2),
+                      AppColors.accentColor.withOpacity(0.4),
+                      AppColors.primaryColor.withOpacity(0.2),
                     ],
                   ),
                 ),
@@ -207,10 +364,7 @@ Widget _buildHeaderSection(BuildContext context) {
               children: [
                 ShaderMask(
                   shaderCallback: (bounds) => const LinearGradient(
-                    colors: [
-                      AppColors.primaryColor,
-                      AppColors.accentColor,
-                    ],
+                    colors: [AppColors.primaryColor, AppColors.accentColor],
                     stops: [0.4, 0.6],
                   ).createShader(bounds),
                   child: const Text(
@@ -234,7 +388,7 @@ Widget _buildHeaderSection(BuildContext context) {
                       fontSize: 20.0,
                       fontWeight: FontWeight.w500,
                       fontFamily: 'SYNE',
-                      color: AppColors.primaryColor.withValues(alpha: 0.9),
+                      color: AppColors.primaryColor.withOpacity(0.9),
                       letterSpacing: 0.3,
                       height: 1.2,
                     ),
@@ -248,9 +402,9 @@ Widget _buildHeaderSection(BuildContext context) {
                     borderRadius: BorderRadius.circular(2),
                     gradient: LinearGradient(
                       colors: [
-                        AppColors.primaryColor.withValues(alpha: 0.2),
-                        AppColors.accentColor.withValues(alpha: 0.4),
-                        AppColors.primaryColor.withValues(alpha: 0.2),
+                        AppColors.primaryColor.withOpacity(0.2),
+                        AppColors.accentColor.withOpacity(0.4),
+                        AppColors.primaryColor.withOpacity(0.2),
                       ],
                     ),
                   ),
@@ -265,14 +419,13 @@ Widget _buildHeaderSection(BuildContext context) {
                         height: 1.7,
                         fontFamily: 'SYNE',
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondary.withValues(alpha: 0.95),
+                        color: AppColors.textSecondary.withOpacity(0.95),
                         letterSpacing: 0.15,
                       ),
                       children: const [
                         TextSpan(
-                          text:
-                              'Welcome to Khedr \nyour AI co-pilot for cultivating success\n',
-                        ),
+                            text:
+                                'Welcome to Khedr \nyour AI co-pilot for cultivating success\n'),
                       ],
                     ),
                   ),
@@ -282,9 +435,7 @@ Widget _buildHeaderSection(BuildContext context) {
           ],
         ),
         _buildFeatureChips(),
-        const SizedBox(
-          height: 20,
-        ),
+        const SizedBox(height: 20),
         _buildStartButton(context),
       ],
     ),
@@ -307,7 +458,7 @@ Widget _buildStartButton(BuildContext context) {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                  color: AppColors.primaryColor.withValues(alpha: 0.2),
+                  color: AppColors.primaryColor.withOpacity(0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 4))
             ],
@@ -322,12 +473,10 @@ Widget _buildStartButton(BuildContext context) {
             child: InkWell(
               borderRadius: BorderRadius.circular(24),
               onTap: () => Navigator.pushNamed(context, '/chat-detail'),
-              splashColor: Colors.white.withValues(alpha: 0.2),
+              splashColor: Colors.white.withOpacity(0.2),
               highlightColor: Colors.transparent,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 18,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 18),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -457,24 +606,21 @@ class _FeatureChipState extends State<FeatureChip> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.primaryColor
-                  .withValues(alpha: _isHovered ? 0.12 : 0.06),
-              AppColors.primaryColor
-                  .withValues(alpha: _isHovered ? 0.18 : 0.10),
+              AppColors.primaryColor.withOpacity(_isHovered ? 0.12 : 0.06),
+              AppColors.primaryColor.withOpacity(_isHovered ? 0.18 : 0.10),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: AppColors.primaryColor
-                .withValues(alpha: _isHovered ? 0.25 : 0.12),
+            color: AppColors.primaryColor.withOpacity(_isHovered ? 0.25 : 0.12),
             width: _isHovered ? 1.2 : 0.8,
           ),
           boxShadow: _isHovered
               ? [
                   BoxShadow(
-                    color: AppColors.primaryColor.withValues(alpha: 0.1),
+                    color: AppColors.primaryColor.withOpacity(0.1),
                     blurRadius: 12,
                     spreadRadius: 2,
                     offset: const Offset(0, 3),
@@ -482,7 +628,7 @@ class _FeatureChipState extends State<FeatureChip> {
                 ]
               : [
                   BoxShadow(
-                    color: AppColors.primaryColor.withValues(alpha: 0.05),
+                    color: AppColors.primaryColor.withOpacity(0.05),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   )
@@ -493,16 +639,16 @@ class _FeatureChipState extends State<FeatureChip> {
           children: [
             Icon(_getIcon(),
                 size: 18,
-                color: AppColors.primaryColor
-                    .withValues(alpha: _isHovered ? 0.9 : 0.7)),
+                color:
+                    AppColors.primaryColor.withOpacity(_isHovered ? 0.9 : 0.7)),
             const SizedBox(width: 10),
             Text(
               widget.text,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primaryColor
-                    .withValues(alpha: _isHovered ? 0.95 : 0.8),
+                color:
+                    AppColors.primaryColor.withOpacity(_isHovered ? 0.95 : 0.8),
                 letterSpacing: 0.3,
               ),
             ),
@@ -511,115 +657,4 @@ class _FeatureChipState extends State<FeatureChip> {
       ),
     );
   }
-}
-
-class _FeatureCard extends StatefulWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  const _FeatureCard(
-      {required this.icon, required this.title, required this.subtitle});
-
-  @override
-  State<_FeatureCard> createState() => _FeatureCardState();
-}
-
-class _FeatureCardState extends State<_FeatureCard> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (e) => setState(() => _isHovered = true),
-      onExit: (e) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutQuad,
-        transform: Matrix4.identity()..translate(0.0, _isHovered ? -4 : 0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryColor
-                  .withValues(alpha: _isHovered ? 0.1 : 0.05),
-              blurRadius: _isHovered ? 16 : 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Card(
-          elevation: 0,
-          color: Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  padding: const EdgeInsets.all(14),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [AppColors.primaryColor, AppColors.accentColor],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Icon(widget.icon, size: 28, color: Colors.white),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  widget.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'SYNE',
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.subtitle,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary.withValues(alpha: 0.9),
-                    fontFamily: 'SYNE',
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BackgroundDotsPainter extends CustomPainter {
-  final Color color;
-
-  _BackgroundDotsPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    const spacing = 40.0;
-    final dotSize = 4.0;
-    for (double x = 0; x < size.width; x += spacing) {
-      for (double y = 0; y < size.height; y += spacing) {
-        canvas.drawCircle(Offset(x, y), dotSize, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
