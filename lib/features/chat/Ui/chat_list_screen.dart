@@ -129,8 +129,8 @@ class ChatListScreen extends StatelessWidget {
 
   Widget _buildHeaderSection(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 25),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 6),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         color: AppColors.primaryColor.withValues(alpha: 0.03),
