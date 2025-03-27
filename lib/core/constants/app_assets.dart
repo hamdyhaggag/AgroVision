@@ -1,7 +1,8 @@
 class AppIcons {
   AppIcons._();
 
-  static const String iconsPath = 'assets/icons';
+  static const chatBubbleOutline = 'assets/icon/bubble-chat.svg';
+  static const chatbot = 'assets/icon/chat-bot.svg';
 }
 
 class AppImages {

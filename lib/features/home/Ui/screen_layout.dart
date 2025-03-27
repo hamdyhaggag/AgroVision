@@ -18,23 +18,23 @@ class ScreenLayout extends StatelessWidget {
   final _navItems = [
     const BottomNavItem(
       type: NavItem.home,
-      iconPath: 'assets/icon/home_icon.svg',
+      iconPath: 'assets/icon/home.svg',
       label: 'Home',
     ),
     const BottomNavItem(
       type: NavItem.detect,
-      iconPath: 'assets/icon/camera.svg',
+      iconPath: 'assets/icon/ai-scan.svg',
       label: 'Detect',
       hasAction: true,
     ),
     const BottomNavItem(
       type: NavItem.sensor,
-      iconPath: 'assets/icon/history_icon.svg',
-      label: 'History',
+      iconPath: 'assets/icon/analytics_icon.svg',
+      label: 'Analytics',
     ),
     const BottomNavItem(
       type: NavItem.chat,
-      iconPath: 'assets/icon/chat_icon.svg',
+      iconPath: 'assets/icon/bubble-chat.svg',
       label: 'Chat',
     ),
   ];
@@ -67,7 +67,7 @@ class ScreenLayout extends StatelessWidget {
       const SensorDataScreen(
         field: {},
       ),
-      ChatListScreen(),
+      const ChatListScreen(),
     ];
     return IndexedStack(index: index, children: screens);
   }
@@ -158,8 +158,8 @@ class _CustomBottomNavBar extends StatelessWidget {
                 isActive ? AppColors.primaryColor : AppColors.greyColor,
                 BlendMode.srcIn,
               ),
-              width: 30,
-              height: 30,
+              width: 28,
+              height: 28,
             ),
             if (isActive)
               Container(
