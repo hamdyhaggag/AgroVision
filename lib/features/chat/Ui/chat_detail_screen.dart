@@ -326,16 +326,29 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   void _showMessageOptions(Message message) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Column(
-        children: [
-          ListTile(
-            title: const Text('Delete'),
-            onTap: () {
-              context.read<ChatCubit>().deleteMessage(message);
-              Navigator.pop(context);
-            },
-          ),
-        ],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: Icon(Icons.delete_outline, color: Colors.redAccent),
+              title: Text(
+                'Delete',
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onTap: () {
+                context.read<ChatCubit>().deleteMessage(message);
+                Navigator.pop(context);
+              },
+            ),
+            // Add additional options here if needed.
+          ],
+        ),
       ),
     );
   }
