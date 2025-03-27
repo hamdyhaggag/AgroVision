@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:agro_vision/features/chat/api/chatbot_service.dart';
 import 'package:agro_vision/models/chat_message.dart';
+import 'package:flutter/foundation.dart';
 
 class ChatRepository {
   final ChatbotService chatbotService;
@@ -21,9 +22,24 @@ class ChatRepository {
     }
   }
 
-  Future<ChatResponse> sendImage(File image) async {
-    final response = await chatbotService.sendImageMessage(image);
-    return response;
+  Future<ChatResponse> sendImage(
+    File image,
+    String question,
+    String mode,
+    String speak,
+  ) async {
+    try {
+      final response = await chatbotService.sendImageMessage(
+        image,
+        question, // 2nd
+        mode, // 3rd
+        speak, // 4th
+      );
+      return response;
+    } on DioException catch (e) {
+      // Add detailed error logging if desired
+      throw Exception('Image upload failed: ${e.message}');
+    }
   }
 
   Future<ChatResponse> sendVoice(File voiceFile) async {

@@ -15,7 +15,12 @@ abstract class ChatbotService {
 
   @POST('image_convo')
   @MultiPart()
-  Future<ChatResponse> sendImageMessage(@Part(name: 'file') File image);
+  Future<ChatResponse> sendImageMessage(
+    @Part(name: 'image_file') File image,
+    @Part(name: 'question') String question,
+    @Part(name: 'mode') String mode,
+    @Part(name: 'speak') String speak,
+  );
 
   @POST('voice_convo')
   @MultiPart()

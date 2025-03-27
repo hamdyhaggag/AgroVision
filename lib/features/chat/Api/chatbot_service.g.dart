@@ -58,17 +58,34 @@ class _ChatbotService implements ChatbotService {
   }
 
   @override
-  Future<ChatResponse> sendImageMessage(File image) async {
+  Future<ChatResponse> sendImageMessage(
+    File image,
+    String question,
+    String mode,
+    String speak,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = FormData();
     _data.files.add(MapEntry(
-      'file',
+      'image_file',
       MultipartFile.fromFileSync(
         image.path,
         filename: image.path.split(Platform.pathSeparator).last,
       ),
+    ));
+    _data.fields.add(MapEntry(
+      'question',
+      question,
+    ));
+    _data.fields.add(MapEntry(
+      'mode',
+      mode,
+    ));
+    _data.fields.add(MapEntry(
+      'speak',
+      speak,
     ));
     final _options = _setStreamType<ChatResponse>(Options(
       method: 'POST',

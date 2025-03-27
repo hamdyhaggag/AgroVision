@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/models/chat_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../shared/widgets/chat_bubble.dart';
 import '../Logic/chat_cubit.dart';
 
@@ -422,7 +425,50 @@ class _AttachmentButton extends StatelessWidget {
     }
   }
 
-  void _pickImage(BuildContext context) async {}
+  void _pickImage(BuildContext context) async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1024,
+    );
+
+    if (pickedFile != null) {
+      final question = await showDialog<String>(
+        context: context,
+        builder: (context) {
+          final textController = TextEditingController();
+          return AlertDialog(
+            title: const Text('Image Question'),
+            content: TextField(
+              controller: textController,
+              decoration: const InputDecoration(
+                hintText: 'Ask about this image...',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, textController.text),
+                child: const Text('Send'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (question?.isNotEmpty ?? false) {
+        context.read<ChatCubit>().sendImageMessage(
+              File(pickedFile.path),
+              question!, // the user's question
+              'text', // mode
+              'false', // speak
+            );
+      }
+    }
+  }
 
   void _recordVoice(BuildContext context) {}
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
 import '../../../core/helpers/cache_helper.dart';
@@ -126,6 +128,58 @@ class ChatCubit extends Cubit<ChatState> {
         ...updatedSession.messages,
         Message(text: response.answer, isSentByMe: false)
       ]);
+      emit(ChatSuccess(
+        sessions: _updateSessions(finalSession),
+        currentSessionId: currentSession.id,
+      ));
+    } catch (e) {
+      emit(ChatError(
+        sessions: updatedSessions,
+        currentSessionId: currentSession.id,
+        error: e.toString(),
+      ));
+    }
+  }
+
+  Future<void> sendImageMessage(
+    File image,
+    String question,
+    String mode,
+    String speak,
+  ) async {
+    final currentSession = state.sessions.firstWhere(
+      (s) => s.id == state.currentSessionId,
+      orElse: () => state.sessions.last,
+    );
+
+    var updatedSession = currentSession.copyWith(
+      messages: [
+        ...currentSession.messages,
+        Message(text: question, isSentByMe: true),
+      ],
+    );
+
+    final updatedSessions = _updateSessions(updatedSession);
+
+    emit(ChatLoading(
+      sessions: updatedSessions,
+      currentSessionId: currentSession.id,
+    ));
+
+    try {
+      // --- FIX THIS CALL ---
+      // Previously was: repository.sendImage(image, 'text', question, 'false')
+      //
+      // If you want to pass the user’s question as the question, and
+      // "text" as mode, and "false" as speak, do this:
+      final response =
+          await repository.sendImage(image, question, 'text', 'false');
+
+      final finalSession = updatedSession.copyWith(messages: [
+        ...updatedSession.messages,
+        Message(text: response.answer, isSentByMe: false)
+      ]);
+
       emit(ChatSuccess(
         sessions: _updateSessions(finalSession),
         currentSessionId: currentSession.id,
