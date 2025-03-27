@@ -1,8 +1,8 @@
-// chat_cubit.dart
-import 'package:meta/meta.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meta/meta.dart';
 import '../../../core/helpers/cache_helper.dart';
 import '../../../models/chat_message.dart';
+import '../../../models/chat_session.dart';
 import '../chat_repository.dart';
 
 part 'chat_state.dart';
@@ -11,51 +11,99 @@ class ChatCubit extends Cubit<ChatState> {
   final ChatRepository repository;
 
   ChatCubit(this.repository) : super(const ChatInitial()) {
-    _loadCachedMessages();
+    _loadCachedSessions();
   }
 
-  void _loadCachedMessages() {
-    final cachedMessages = CacheHelper.getMessages();
-    if (cachedMessages.isNotEmpty) {
-      emit(ChatSuccess(messages: cachedMessages));
+  Future<void> _loadCachedSessions() async {
+    final cachedSessions = await CacheHelper.getSessions();
+    if (cachedSessions.isNotEmpty) {
+      emit(ChatSuccess(
+        sessions: cachedSessions,
+        currentSessionId: cachedSessions.last.id,
+      ));
     }
   }
 
   @override
   void emit(ChatState state) {
-    if (state is ChatSuccess) {
-      CacheHelper.saveMessages(state.messages);
-    }
+    if (state is ChatSuccess) CacheHelper.saveSessions(state.sessions);
     super.emit(state);
   }
 
-  Future<void> sendTextMessage(String text) async {
-    final newMessage = Message(
-      text: text,
-      isSentByMe: true,
+  void createNewSession() {
+    final newSession = ChatSession(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      messages: [],
+      createdAt: DateTime.now(),
     );
+    emit(ChatSuccess(
+      sessions: [...state.sessions, newSession],
+      currentSessionId: newSession.id,
+    ));
+  }
 
-    final loadingMessages = [...state.messages, newMessage];
-    emit(ChatLoading(messages: loadingMessages));
-
-    try {
-      final response = await repository.sendText(text);
-      final botMessage = Message(
-        text: response.answer,
-        isSentByMe: false,
-      );
-
-      emit(ChatSuccess(messages: [...loadingMessages, botMessage]));
-    } catch (e) {
-      emit(ChatError(messages: state.messages, error: e.toString()));
-    }
+  void setCurrentSession(String sessionId) {
+    emit(ChatSuccess(
+      sessions: state.sessions,
+      currentSessionId: sessionId,
+    ));
   }
 
   void deleteMessage(Message message) {
-    final updatedMessages = List<Message>.from(state.messages)
-      ..removeWhere(
-          (m) => m.timestamp == message.timestamp && m.text == message.text);
+    final updatedSessions = state.sessions.map((session) {
+      if (session.id == state.currentSessionId) {
+        return session.copyWith(
+          messages: session.messages.where((m) => m != message).toList(),
+        );
+      }
+      return session;
+    }).toList();
 
-    emit(ChatSuccess(messages: updatedMessages));
+    emit(ChatSuccess(
+      sessions: updatedSessions,
+      currentSessionId: state.currentSessionId,
+    ));
+  }
+
+  Future<void> sendTextMessage(String text) async {
+    final currentSession = state.sessions.firstWhere(
+      (s) => s.id == state.currentSessionId,
+      orElse: () => state.sessions.last,
+    );
+
+    final updatedSession = currentSession.copyWith(messages: [
+      ...currentSession.messages,
+      Message(text: text, isSentByMe: true)
+    ]);
+    final updatedSessions = _updateSessions(updatedSession);
+
+    emit(ChatLoading(
+      sessions: updatedSessions,
+      currentSessionId: currentSession.id,
+    ));
+
+    try {
+      final response = await repository.sendText(text);
+      final finalSession = updatedSession.copyWith(messages: [
+        ...updatedSession.messages,
+        Message(text: response.answer, isSentByMe: false)
+      ]);
+      emit(ChatSuccess(
+        sessions: _updateSessions(finalSession),
+        currentSessionId: currentSession.id,
+      ));
+    } catch (e) {
+      emit(ChatError(
+        sessions: updatedSessions,
+        currentSessionId: currentSession.id,
+        error: e.toString(),
+      ));
+    }
+  }
+
+  List<ChatSession> _updateSessions(ChatSession updatedSession) {
+    return state.sessions
+        .map((s) => s.id == updatedSession.id ? updatedSession : s)
+        .toList();
   }
 }

@@ -2,24 +2,42 @@ part of 'chat_cubit.dart';
 
 @immutable
 sealed class ChatState {
-  final List<Message> messages;
+  final List<ChatSession> sessions;
+  final String? currentSessionId;
   final String? error;
 
-  const ChatState({required this.messages, this.error});
+  const ChatState({
+    required this.sessions,
+    this.currentSessionId,
+    this.error,
+  });
+
+  List<Message> get messages =>
+      sessions.firstWhere((s) => s.id == currentSessionId).messages;
 }
 
 final class ChatInitial extends ChatState {
-  const ChatInitial() : super(messages: const []);
+  const ChatInitial() : super(sessions: const []);
 }
 
 final class ChatLoading extends ChatState {
-  const ChatLoading({required super.messages});
+  const ChatLoading({
+    required super.sessions,
+    required super.currentSessionId,
+  });
 }
 
 final class ChatSuccess extends ChatState {
-  const ChatSuccess({required super.messages}) : super(error: null);
+  const ChatSuccess({
+    required super.sessions,
+    required super.currentSessionId,
+  }) : super(error: null);
 }
 
 final class ChatError extends ChatState {
-  const ChatError({required super.messages, required super.error});
+  const ChatError({
+    required super.sessions,
+    required super.currentSessionId,
+    required super.error,
+  });
 }

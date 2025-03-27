@@ -1,9 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../core/constants/app_assets.dart';
-import '../../../models/chat_message.dart';
+import '../../../models/chat_session.dart';
 import '../../../shared/widgets/custom_appbar.dart';
 import '../Logic/chat_cubit.dart';
 
@@ -23,14 +24,11 @@ class ChatListScreen extends StatelessWidget {
               child: TabBarView(
                 children: [
                   _buildChatList(context),
-                  // Conditional rendering for Chatbot tab
                   BlocBuilder<ChatCubit, ChatState>(
                     builder: (context, state) {
-                      if (state.messages.isEmpty) {
-                        return _buildChatbotWelcome(context);
-                      } else {
-                        return _buildChatHistory(context, state.messages);
-                      }
+                      return state.sessions.isEmpty
+                          ? _buildChatbotWelcome(context)
+                          : _buildSessionList(context, state.sessions);
                     },
                   ),
                 ],
@@ -39,36 +37,31 @@ class ChatListScreen extends StatelessWidget {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.read<ChatCubit>().createNewSession(),
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
-  Widget _buildChatHistory(BuildContext context, List<Message> messages) {
+  Widget _buildSessionList(BuildContext context, List<ChatSession> sessions) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: messages.length,
+      itemCount: sessions.length,
       itemBuilder: (context, index) {
-        final message = messages[index];
+        final session = sessions[index];
+        final lastMessage = session.messages.isNotEmpty
+            ? session.messages.last.text
+            : 'No messages yet';
         return ListTile(
-          leading: CircleAvatar(
-            backgroundColor: message.isSentByMe
-                ? AppColors.primaryColor
-                : AppColors.accentColor,
-            child: Icon(
-              message.isSentByMe ? Icons.person : Icons.android,
-              color: Colors.white,
-            ),
-          ),
-          title: Text(
-            message.text,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontFamily: 'SYNE',
-            ),
-          ),
-          subtitle: Text(
-            message.timestamp.toString(),
-            style: const TextStyle(color: Colors.grey),
-          ),
+          leading: CircleAvatar(child: Text('${index + 1}')),
+          title: Text(session.title ?? 'Session ${index + 1}'),
+          subtitle: Text(lastMessage),
+          trailing: Text(DateFormat('MMM dd').format(session.createdAt)),
+          onTap: () {
+            context.read<ChatCubit>().setCurrentSession(session.id);
+            Navigator.pushNamed(context, '/chat-detail');
+          },
         );
       },
     );
@@ -83,7 +76,7 @@ class ChatListScreen extends StatelessWidget {
             color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
-          ),
+          )
         ],
       ),
       child: Container(
@@ -92,331 +85,311 @@ class ChatListScreen extends StatelessWidget {
           color: Colors.grey[100],
           borderRadius: BorderRadius.circular(16),
         ),
-        child: SizedBox(
+        child: const SizedBox(
           height: 50,
           child: TabBar(
             unselectedLabelColor: AppColors.greyColor,
             labelColor: AppColors.primaryColor,
             splashFactory: NoSplash.splashFactory,
-            overlayColor: WidgetStateProperty.resolveWith<Color?>(
-              (Set<WidgetState> states) => Colors.transparent,
-            ),
+            overlayColor: WidgetStatePropertyAll(Colors.transparent),
             dividerColor: Colors.transparent,
-            labelStyle: const TextStyle(
-              fontFamily: 'SYNE',
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-            unselectedLabelStyle: const TextStyle(
-              fontSize: 14,
-              fontFamily: 'SYNE',
-            ),
+            labelStyle: TextStyle(
+                fontFamily: 'SYNE', fontSize: 14, fontWeight: FontWeight.w500),
+            unselectedLabelStyle: TextStyle(fontFamily: 'SYNE', fontSize: 14),
             indicatorColor: AppColors.primaryColor,
-            tabs: const [
+            tabs: [
               Tab(
-                text: 'Chats',
-                icon: SvgIcon(
-                  AppIcons.chatBubbleOutline,
-                  size: 20,
-                ),
-              ),
-              Tab(
-                text: 'Chatbot',
-                icon: SvgIcon(
-                  AppIcons.chatbot,
-                  size: 20,
-                ),
-              ),
+                  text: 'Chats',
+                  icon: SvgIcon(AppIcons.chatBubbleOutline, size: 20)),
+              Tab(text: 'Chatbot', icon: SvgIcon(AppIcons.chatbot, size: 20)),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildChatList(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: 15,
-      separatorBuilder: (context, index) =>
-          Divider(height: 1, color: Colors.grey.shade200),
-      itemBuilder: (context, index) {
-        return ListTile(
-          leading: const CircleAvatar(
-              radius: 24,
-              backgroundImage: AssetImage('assets/images/user.png')),
-          title: Text('User ${index + 1}',
-              style: const TextStyle(
-                  fontWeight: FontWeight.w600, fontFamily: 'SYNE')),
-          subtitle: const Text('Last message preview...',
-              overflow: TextOverflow.ellipsis),
-          trailing: const Text('2h', style: TextStyle(color: Colors.grey)),
-          contentPadding: const EdgeInsets.symmetric(vertical: 8),
-          onTap: () => Navigator.pushNamed(context, '/chat-detail'),
-        );
-      },
-    );
-  }
+Widget _buildChatbotWelcome(BuildContext context) {
+  return SingleChildScrollView(
+    physics: const BouncingScrollPhysics(),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildHeaderSection(context),
+        const SizedBox(height: 32),
+      ],
+    ),
+  );
+}
 
-  Widget _buildChatbotWelcome(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildHeaderSection(context),
-          const SizedBox(height: 32),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeaderSection(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 25),
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 6),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: AppColors.primaryColor.withValues(alpha: 0.03),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryColor.withValues(alpha: 0.05),
-            blurRadius: 32,
-            spreadRadius: 2,
-            offset: const Offset(0, 12),
-          ),
-        ],
-        border: Border.all(
-          color: AppColors.primaryColor.withValues(alpha: 0.1),
-          width: 1,
+Widget _buildHeaderSection(BuildContext context) {
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 25),
+    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 6),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(24),
+      color: AppColors.primaryColor.withValues(alpha: 0.03),
+      boxShadow: [
+        BoxShadow(
+          color: AppColors.primaryColor.withValues(alpha: 0.05),
+          blurRadius: 32,
+          spreadRadius: 2,
+          offset: const Offset(0, 12),
         ),
+      ],
+      border: Border.all(
+        color: AppColors.primaryColor.withValues(alpha: 0.1),
+        width: 1,
       ),
-      child: Column(
-        children: [
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.primaryColor.withValues(alpha: 0.1),
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryColor.withValues(alpha: 0.1),
-                  blurRadius: 24,
-                  spreadRadius: 2,
-                ),
-              ],
+    ),
+    child: Column(
+      children: [
+        Container(
+          height: 200,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: AppColors.primaryColor.withValues(alpha: 0.1),
+              width: 2,
             ),
-            child: Stack(
-              alignment: Alignment.center,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryColor.withValues(alpha: 0.1),
+                blurRadius: 24,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 180,
+                height: 180,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: const DecorationImage(
+                    image: AssetImage('assets/images/khedr.jpg'),
+                    fit: BoxFit.cover,
+                  ),
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            Positioned(
+              top: -20,
+              child: Container(
+                width: 120,
+                height: 4,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(2),
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.accentColor.withValues(alpha: 0.4),
+                      AppColors.primaryColor.withValues(alpha: 0.2),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  width: 180,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/khedr.jpg'),
-                      fit: BoxFit.cover,
-                    ),
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 4,
+                ShaderMask(
+                  shaderCallback: (bounds) => const LinearGradient(
+                    colors: [
+                      AppColors.primaryColor,
+                      AppColors.accentColor,
+                    ],
+                    stops: [0.4, 0.6],
+                  ).createShader(bounds),
+                  child: const Text(
+                    'Khedr',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.w800,
+                      fontFamily: 'SYNE',
+                      letterSpacing: -0.5,
+                      height: 0.9,
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Stack(
-            alignment: Alignment.topCenter,
-            children: [
-              Positioned(
-                top: -20,
-                child: Container(
-                  width: 120,
-                  height: 4,
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    'Agricultural Intelligence',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'SYNE',
+                      color: AppColors.primaryColor.withValues(alpha: 0.9),
+                      letterSpacing: 0.3,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 72,
+                  height: 2,
+                  margin: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(2),
                     gradient: LinearGradient(
                       colors: [
+                        AppColors.primaryColor.withValues(alpha: 0.2),
                         AppColors.accentColor.withValues(alpha: 0.4),
                         AppColors.primaryColor.withValues(alpha: 0.2),
                       ],
                     ),
                   ),
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ShaderMask(
-                    shaderCallback: (bounds) => const LinearGradient(
-                      colors: [
-                        AppColors.primaryColor,
-                        AppColors.accentColor,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: 15.0,
+                        height: 1.7,
+                        fontFamily: 'SYNE',
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textSecondary.withValues(alpha: 0.95),
+                        letterSpacing: 0.15,
+                      ),
+                      children: const [
+                        TextSpan(
+                          text:
+                              'Welcome to Khedr \nyour AI co-pilot for cultivating success\n',
+                        ),
                       ],
-                      stops: [0.4, 0.6],
-                    ).createShader(bounds),
-                    child: const Text(
-                      'Khedr',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 30.0,
-                        fontWeight: FontWeight.w800,
-                        fontFamily: 'SYNE',
-                        letterSpacing: -0.5,
-                        height: 0.9,
-                      ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      'Agricultural Intelligence',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'SYNE',
-                        color: AppColors.primaryColor.withValues(alpha: 0.9),
-                        letterSpacing: 0.3,
-                        height: 1.2,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 72,
-                    height: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(2),
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.primaryColor.withValues(alpha: 0.2),
-                          AppColors.accentColor.withValues(alpha: 0.4),
-                          AppColors.primaryColor.withValues(alpha: 0.2),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        style: TextStyle(
-                          fontSize: 15.0,
-                          height: 1.7,
-                          fontFamily: 'SYNE',
-                          fontWeight: FontWeight.w400,
-                          color:
-                              AppColors.textSecondary.withValues(alpha: 0.95),
-                          letterSpacing: 0.15,
-                        ),
-                        children: const [
-                          TextSpan(
-                            text:
-                                'Welcome to Khedr \nyour AI co-pilot for cultivating success\n',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          _buildFeatureChips(),
-          const SizedBox(
-            height: 20,
-          ),
-          _buildStartButton(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeatureChips() {
-    return const Wrap(
-      spacing: 16,
-      runSpacing: 16,
-      alignment: WrapAlignment.center,
-      children: [
-        FeatureChip(text: 'Crop Analytics'),
-        FeatureChip(text: 'AI Predictions'),
-        FeatureChip(text: 'Sustainability'),
-        FeatureChip(text: '24/7 Support'),
-      ],
-    );
-  }
-
-  Widget _buildStartButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.95, end: 1.0),
-          duration: const Duration(milliseconds: 200),
-          builder: (context, value, child) =>
-              Transform.scale(scale: value, child: child),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                    color: AppColors.primaryColor.withValues(alpha: 0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4))
+                ),
               ],
-              gradient: const LinearGradient(
-                colors: [AppColors.primaryColor, AppColors.accentColor],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: () => Navigator.pushNamed(context, '/chat-detail'),
-                splashColor: Colors.white.withValues(alpha: 0.2),
-                highlightColor: Colors.transparent,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 18,
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.auto_awesome_outlined,
-                          size: 22, color: Colors.white),
-                      SizedBox(width: 12),
-                      Text(
-                        'Start Smart Session',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          fontFamily: 'SYNE',
-                          letterSpacing: 0.5,
-                        ),
+          ],
+        ),
+        _buildFeatureChips(),
+        const SizedBox(
+          height: 20,
+        ),
+        _buildStartButton(context),
+      ],
+    ),
+  );
+}
+
+Widget _buildStartButton(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 8),
+    child: MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.95, end: 1.0),
+        duration: const Duration(milliseconds: 200),
+        builder: (context, value, child) =>
+            Transform.scale(scale: value, child: child),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                  color: AppColors.primaryColor.withValues(alpha: 0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4))
+            ],
+            gradient: const LinearGradient(
+              colors: [AppColors.primaryColor, AppColors.accentColor],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(24),
+              onTap: () => Navigator.pushNamed(context, '/chat-detail'),
+              splashColor: Colors.white.withValues(alpha: 0.2),
+              highlightColor: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 18,
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.auto_awesome_outlined,
+                        size: 22, color: Colors.white),
+                    SizedBox(width: 12),
+                    Text(
+                      'Start Smart Session',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        fontFamily: 'SYNE',
+                        letterSpacing: 0.5,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+Widget _buildFeatureChips() {
+  return const Wrap(
+    spacing: 16,
+    runSpacing: 16,
+    alignment: WrapAlignment.center,
+    children: [
+      FeatureChip(text: 'Crop Analytics'),
+      FeatureChip(text: 'AI Predictions'),
+      FeatureChip(text: 'Sustainability'),
+      FeatureChip(text: '24/7 Support'),
+    ],
+  );
+}
+
+Widget _buildChatList(BuildContext context) {
+  return ListView.separated(
+    padding: const EdgeInsets.all(16),
+    itemCount: 15,
+    separatorBuilder: (context, index) =>
+        Divider(height: 1, color: Colors.grey.shade200),
+    itemBuilder: (context, index) {
+      return ListTile(
+        leading: const CircleAvatar(
+            radius: 24, backgroundImage: AssetImage('assets/images/user.png')),
+        title: Text('User ${index + 1}',
+            style: const TextStyle(
+                fontWeight: FontWeight.w600, fontFamily: 'SYNE')),
+        subtitle: const Text('Last message preview...',
+            overflow: TextOverflow.ellipsis),
+        trailing: const Text('2h', style: TextStyle(color: Colors.grey)),
+        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+        onTap: () => Navigator.pushNamed(context, '/chat-detail'),
+      );
+    },
+  );
 }
 
 class SvgIcon extends StatelessWidget {

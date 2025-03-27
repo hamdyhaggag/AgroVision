@@ -1,12 +1,14 @@
-// cache_helper.dart
 import 'dart:convert';
 import 'dart:developer';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:agro_vision/models/chat_message.dart';
 
+import '../../models/chat_session.dart';
+
 class CacheHelper {
   static SharedPreferences? sharedPreferences;
   static const String _chatMessagesKey = 'chat_messages';
+  static const _sessionsKey = 'chat_sessions';
 
   static init() async {
     sharedPreferences = await SharedPreferences.getInstance();
@@ -47,4 +49,19 @@ class CacheHelper {
 
   static Future<bool> removeData({required String key}) async =>
       await sharedPreferences!.remove(key);
+
+  static Future<List<ChatSession>> getSessions() async {
+    final prefs = await SharedPreferences.getInstance();
+    final sessionsJson = prefs.getStringList(_sessionsKey) ?? [];
+    return sessionsJson
+        .map((json) => ChatSession.fromJson(jsonDecode(json)))
+        .toList();
+  }
+
+  static Future<void> saveSessions(List<ChatSession> sessions) async {
+    final prefs = await SharedPreferences.getInstance();
+    final sessionsJson =
+        sessions.map((session) => jsonEncode(session.toJson())).toList();
+    prefs.setStringList(_sessionsKey, sessionsJson);
+  }
 }

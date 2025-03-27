@@ -1,33 +1,18 @@
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/models/chat_message.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/dependency_injection/di.dart';
 import '../../../shared/widgets/chat_bubble.dart';
 import '../Logic/chat_cubit.dart';
-import '../chat_repository.dart';
 
-class ChatDetailScreen extends StatelessWidget {
+class ChatDetailScreen extends StatefulWidget {
   const ChatDetailScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ChatCubit(getIt<ChatRepository>()),
-      child: const _ChatDetailView(),
-    );
-  }
+  State<ChatDetailScreen> createState() => _ChatDetailScreenState();
 }
 
-class _ChatDetailView extends StatefulWidget {
-  const _ChatDetailView();
-
-  @override
-  State<_ChatDetailView> createState() => __ChatDetailViewState();
-}
-
-class __ChatDetailViewState extends State<_ChatDetailView> {
+class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -38,121 +23,36 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.primaryColor.withValues(alpha: 0.2),
-                  width: 2,
-                ),
-              ),
-              child: const CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.transparent,
-                backgroundImage: AssetImage('assets/images/khedr.jpg'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Khedr AI',
-                  style: TextStyle(
+  void _showCapabilitiesDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Assistant Capabilities',
+                style: TextStyle(
                     fontSize: 16,
                     fontFamily: 'SYNE',
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary.withValues(alpha: 0.9),
-                  ),
-                ),
-                Text(
-                  'Agricultural Assistant',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'SYNE',
-                    color: AppColors.textSecondary.withValues(alpha: 0.8),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        centerTitle: false,
-        elevation: 4,
-        shadowColor: AppColors.primaryColor.withValues(alpha: 0.15),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.help_outline,
-                color: AppColors.primaryColor.withValues(alpha: 0.8)),
-            onPressed: () => _showCapabilitiesDialog(),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: BlocListener<ChatCubit, ChatState>(
-              listener: (context, state) {
-                if (state.messages.isNotEmpty) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _scrollController.animateTo(
-                      _scrollController.position.maxScrollExtent,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOut,
-                    );
-                  });
-                }
-              },
-              child: BlocBuilder<ChatCubit, ChatState>(
-                builder: (context, state) {
-                  if (state.messages.isEmpty && state is! ChatLoading) {
-                    return _buildEmptyState();
-                  }
-                  return ListView.separated(
-                    controller: _scrollController,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                    itemCount:
-                        state.messages.length + (state is ChatLoading ? 1 : 0),
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      if (index < state.messages.length) {
-                        final message = state.messages[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: ChatBubble(
-                            message: message,
-                            onLongPress: () => _showMessageOptions(message),
-                          ),
-                        );
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: ChatBubble(
-                          message: Message(
-                            text: '',
-                            isSentByMe: false,
-                            timestamp: DateTime.now(),
-                          ),
-                          isLoading: true,
-                          loadingColor: AppColors.primaryColor,
-                          onLongPress: () {},
-                        ),
-                      );
-                    },
-                  );
-                },
+                    fontWeight: FontWeight.bold),
               ),
-            ),
+              const SizedBox(height: 16),
+              ..._buildCapabilityItems(),
+              const SizedBox(height: 8),
+              const Text('More features coming soon!',
+                  style: TextStyle(
+                    fontFamily: 'SYNE',
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  )),
+            ],
           ),
-          _buildInputSection(context),
-        ],
+        ),
       ),
     );
   }
@@ -183,6 +83,130 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
               )),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ChatCubit, ChatState>(
+      builder: (context, state) {
+        final currentSession = state.sessions.firstWhere(
+          (s) => s.id == state.currentSessionId,
+          orElse: () => state.sessions.last,
+        );
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Row(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.primaryColor.withValues(alpha: 0.2),
+                      width: 2,
+                    ),
+                  ),
+                  child: const CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.transparent,
+                    backgroundImage: AssetImage('assets/images/khedr.jpg'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Khedr AI',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'SYNE',
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary.withValues(alpha: 0.9),
+                      ),
+                    ),
+                    Text(
+                      'Agricultural Assistant',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'SYNE',
+                        color: AppColors.textSecondary.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.help_outline,
+                    color: AppColors.primaryColor.withValues(alpha: 0.8)),
+                onPressed: _showCapabilitiesDialog,
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child: BlocListener<ChatCubit, ChatState>(
+                  listener: (context, state) {
+                    if (currentSession.messages.isNotEmpty) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _scrollController.animateTo(
+                          _scrollController.position.maxScrollExtent,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                        );
+                      });
+                    }
+                  },
+                  child: currentSession.messages.isEmpty
+                      ? _buildEmptyState()
+                      : ListView.separated(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 8),
+                          itemCount: currentSession.messages.length +
+                              (state is ChatLoading ? 1 : 0),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            if (index < currentSession.messages.length) {
+                              final message = currentSession.messages[index];
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                child: ChatBubble(
+                                  message: message,
+                                  onLongPress: () =>
+                                      _showMessageOptions(message),
+                                ),
+                              );
+                            }
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              child: ChatBubble(
+                                message: Message(
+                                  text: '',
+                                  isSentByMe: false,
+                                  timestamp: DateTime.now(),
+                                ),
+                                isLoading: true,
+                                loadingColor: AppColors.primaryColor,
+                                onLongPress: () {},
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ),
+              _buildInputSection(context),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -241,38 +265,10 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
     );
   }
 
-  void _showCapabilitiesDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Assistant Capabilities',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'SYNE',
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              ..._buildCapabilityItems(),
-              const SizedBox(height: 8),
-              const Text('More features coming soon!',
-                  style: TextStyle(
-                    fontFamily: 'SYNE',
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                  )),
-            ],
-          ),
-        ),
-      ),
-    );
+  void _handleSend(String text, BuildContext context) {
+    if (text.trim().isEmpty) return;
+    context.read<ChatCubit>().sendTextMessage(text);
+    _controller.clear();
   }
 
   List<Widget> _buildCapabilityItems() {
@@ -330,66 +326,18 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
   void _showMessageOptions(Message message) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                'Message Options',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'SYNE',
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-            Divider(height: 1, color: Colors.grey[300]),
-            ListTile(
-              leading: Icon(Icons.delete_outline, color: Colors.red[400]),
-              title: const Text(
-                'Delete Message',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'SYNE',
-                ),
-              ),
-              onTap: () {
-                context.read<ChatCubit>().deleteMessage(message);
-                Navigator.pop(context);
-              },
-            ),
-            if (!message.isSentByMe)
-              ListTile(
-                leading: const Icon(Icons.copy, color: AppColors.primaryColor),
-                title: const Text(
-                  'Copy to Clipboard',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'SYNE',
-                  ),
-                ),
-                onTap: () {
-                  Clipboard.setData(ClipboardData(text: message.text));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Message copied')),
-                  );
-                  Navigator.pop(context);
-                },
-              ),
-          ],
-        ),
+      builder: (context) => Column(
+        children: [
+          ListTile(
+            title: const Text('Delete'),
+            onTap: () {
+              context.read<ChatCubit>().deleteMessage(message);
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
     );
-  }
-
-  void _handleSend(String text, BuildContext context) {
-    if (text.trim().isEmpty) return;
-    context.read<ChatCubit>().sendTextMessage(text);
-    _controller.clear();
   }
 }
 
