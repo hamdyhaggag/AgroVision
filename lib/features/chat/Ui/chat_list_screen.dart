@@ -89,9 +89,16 @@ class _ChatListScreenState extends State<ChatListScreen>
         ],
       ),
       floatingActionButton: _currentTabIndex == 1
-          ? FloatingActionButton(
-              onPressed: () => context.read<ChatCubit>().createNewSession(),
-              child: const Icon(Icons.add),
+          ? BlocBuilder<ChatCubit, ChatState>(
+              builder: (context, state) {
+                return state.sessions.isNotEmpty
+                    ? FloatingActionButton(
+                        onPressed: () =>
+                            context.read<ChatCubit>().createNewSession(),
+                        child: const Icon(Icons.add),
+                      )
+                    : const SizedBox.shrink();
+              },
             )
           : null,
     );
@@ -514,7 +521,7 @@ Widget _buildHeaderSection(BuildContext context) {
                     stops: [0.4, 0.6],
                   ).createShader(bounds),
                   child: const Text(
-                    'Khedr',
+                    'Khedr Ai',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 30.0,
@@ -618,7 +625,7 @@ Widget _buildStartButton(BuildContext context) {
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(24),
-              onTap: () => Navigator.pushNamed(context, '/chat-detail'),
+              onTap: () => context.read<ChatCubit>().createNewSession(),
               splashColor: Colors.white.withValues(alpha: 0.2),
               highlightColor: Colors.transparent,
               child: Container(
