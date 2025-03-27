@@ -43,28 +43,54 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              'Khedr AI',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'SYNE',
-                  fontWeight: FontWeight.bold),
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.primaryColor.withValues(alpha: 0.2),
+                  width: 2,
+                ),
+              ),
+              child: const CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.transparent,
+                backgroundImage: AssetImage('assets/images/khedr.jpg'),
+              ),
             ),
-            Text(
-              'Agricultural Assistant',
-              style: TextStyle(fontSize: 14, fontFamily: 'SYNE'),
-            )
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Khedr AI',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'SYNE',
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary.withValues(alpha: 0.9),
+                  ),
+                ),
+                Text(
+                  'Agricultural Assistant',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'SYNE',
+                    color: AppColors.textSecondary.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
         centerTitle: false,
-        elevation: 2,
-        shadowColor: AppColors.primaryColor.withValues(alpha: 0.1),
+        elevation: 4,
+        shadowColor: AppColors.primaryColor.withValues(alpha: 0.15),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline, color: AppColors.primaryColor),
+            icon: Icon(Icons.help_outline,
+                color: AppColors.primaryColor.withValues(alpha: 0.8)),
             onPressed: () => _showCapabilitiesDialog(),
           ),
         ],
