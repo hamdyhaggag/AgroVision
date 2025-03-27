@@ -3,7 +3,6 @@ import 'package:agro_vision/models/chat_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../core/dependency_injection/di.dart';
 import '../../../shared/widgets/chat_bubble.dart';
 import '../Logic/chat_cubit.dart';
@@ -112,22 +111,38 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
               },
               child: BlocBuilder<ChatCubit, ChatState>(
                 builder: (context, state) {
-                  if (state.messages.isEmpty) {
+                  if (state.messages.isEmpty && state is! ChatLoading) {
                     return _buildEmptyState();
                   }
                   return ListView.separated(
                     controller: _scrollController,
                     padding:
                         const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                    itemCount: state.messages.length,
+                    itemCount:
+                        state.messages.length + (state is ChatLoading ? 1 : 0),
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
-                      final message = state.messages[index];
+                      if (index < state.messages.length) {
+                        final message = state.messages[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: ChatBubble(
+                            message: message,
+                            onLongPress: () => _showMessageOptions(message),
+                          ),
+                        );
+                      }
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: ChatBubble(
-                          message: message,
-                          onLongPress: () => _showMessageOptions(message),
+                          message: Message(
+                            text: '',
+                            isSentByMe: false,
+                            timestamp: DateTime.now(),
+                          ),
+                          isLoading: true,
+                          loadingColor: AppColors.primaryColor,
+                          onLongPress: () {},
                         ),
                       );
                     },
@@ -209,15 +224,9 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
                   suffixIcon: BlocBuilder<ChatCubit, ChatState>(
                     builder: (context, state) {
                       return IconButton(
-                        icon: state is ChatLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.send_rounded,
-                                color: AppColors.primaryColor),
+                        key: const ValueKey('send'),
+                        icon: const Icon(Icons.send_rounded,
+                            color: AppColors.primaryColor),
                         onPressed: () => _handleSend(_controller.text, context),
                       );
                     },
