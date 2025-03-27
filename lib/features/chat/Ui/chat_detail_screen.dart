@@ -47,7 +47,7 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'AgroVision AI',
+              'Khedr AI',
               style: TextStyle(
                   fontSize: 16,
                   fontFamily: 'SYNE',
@@ -121,8 +121,11 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.agriculture,
-              size: 64, color: AppColors.primaryColor.withOpacity(0.3)),
+          Image.asset(
+            'assets/images/khedr.jpg',
+            width: 80,
+            height: 80,
+          ),
           const SizedBox(height: 16),
           const Text('How can I help you today?',
               style: TextStyle(
@@ -172,7 +175,8 @@ class __ChatDetailViewState extends State<_ChatDetailView> {
                 maxLines: 4,
                 decoration: InputDecoration(
                   hintText: 'Type your message...',
-                  hintStyle: const TextStyle(fontFamily: 'SYNE'),
+                  hintStyle: const TextStyle(
+                      fontFamily: 'SYNE', color: AppColors.greyColor),
                   border: InputBorder.none,
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

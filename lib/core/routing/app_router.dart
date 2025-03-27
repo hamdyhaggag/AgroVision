@@ -30,7 +30,6 @@ import '../../features/onboarding/Ui/onboarding_screen.dart';
 import '../../features/splash/Ui/splash_screen.dart';
 import '../../features/chat/ui/chat_list_screen.dart';
 import '../../features/chat/ui/chat_detail_screen.dart';
-import '../../features/chat/ui/community_chat_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -131,10 +130,7 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => const ChatDetailScreen(),
         );
-      case AppRoutes.communityChat:
-        return MaterialPageRoute(
-          builder: (_) => const CommunityChatScreen(),
-        );
+
       case AppRoutes.consultationChat:
         return MaterialPageRoute(
           builder: (_) => const ChatBotScreen(),
