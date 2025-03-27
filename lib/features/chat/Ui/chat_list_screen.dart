@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../models/chat_session.dart';
-import '../../../shared/widgets/custom_appbar.dart';
 import '../Logic/chat_cubit.dart';
 
 class ChatListScreen extends StatefulWidget {
@@ -66,41 +65,42 @@ class _ChatListScreenState extends State<ChatListScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(isHome: true, title: 'Chats'),
-      body: Column(
-        children: [
-          _buildEnhancedTabBar(_tabController),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildChatList(context),
-                BlocBuilder<ChatCubit, ChatState>(
-                  builder: (context, state) {
-                    return state.sessions.isEmpty
-                        ? _buildChatbotWelcome(context)
-                        : _buildSessionList(context, state.sessions);
-                  },
-                ),
-              ],
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          children: [
+            _buildEnhancedTabBar(_tabController),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildChatList(context),
+                  BlocBuilder<ChatCubit, ChatState>(
+                    builder: (context, state) {
+                      return state.sessions.isEmpty
+                          ? _buildChatbotWelcome(context)
+                          : _buildSessionList(context, state.sessions);
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        floatingActionButton: _currentTabIndex == 1
+            ? BlocBuilder<ChatCubit, ChatState>(
+                builder: (context, state) {
+                  return state.sessions.isNotEmpty
+                      ? FloatingActionButton(
+                          onPressed: () =>
+                              context.read<ChatCubit>().createNewSession(),
+                          child: const Icon(Icons.add),
+                        )
+                      : const SizedBox.shrink();
+                },
+              )
+            : null,
       ),
-      floatingActionButton: _currentTabIndex == 1
-          ? BlocBuilder<ChatCubit, ChatState>(
-              builder: (context, state) {
-                return state.sessions.isNotEmpty
-                    ? FloatingActionButton(
-                        onPressed: () =>
-                            context.read<ChatCubit>().createNewSession(),
-                        child: const Icon(Icons.add),
-                      )
-                    : const SizedBox.shrink();
-              },
-            )
-          : null,
     );
   }
 
