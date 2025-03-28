@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -104,12 +104,15 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                 children: [
                   if (widget.message.imageUrl != null && !widget.isLoading)
                     _buildImagePreview(widget.message.imageUrl!),
+
                   if (widget.message.voiceFilePath != null && !widget.isLoading)
                     _buildVoiceMessage(widget.message.voiceFilePath!),
+
                   if (widget.isLoading) _buildTypingIndicator(),
-                  if (!widget.isLoading &&
-                      widget.message.voiceFilePath == null &&
-                      widget.message.imageUrl == null) ...[
+
+                  // Always show text if present
+                  if (widget.message.text.isNotEmpty) ...[
+                    const SizedBox(height: 8),
                     Text(
                       widget.message.text,
                       style: const TextStyle(
@@ -117,16 +120,18 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                         fontFamily: 'SYNE',
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      DateFormat('HH:mm').format(widget.message.timestamp),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontSize: 10,
-                            fontFamily: 'SYNE',
-                            color: Colors.grey,
-                          ),
-                    ),
                   ],
+
+                  // Always show timestamp
+                  const SizedBox(height: 4),
+                  Text(
+                    DateFormat('HH:mm').format(widget.message.timestamp),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontSize: 10,
+                          fontFamily: 'SYNE',
+                          color: Colors.grey,
+                        ),
+                  ),
                 ],
               ),
             ),
@@ -166,20 +171,29 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
   }
 
   Widget _buildImagePreview(String url) {
+    final isNetworkImage = url.startsWith('http');
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
-      child: CachedNetworkImage(
-        imageUrl: url,
-        width: 200,
-        height: 150,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          color: Colors.grey[200],
-          width: 200,
-          height: 150,
-        ),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
-      ),
+      child: isNetworkImage
+          ? CachedNetworkImage(
+              imageUrl: url,
+              width: 200,
+              height: 150,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                color: Colors.grey[200],
+                width: 200,
+                height: 150,
+              ),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+            )
+          : Image.file(
+              File(url),
+              width: 200,
+              height: 150,
+              fit: BoxFit.cover,
+            ),
     );
   }
 

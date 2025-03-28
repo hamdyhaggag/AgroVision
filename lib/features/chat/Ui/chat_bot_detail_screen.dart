@@ -494,9 +494,9 @@ class _AttachmentButton extends StatelessWidget {
       if (question?.isNotEmpty ?? false) {
         context.read<ChatCubit>().sendImageMessage(
               File(pickedFile.path),
-              question!, // the user's question
-              'text', // mode
-              'false', // speak
+              question!,
+              'text',
+              'false',
             );
       }
     }

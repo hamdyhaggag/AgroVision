@@ -155,7 +155,11 @@ class ChatCubit extends Cubit<ChatState> {
     var updatedSession = currentSession.copyWith(
       messages: [
         ...currentSession.messages,
-        Message(text: question, isSentByMe: true),
+        Message(
+          text: question,
+          isSentByMe: true,
+          imageUrl: image.path,
+        ),
       ],
     );
 
