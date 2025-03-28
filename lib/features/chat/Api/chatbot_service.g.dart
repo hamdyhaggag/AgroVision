@@ -116,17 +116,29 @@ class _ChatbotService implements ChatbotService {
   }
 
   @override
-  Future<ChatResponse> sendVoiceMessage(File voiceFile) async {
+  Future<ChatResponse> sendVoiceMessage(
+    File voiceFile,
+    String speak,
+    String language,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = FormData();
     _data.files.add(MapEntry(
-      'file',
+      'audio_file',
       MultipartFile.fromFileSync(
         voiceFile.path,
         filename: voiceFile.path.split(Platform.pathSeparator).last,
       ),
+    ));
+    _data.fields.add(MapEntry(
+      'speak',
+      speak,
+    ));
+    _data.fields.add(MapEntry(
+      'language',
+      language,
     ));
     final _options = _setStreamType<ChatResponse>(Options(
       method: 'POST',

@@ -5,6 +5,7 @@ import 'package:agro_vision/models/chat_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/helpers/voice_recorder_utility.dart';
 import '../../../shared/widgets/chat_bubble.dart';
 import '../Logic/chat_cubit.dart';
 
@@ -229,7 +230,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          _AttachmentButton(),
+          const _AttachmentButton(),
           const SizedBox(width: 8),
           Expanded(
             child: Container(
@@ -329,15 +330,16 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
   void _showMessageOptions(Message message) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
       ),
       builder: (context) => SafeArea(
         child: Wrap(
           children: [
             ListTile(
-              leading: Icon(Icons.delete_outline, color: Colors.redAccent),
-              title: Text(
+              leading:
+                  const Icon(Icons.delete_outline, color: Colors.redAccent),
+              title: const Text(
                 'Delete',
                 style: TextStyle(
                   color: Colors.redAccent,
@@ -358,6 +360,8 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
 }
 
 class _AttachmentButton extends StatelessWidget {
+  const _AttachmentButton();
+
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
@@ -420,7 +424,30 @@ class _AttachmentButton extends StatelessWidget {
         _pickImage(context);
         break;
       case 'voice':
-        _recordVoice(context);
+        showModalBottomSheet(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          builder: (context) => const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Record Voice Message",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'SYNE',
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 16),
+                VoiceRecordingWidget(),
+              ],
+            ),
+          ),
+        );
         break;
     }
   }
@@ -469,6 +496,57 @@ class _AttachmentButton extends StatelessWidget {
       }
     }
   }
+}
 
-  void _recordVoice(BuildContext context) {}
+class VoiceRecordingWidget extends StatefulWidget {
+  const VoiceRecordingWidget({super.key});
+
+  @override
+  State<VoiceRecordingWidget> createState() => _VoiceRecordingWidgetState();
+}
+
+class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget> {
+  final VoiceRecorder _voiceRecorder = VoiceRecorder();
+  bool _isRecording = false;
+  String? _recordedFilePath;
+
+  @override
+  void dispose() {
+    _voiceRecorder.dispose();
+    super.dispose();
+  }
+
+  Future<void> _toggleRecording() async {
+    if (_isRecording) {
+      // Stop recording
+      await _voiceRecorder.stopRecording();
+      setState(() {
+        _isRecording = false;
+      });
+      if (_recordedFilePath != null) {
+        final recordedFile = File(_recordedFilePath!);
+        // Send the voice message via the Cubit
+        context
+            .read<ChatCubit>()
+            .sendVoiceMessage(recordedFile, speak: 'false', language: 'en');
+        // Dismiss the bottom sheet after sending
+        Navigator.pop(context);
+      }
+    } else {
+      // Start recording
+      final filePath = await _voiceRecorder.startRecording();
+      setState(() {
+        _isRecording = true;
+        _recordedFilePath = filePath;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(_isRecording ? Icons.stop : Icons.mic),
+      onPressed: _toggleRecording,
+    );
+  }
 }

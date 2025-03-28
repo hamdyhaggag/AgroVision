@@ -1,12 +1,17 @@
+import 'dart:math';
+
+import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../models/chat_message.dart';
+import 'package:audio_waveforms/audio_waveforms.dart';
 
 class ChatBubble extends StatefulWidget {
   final Message message;
   final VoidCallback onLongPress;
   final bool isLoading;
+  final Color? loadingColor;
 
   const ChatBubble({
     super.key,
@@ -15,7 +20,6 @@ class ChatBubble extends StatefulWidget {
     this.isLoading = false,
     this.loadingColor,
   });
-  final Color? loadingColor;
 
   @override
   State<ChatBubble> createState() => _ChatBubbleState();
@@ -100,8 +104,12 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                 children: [
                   if (widget.message.imageUrl != null && !widget.isLoading)
                     _buildImagePreview(widget.message.imageUrl!),
+                  if (widget.message.voiceFilePath != null && !widget.isLoading)
+                    _buildVoiceMessage(widget.message.voiceFilePath!),
                   if (widget.isLoading) _buildTypingIndicator(),
-                  if (!widget.isLoading) ...[
+                  if (!widget.isLoading &&
+                      widget.message.voiceFilePath == null &&
+                      widget.message.imageUrl == null) ...[
                     Text(
                       widget.message.text,
                       style: const TextStyle(
@@ -171,6 +179,90 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
           height: 150,
         ),
         errorWidget: (context, url, error) => const Icon(Icons.error),
+      ),
+    );
+  }
+
+  Widget _buildVoiceMessage(String filePath) {
+    return VoiceMessageBubble(filePath: filePath);
+  }
+}
+
+class VoiceMessageBubble extends StatefulWidget {
+  final String filePath;
+  const VoiceMessageBubble({Key? key, required this.filePath})
+      : super(key: key);
+
+  @override
+  State<VoiceMessageBubble> createState() => _VoiceMessageBubbleState();
+}
+
+class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool isPlaying = false;
+  late final PlayerController _playerController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the player controller which will be used to generate the waveform.
+    _playerController = PlayerController();
+    _preparePlayer();
+  }
+
+  Future<void> _preparePlayer() async {
+    // Preload the audio file to extract waveform data.
+    await _playerController.preparePlayer(path: widget.filePath);
+  }
+
+  Future<void> _togglePlayPause() async {
+    if (isPlaying) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.play(DeviceFileSource(widget.filePath));
+    }
+    setState(() {
+      isPlaying = !isPlaying;
+    });
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    _playerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.only(bottom: 4),
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Play/Pause button.
+          IconButton(
+            icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+            onPressed: _togglePlayPause,
+          ),
+          // Audio waveform widget.
+          Expanded(
+            child: AudioFileWaveforms(
+              playerController: _playerController,
+              size: const Size(double.infinity, 50),
+              waveformType: WaveformType.fitWidth,
+              enableSeekGesture: true,
+              playerWaveStyle: const PlayerWaveStyle(
+                fixedWaveColor: Colors.blueAccent,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

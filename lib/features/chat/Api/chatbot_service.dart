@@ -6,7 +6,7 @@ import 'package:agro_vision/models/chat_message.dart';
 
 part 'chatbot_service.g.dart';
 
-@RestApi(baseUrl: 'https://7aff-156-211-133-253.ngrok-free.app/')
+@RestApi(baseUrl: 'https://e4ce-197-48-37-106.ngrok-free.app/')
 abstract class ChatbotService {
   factory ChatbotService(Dio dio) = _ChatbotService;
 
@@ -24,5 +24,9 @@ abstract class ChatbotService {
 
   @POST('voice_convo')
   @MultiPart()
-  Future<ChatResponse> sendVoiceMessage(@Part(name: 'file') File voiceFile);
+  Future<ChatResponse> sendVoiceMessage(
+    @Part(name: 'audio_file') File voiceFile,
+    @Part(name: 'speak') String speak,
+    @Part(name: 'language') String language,
+  );
 }

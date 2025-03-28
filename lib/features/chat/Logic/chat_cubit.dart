@@ -167,11 +167,6 @@ class ChatCubit extends Cubit<ChatState> {
     ));
 
     try {
-      // --- FIX THIS CALL ---
-      // Previously was: repository.sendImage(image, 'text', question, 'false')
-      //
-      // If you want to pass the user’s question as the question, and
-      // "text" as mode, and "false" as speak, do this:
       final response =
           await repository.sendImage(image, question, 'text', 'false');
 
@@ -197,5 +192,58 @@ class ChatCubit extends Cubit<ChatState> {
     return state.sessions
         .map((s) => s.id == updatedSession.id ? updatedSession : s)
         .toList();
+  }
+
+  Future<void> sendVoiceMessage(File voiceFile,
+      {String speak = 'false', String language = 'en'}) async {
+    final currentSession = state.sessions.firstWhere(
+      (s) => s.id == state.currentSessionId,
+      orElse: () => state.sessions.last,
+    );
+
+    // 1) Add a message with the local voice file path so the UI can play it.
+    var updatedSession = currentSession.copyWith(
+      messages: [
+        ...currentSession.messages,
+        Message(
+          text: '',
+          isSentByMe: true,
+          voiceFilePath: voiceFile.path, // Now this is a named parameter
+        ),
+      ],
+    );
+
+    final updatedSessions = _updateSessions(updatedSession);
+    emit(ChatLoading(
+      sessions: updatedSessions,
+      currentSessionId: currentSession.id,
+    ));
+
+    try {
+      // 2) Send the voice file to the server
+      final response = await repository.sendVoice(voiceFile, speak, language);
+
+      // 3) Append the server’s response to the chat
+      final finalSession = updatedSession.copyWith(
+        messages: [
+          ...updatedSession.messages,
+          Message(
+            text: response.answer,
+            isSentByMe: false,
+          ),
+        ],
+      );
+
+      emit(ChatSuccess(
+        sessions: _updateSessions(finalSession),
+        currentSessionId: currentSession.id,
+      ));
+    } catch (e) {
+      emit(ChatError(
+        sessions: updatedSessions,
+        currentSessionId: currentSession.id,
+        error: e.toString(),
+      ));
+    }
   }
 }
