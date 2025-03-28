@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/models/chat_message.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; //
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/helpers/voice_recorder_utility.dart';
@@ -465,22 +465,27 @@ class _AttachmentButton extends StatelessWidget {
         builder: (context) {
           final textController = TextEditingController();
           return AlertDialog(
-            title: const Text('Image Question'),
+            title: const Center(
+              child:
+                  Text('Image Question', style: TextStyle(fontFamily: 'SYNE')),
+            ),
             content: TextField(
               controller: textController,
               decoration: const InputDecoration(
+                hintStyle: TextStyle(fontFamily: 'SYNE', color: Colors.grey),
+                labelStyle: TextStyle(fontFamily: 'SYNE'),
                 hintText: 'Ask about this image...',
               ),
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel',
+                      style: TextStyle(fontFamily: 'SYNE'))),
               TextButton(
-                onPressed: () => Navigator.pop(context, textController.text),
-                child: const Text('Send'),
-              ),
+                  onPressed: () => Navigator.pop(context, textController.text),
+                  child:
+                      const Text('Send', style: TextStyle(fontFamily: 'SYNE'))),
             ],
           );
         },
