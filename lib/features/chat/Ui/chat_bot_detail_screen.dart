@@ -2,10 +2,11 @@ import 'dart:io';
 
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/models/chat_message.dart';
-import 'package:flutter/material.dart'; //
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/helpers/voice_recorder_utility.dart';
+import '../../../models/chat_session.dart';
 import '../../../shared/widgets/chat_bubble.dart';
 import '../Logic/chat_cubit.dart';
 
@@ -81,7 +82,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
           const SizedBox(height: 8),
           Text('Ask about crops, weather, or soil analysis',
               style: TextStyle(
-                color: AppColors.textSecondary.withValues(alpha: 0.7),
+                color: AppColors.textSecondary.withOpacity(0.7),
                 fontSize: 14,
                 fontFamily: 'SYNE',
               )),
@@ -92,125 +93,165 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChatCubit, ChatState>(
-      builder: (context, state) {
-        final currentSession = state.sessions.firstWhere(
-          (s) => s.id == state.currentSessionId,
-          orElse: () => state.sessions.last,
-        );
-
-        return Scaffold(
-          appBar: AppBar(
-            title: Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.primaryColor.withValues(alpha: 0.2),
-                      width: 2,
+    return BlocListener<ChatCubit, ChatState>(
+      listener: (context, state) {
+        if (state is ChatNetworkError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.wifi_off, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(state.error)),
+                  TextButton(
+                    child: const Text(
+                      'RETRY',
+                      style: TextStyle(color: Colors.white, fontFamily: 'SYNE'),
                     ),
+                    onPressed: () =>
+                        context.read<ChatCubit>().retryPendingMessages(),
                   ),
-                  child: const CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.transparent,
-                    backgroundImage: AssetImage('assets/images/khedr.jpg'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Khedr AI',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: 'SYNE',
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary.withValues(alpha: 0.9),
-                      ),
-                    ),
-                    Text(
-                      'Agricultural Assistant',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontFamily: 'SYNE',
-                        color: AppColors.textSecondary.withValues(alpha: 0.8),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
+              backgroundColor: Colors.red[800],
+              duration: const Duration(days: 1),
             ),
-            actions: [
-              IconButton(
-                icon: Icon(Icons.help_outline,
-                    color: AppColors.primaryColor.withValues(alpha: 0.8)),
-                onPressed: _showCapabilitiesDialog,
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: BlocSelector<ChatCubit, ChatState, bool>(
+            selector: (state) => state is ChatNetworkError,
+            builder: (context, isOffline) {
+              return Icon(
+                isOffline ? Icons.cloud_off : Icons.cloud,
+                color: isOffline ? Colors.red : Colors.green,
+              );
+            },
+          ),
+          title: Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.primaryColor.withOpacity(0.2),
+                    width: 2,
+                  ),
+                ),
+                child: const CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.transparent,
+                  backgroundImage: AssetImage('assets/images/khedr.jpg'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Khedr AI',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'SYNE',
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary.withOpacity(0.9),
+                    ),
+                  ),
+                  Text(
+                    'Agricultural Assistant',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'SYNE',
+                      color: AppColors.textSecondary.withOpacity(0.8),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          body: Column(
-            children: [
-              Expanded(
-                child: BlocListener<ChatCubit, ChatState>(
-                  listener: (context, state) {
-                    if (currentSession.messages.isNotEmpty) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        _scrollController.animateTo(
-                          _scrollController.position.maxScrollExtent,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOut,
-                        );
-                      });
-                    }
-                  },
-                  child: currentSession.messages.isEmpty
-                      ? _buildEmptyState()
-                      : ListView.separated(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 8),
-                          itemCount: currentSession.messages.length +
-                              (state is ChatLoading ? 1 : 0),
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            if (index < currentSession.messages.length) {
-                              final message = currentSession.messages[index];
+          actions: [
+            IconButton(
+              icon: Icon(Icons.help_outline,
+                  color: AppColors.primaryColor.withOpacity(0.8)),
+              onPressed: _showCapabilitiesDialog,
+            ),
+          ],
+        ),
+        body: BlocBuilder<ChatCubit, ChatState>(
+          builder: (context, state) {
+            final currentSession = state.sessions.firstWhere(
+              (s) => s.id == state.currentSessionId,
+              orElse: () => ChatSession(
+                id: 'default',
+                messages: [],
+                createdAt: DateTime.now(),
+              ),
+            );
+
+            return Column(
+              children: [
+                Expanded(
+                  child: BlocListener<ChatCubit, ChatState>(
+                    listener: (context, state) {
+                      if (currentSession.messages.isNotEmpty) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _scrollController.animateTo(
+                            _scrollController.position.maxScrollExtent,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        });
+                      }
+                    },
+                    child: currentSession.messages.isEmpty
+                        ? _buildEmptyState()
+                        : ListView.separated(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16, horizontal: 8),
+                            itemCount: currentSession.messages.length +
+                                (state is ChatLoading ? 1 : 0),
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              if (index < currentSession.messages.length) {
+                                final message = currentSession.messages[index];
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  child: ChatBubble(
+                                    message: message,
+                                    onLongPress: () =>
+                                        _showMessageOptions(message),
+                                  ),
+                                );
+                              }
                               return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 8),
                                 child: ChatBubble(
-                                  message: message,
-                                  onLongPress: () =>
-                                      _showMessageOptions(message),
+                                  message: Message(
+                                    text: '',
+                                    isSentByMe: false,
+                                    timestamp: DateTime.now(),
+                                  ),
+                                  isLoading: true,
+                                  loadingColor: AppColors.primaryColor,
+                                  onLongPress: () {},
                                 ),
                               );
-                            }
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              child: ChatBubble(
-                                message: Message(
-                                  text: '',
-                                  isSentByMe: false,
-                                  timestamp: DateTime.now(),
-                                ),
-                                isLoading: true,
-                                loadingColor: AppColors.primaryColor,
-                                onLongPress: () {},
-                              ),
-                            );
-                          },
-                        ),
+                            },
+                          ),
+                  ),
                 ),
-              ),
-              _buildInputSection(context),
-            ],
-          ),
-        );
-      },
+                _buildInputSection(context),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -220,7 +261,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
         color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, -4),
           ),
@@ -297,7 +338,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withValues(alpha: 0.1),
+              color: AppColors.primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 20, color: AppColors.primaryColor),
@@ -351,7 +392,6 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                 Navigator.pop(context);
               },
             ),
-            // Add additional options here if needed.
           ],
         ),
       ),
@@ -361,62 +401,6 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
 
 class _AttachmentButton extends StatelessWidget {
   const _AttachmentButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return PopupMenuButton(
-      icon: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: AppColors.primaryColor.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.add, color: AppColors.primaryColor),
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 'image',
-          child: ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.image, color: AppColors.primaryColor),
-            ),
-            title: const Text('Upload Image',
-                style: TextStyle(
-                    color: AppColors.textPrimary, fontFamily: 'SYNE')),
-            subtitle: const Text('JPG, PNG up to 5MB',
-                style: TextStyle(
-                    color: AppColors.textSecondary, fontFamily: 'SYNE')),
-          ),
-        ),
-        PopupMenuItem(
-          value: 'voice',
-          child: ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.mic, color: AppColors.primaryColor),
-            ),
-            title: const Text('Voice Message',
-                style: TextStyle(
-                    color: AppColors.textPrimary, fontFamily: 'SYNE')),
-            subtitle: const Text('Press to record',
-                style: TextStyle(
-                    color: AppColors.textSecondary, fontFamily: 'SYNE')),
-          ),
-        ),
-      ],
-      onSelected: (value) => _handleAttachment(value, context),
-    );
-  }
 
   void _handleAttachment(String value, BuildContext context) {
     switch (value) {
@@ -472,9 +456,8 @@ class _AttachmentButton extends StatelessWidget {
             content: TextField(
               controller: textController,
               decoration: const InputDecoration(
-                hintStyle: TextStyle(fontFamily: 'SYNE', color: Colors.grey),
-                labelStyle: TextStyle(fontFamily: 'SYNE'),
                 hintText: 'Ask about this image...',
+                hintStyle: TextStyle(fontFamily: 'SYNE', color: Colors.grey),
               ),
             ),
             actions: [
@@ -501,6 +484,62 @@ class _AttachmentButton extends StatelessWidget {
       }
     }
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton(
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColors.primaryColor.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.add, color: AppColors.primaryColor),
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'image',
+          child: ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.image, color: AppColors.primaryColor),
+            ),
+            title: const Text('Upload Image',
+                style: TextStyle(
+                    color: AppColors.textPrimary, fontFamily: 'SYNE')),
+            subtitle: const Text('JPG, PNG up to 5MB',
+                style: TextStyle(
+                    color: AppColors.textSecondary, fontFamily: 'SYNE')),
+          ),
+        ),
+        PopupMenuItem(
+          value: 'voice',
+          child: ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.mic, color: AppColors.primaryColor),
+            ),
+            title: const Text('Voice Message',
+                style: TextStyle(
+                    color: AppColors.textPrimary, fontFamily: 'SYNE')),
+            subtitle: const Text('Press to record',
+                style: TextStyle(
+                    color: AppColors.textSecondary, fontFamily: 'SYNE')),
+          ),
+        ),
+      ],
+      onSelected: (value) => _handleAttachment(value, context),
+    );
+  }
 }
 
 class VoiceRecordingWidget extends StatefulWidget {
@@ -523,22 +562,17 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget> {
 
   Future<void> _toggleRecording() async {
     if (_isRecording) {
-      // Stop recording
       await _voiceRecorder.stopRecording();
-      setState(() {
-        _isRecording = false;
-      });
+      setState(() => _isRecording = false);
       if (_recordedFilePath != null) {
-        final recordedFile = File(_recordedFilePath!);
-        // Send the voice message via the Cubit
-        context
-            .read<ChatCubit>()
-            .sendVoiceMessage(recordedFile, speak: 'false', language: 'en');
-        // Dismiss the bottom sheet after sending
+        context.read<ChatCubit>().sendVoiceMessage(
+              File(_recordedFilePath!),
+              speak: 'false',
+              language: 'en',
+            );
         Navigator.pop(context);
       }
     } else {
-      // Start recording
       final filePath = await _voiceRecorder.startRecording();
       setState(() {
         _isRecording = true;

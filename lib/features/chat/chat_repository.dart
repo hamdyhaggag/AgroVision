@@ -3,6 +3,20 @@ import 'package:dio/dio.dart';
 import 'package:agro_vision/features/chat/api/chatbot_service.dart';
 import 'package:agro_vision/models/chat_message.dart';
 
+// Custom exceptions
+class NetworkUnavailableException implements Exception {
+  @override
+  String toString() => 'Internet connection unavailable';
+}
+
+class ChatException implements Exception {
+  final String message;
+  ChatException(this.message);
+
+  @override
+  String toString() => message;
+}
+
 class ChatRepository {
   final ChatbotService chatbotService;
 
@@ -11,22 +25,25 @@ class ChatRepository {
   Future<ChatResponse> sendText(String text) async {
     try {
       final response =
-          await chatbotService.sendTextMessage(ChatRequestBody(query: text));
+      await chatbotService.sendTextMessage(ChatRequestBody(query: text));
       return response;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
-        throw Exception('API endpoint not found. Check server configuration');
+      if (_isNetworkError(e)) {
+        throw NetworkUnavailableException();
       }
-      throw Exception('Failed to send message: ${e.message}');
+      if (e.response?.statusCode == 404) {
+        throw ChatException('API endpoint not found. Check server configuration');
+      }
+      throw ChatException('Failed to send message: ${e.message}');
     }
   }
 
   Future<ChatResponse> sendImage(
-    File image,
-    String question,
-    String mode,
-    String speak,
-  ) async {
+      File image,
+      String question,
+      String mode,
+      String speak,
+      ) async {
     try {
       final response = await chatbotService.sendImageMessage(
         image,
@@ -36,7 +53,10 @@ class ChatRepository {
       );
       return response;
     } on DioException catch (e) {
-      throw Exception('Image upload failed: ${e.message}');
+      if (_isNetworkError(e)) {
+        throw NetworkUnavailableException();
+      }
+      throw ChatException('Image upload failed: ${e.message}');
     }
   }
 
@@ -50,7 +70,17 @@ class ChatRepository {
       );
       return response;
     } on DioException catch (e) {
-      throw Exception('Voice upload failed: ${e.message}');
+      if (_isNetworkError(e)) {
+        throw NetworkUnavailableException();
+      }
+      throw ChatException('Voice upload failed: ${e.message}');
     }
+  }
+
+  bool _isNetworkError(DioException e) {
+    return e.type == DioExceptionType.connectionError ||
+        e.error is SocketException ||
+        (e.error?.toString().contains('Failed host lookup') ?? false) ||
+        (e.message?.contains('Connection closed') ?? false);
   }
 }

@@ -25,12 +25,14 @@ class Message {
   final String? imageUrl;
   final String? audioUrl;
   final String? voiceFilePath;
+  final MessageStatus status;
 
   Message({
     required this.text,
     required this.isSentByMe,
     DateTime? timestamp,
     this.imageUrl,
+    this.status = MessageStatus.delivered,
     this.audioUrl,
     this.voiceFilePath,
   }) : timestamp = timestamp ?? DateTime.now();
@@ -53,3 +55,5 @@ class Message {
         voiceFilePath: json['voiceFilePath'],
       );
 }
+
+enum MessageStatus { pending, delivered, error }

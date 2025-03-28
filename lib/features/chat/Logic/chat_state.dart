@@ -41,3 +41,17 @@ final class ChatError extends ChatState {
     required super.error,
   });
 }
+
+class ChatNetworkError extends ChatState {
+  final String error;
+  final String lastMessage;
+  final List<Message> pendingMessages;
+
+  const ChatNetworkError({
+    required super.sessions,
+    required super.currentSessionId,
+    required this.error,
+    required this.lastMessage,
+    required this.pendingMessages,
+  });
+}

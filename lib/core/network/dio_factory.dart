@@ -15,7 +15,7 @@ class DioFactory {
 
   static Dio getChatDio() {
     return Dio(BaseOptions(
-      baseUrl: 'https://e4ce-197-48-37-106.ngrok-free.app/',
+      baseUrl: 'https://bbe2-197-48-37-106.ngrok-free.app/',
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       headers: {
