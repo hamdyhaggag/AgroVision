@@ -522,140 +522,184 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Colors.white,
-      child: ListView(
+      backgroundColor: AppColors.whiteColor,
+      child: Column(
         children: [
           const DrawerHeaderWidget(),
-          ListTile(
-            leading: const Icon(Icons.dataset, color: AppColors.primaryColor),
-            title: const Text(
-              'Farm Analytics',
-              style: TextStyle(
-                color: AppColors.primaryColor,
-                fontFamily: 'SYNE',
-              ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+              children: [
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.analytics_outlined,
+                  title: 'Farm Analytics',
+                  subtitle: 'Performance insights & reports',
+                  route: '/farmAnalytics',
+                ),
+                _buildDivider(),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.agriculture_outlined,
+                  title: 'Crops Management',
+                  subtitle: 'Crop cycles & planning',
+                  route: '/cropsManagement',
+                ),
+                _buildDivider(),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.inventory_2_outlined,
+                  title: 'Farm Inventory',
+                  subtitle: 'Equipment & supplies tracking',
+                  route: '/farmInventory',
+                ),
+                _buildDivider(),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.sensors_outlined,
+                  title: 'Sensor Data',
+                  subtitle: 'Real-time field metrics',
+                  route: '/sensorData',
+                ),
+                _buildDivider(),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.settings_outlined,
+                  title: 'Settings',
+                  route: '/settingsScreen',
+                ),
+              ],
             ),
-            onTap: () => Navigator.pushNamed(context, '/farmAnalytics'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.grass, color: AppColors.primaryColor),
-            title: const Text(
-              'Crops Management',
-              style: TextStyle(
-                color: AppColors.primaryColor,
-                fontFamily: 'SYNE',
-              ),
-            ),
-            onTap: () => Navigator.pushNamed(context, '/cropsManagment'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.note_alt, color: AppColors.primaryColor),
-            title: const Text(
-              'Farm Inventory',
-              style: TextStyle(
-                color: AppColors.primaryColor,
-                fontFamily: 'SYNE',
-              ),
-            ),
-            onTap: () => Navigator.pushNamed(context, '/farmInventory'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.data_thresholding,
-                color: AppColors.primaryColor),
-            title: const Text(
-              'Sensor Data',
-              style: TextStyle(
-                color: AppColors.primaryColor,
-                fontFamily: 'SYNE',
-              ),
-            ),
-            onTap: () => Navigator.pushNamed(context, '/sensorData'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.people_alt_rounded,
-                color: AppColors.primaryColor),
-            title: const Text(
-              'Team',
-              style: TextStyle(
-                color: AppColors.primaryColor,
-                fontFamily: 'SYNE',
-              ),
-            ),
-            onTap: () => Navigator.pushNamed(context, '/team'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings, color: AppColors.primaryColor),
-            title: const Text(
-              'Settings',
-              style: TextStyle(
-                color: AppColors.primaryColor,
-                fontFamily: 'SYNE',
-              ),
-            ),
-            onTap: () => Navigator.pushNamed(context, '/settingsScreen'),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildDivider() {
+    return Divider(
+      height: 1,
+      thickness: 0.5,
+      color: AppColors.primaryColor.withOpacity(0.1),
+      indent: 56,
+      endIndent: 16,
+    );
+  }
+
+  Widget _buildDrawerItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    required String route,
+  }) {
+    return Material(
+      color: Colors.white,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, size: 24, color: AppColors.primaryColor),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontFamily: 'SYNE',
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primaryColor,
+          ),
+        ),
+        subtitle: subtitle != null
+            ? Text(
+                subtitle,
+                style: TextStyle(
+                  fontFamily: 'SYNE',
+                  fontSize: 12,
+                  color: AppColors.primaryColor.withOpacity(0.7),
+                ),
+              )
+            : null,
+        trailing: Icon(
+          Icons.chevron_right_rounded,
+          color: AppColors.primaryColor.withOpacity(0.5),
+        ),
+        onTap: () {
+          Navigator.pushNamed(context, route);
+        },
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
 }
 
-class DrawerHeaderWidget extends StatefulWidget {
+class DrawerHeaderWidget extends StatelessWidget {
   const DrawerHeaderWidget({super.key});
 
   @override
-  DrawerHeaderWidgetState createState() => DrawerHeaderWidgetState();
-}
-
-class DrawerHeaderWidgetState extends State<DrawerHeaderWidget> {
-  bool _showShimmer = true;
-
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _showShimmer = false);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return DrawerHeader(
-      child: Stack(
-        fit: StackFit.expand,
+    return Container(
+      height: 200,
+      width: 200,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primaryColor.withOpacity(0.9),
+            AppColors.primaryColor.withOpacity(0.7),
+          ],
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomRight: Radius.circular(24),
+          bottomLeft: Radius.circular(24),
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/field1.jpg'),
-                fit: BoxFit.cover,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withOpacity(0.2),
+                width: 2,
               ),
             ),
-          ),
-          AnimatedOpacity(
-            opacity: _showShimmer ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 500),
-            child: Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: Container(color: Colors.white.withAlpha(128)),
+            child: Image.asset(
+              'assets/images/App_Logo.png',
+              height: 80,
+              width: 80,
+              color: Colors.white,
             ),
           ),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 1.5),
-              child: Container(color: Colors.black.withAlpha(25)),
+          const SizedBox(height: 16),
+          const Text(
+            'AgroVision ',
+            style: TextStyle(
+              fontFamily: 'SYNE',
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              letterSpacing: 0.5,
             ),
           ),
-          const Center(
-            child: Text(
-              'AgroVision',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 45,
-                fontFamily: 'SYNE',
-                fontWeight: FontWeight.bold,
-              ),
+          const SizedBox(height: 4),
+          Text(
+            'Farm Management Suite',
+            style: TextStyle(
+              fontFamily: 'SYNE',
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.white.withOpacity(0.9),
+              letterSpacing: 1.2,
             ),
           ),
         ],

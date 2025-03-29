@@ -21,7 +21,6 @@ import '../../features/home/Ui/drawer/crops_managment.dart';
 import '../../features/home/Ui/drawer/farm_analytics.dart';
 import '../../features/home/Ui/drawer/farm_inventory.dart';
 import '../../features/home/Ui/drawer/settings_screen.dart';
-import '../../features/home/Ui/drawer/team.dart';
 
 import '../../features/home/Ui/notifications_screen.dart';
 import '../../features/home/Ui/profile/edit_profile_screen.dart';
@@ -109,15 +108,15 @@ class AppRouter {
           builder: (_) => const FarmerChatScreen(),
         );
 
-      case '/farmAnalytics-chat':
+      case '/farmAnalytics':
         return MaterialPageRoute(
           builder: (_) => const FarmAnalyticsScreen(),
         );
-      case '/cropsManagment-chat':
+      case '/cropsManagment':
         return MaterialPageRoute(
           builder: (_) => const CropsManagementScreen(),
         );
-      case '/farmInventory-chat':
+      case '/farmInventory':
         return MaterialPageRoute(
           builder: (_) => const FarmInventoryScreen(),
         );
@@ -126,10 +125,6 @@ class AppRouter {
           builder: (_) => const SensorDataScreen(
             field: {},
           ),
-        );
-      case '/team':
-        return MaterialPageRoute(
-          builder: (_) => const TeamScreen(),
         );
       case '/settingsScreen':
         return MaterialPageRoute(

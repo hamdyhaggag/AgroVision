@@ -22,7 +22,6 @@ class AppRoutes {
   static const String farmAnalytics = '/farmAnalytics';
   static const String cropsManagment = '/cropsManagment';
   static const String farmInventory = '/farmInventory';
-  static const String team = '/team';
   static const String settingsScreen = '/settingsScreen';
   static const String profileScreen = '/profileScreen';
   static const String editProfileScreen = '/editProfileScreen';
