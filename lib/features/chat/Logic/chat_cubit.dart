@@ -173,7 +173,6 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  // Helper methods
   ChatSession _getCurrentSession() => state.sessions.firstWhere(
         (s) => s.id == state.currentSessionId,
         orElse: () => state.sessions.last,
@@ -216,10 +215,10 @@ class ChatCubit extends Cubit<ChatState> {
       ));
 
       emit(ChatNetworkError(
-        sessions: sessions, // Changed from updatedSessions to sessions
+        sessions: sessions,
         currentSessionId: session.id,
         error: error.toString(),
-        lastMessage: text, // Added missing parameter
+        lastMessage: text,
         pendingMessages: _pendingMessages,
       ));
     } else {

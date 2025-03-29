@@ -82,7 +82,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
           const SizedBox(height: 8),
           Text('Ask about crops, weather, or soil analysis',
               style: TextStyle(
-                color: AppColors.textSecondary.withOpacity(0.7),
+                color: AppColors.textSecondary.withValues(alpha: 0.7),
                 fontSize: 14,
                 fontFamily: 'SYNE',
               )),
@@ -114,7 +114,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                 ],
               ),
               backgroundColor: Colors.red[800],
-              duration: const Duration(days: 1),
+              duration: const Duration(seconds: 1),
             ),
           );
         }
@@ -136,7 +136,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.primaryColor.withOpacity(0.2),
+                    color: AppColors.primaryColor.withValues(alpha: 0.2),
                     width: 2,
                   ),
                 ),
@@ -156,7 +156,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                       fontSize: 16,
                       fontFamily: 'SYNE',
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary.withOpacity(0.9),
+                      color: AppColors.textPrimary.withValues(alpha: 0.9),
                     ),
                   ),
                   Text(
@@ -164,7 +164,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       fontFamily: 'SYNE',
-                      color: AppColors.textSecondary.withOpacity(0.8),
+                      color: AppColors.textSecondary.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
@@ -174,7 +174,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
           actions: [
             IconButton(
               icon: Icon(Icons.help_outline,
-                  color: AppColors.primaryColor.withOpacity(0.8)),
+                  color: AppColors.primaryColor.withValues(alpha: 0.8)),
               onPressed: _showCapabilitiesDialog,
             ),
           ],
@@ -261,7 +261,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
         color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, -4),
           ),
@@ -338,7 +338,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.1),
+              color: AppColors.primaryColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 20, color: AppColors.primaryColor),
@@ -491,7 +491,7 @@ class _AttachmentButton extends StatelessWidget {
       icon: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.primaryColor.withOpacity(0.1),
+          color: AppColors.primaryColor.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: const Icon(Icons.add, color: AppColors.primaryColor),
@@ -504,7 +504,7 @@ class _AttachmentButton extends StatelessWidget {
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.1),
+                color: AppColors.primaryColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.image, color: AppColors.primaryColor),
@@ -523,7 +523,7 @@ class _AttachmentButton extends StatelessWidget {
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.1),
+                color: AppColors.primaryColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.mic, color: AppColors.primaryColor),

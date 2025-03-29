@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:agro_vision/features/chat/api/chatbot_service.dart';
 import 'package:agro_vision/models/chat_message.dart';
 
-// Custom exceptions
 class NetworkUnavailableException implements Exception {
   @override
   String toString() => 'Internet connection unavailable';
