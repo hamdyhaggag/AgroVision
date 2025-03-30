@@ -1,4 +1,6 @@
+import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/features/home/Ui/drawer/view_all_order_analytics.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../../../shared/widgets/custom_appbar.dart';
 
@@ -293,61 +295,107 @@ class _StatCard extends StatelessWidget {
 
 class _InvoiceChart extends StatelessWidget {
   const _InvoiceChart();
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 200,
-          child: CustomPaint(
-            painter: _ChartPainter(),
+    return LineChart(
+      LineChartData(
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: true,
+          horizontalInterval: 200,
+          verticalInterval: 1,
+          getDrawingHorizontalLine: (value) => FlLine(
+            color: Colors.grey.withOpacity(0.1),
+            strokeWidth: 1,
+          ),
+          getDrawingVerticalLine: (value) => FlLine(
+            color: Colors.grey.withOpacity(0.1),
+            strokeWidth: 1,
           ),
         ),
-        const SizedBox(height: 20),
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _ChartLegend(color: Colors.blue, label: 'Current Month'),
-            SizedBox(width: 24),
-            _ChartLegend(color: Colors.grey, label: 'Previous Month'),
-          ],
-        )
-      ],
-    );
-  }
-}
-
-class _ChartPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {}
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _ChartLegend extends StatelessWidget {
-  final Color color;
-  final String label;
-  const _ChartLegend({required this.color, required this.label});
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
+        titlesData: FlTitlesData(
+          show: true,
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 30,
+              interval: 1,
+              getTitlesWidget: (value, meta) {
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+                return Text(
+                  months[value.toInt() - 1],
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface),
+                );
+              },
+            ),
+          ),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: 200,
+              getTitlesWidget: (value, meta) => Text(
+                '\$${value.toInt()}',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelSmall
+                    ?.copyWith(color: Theme.of(context).colorScheme.onSurface),
+              ),
+              reservedSize: 40,
+            ),
           ),
         ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontFamily: 'SYNE',
-              color: Theme.of(context).colorScheme.onSurface),
+        borderData: FlBorderData(
+          show: false,
         ),
-      ],
+        minX: 1,
+        maxX: 6,
+        minY: 0,
+        maxY: 1000,
+        lineBarsData: [
+          LineChartBarData(
+            spots: const [
+              FlSpot(1, 200),
+              FlSpot(2, 500),
+              FlSpot(3, 800),
+              FlSpot(4, 600),
+              FlSpot(5, 750),
+              FlSpot(6, 950),
+            ],
+            isCurved: true,
+            color: AppColors.primaryColor,
+            barWidth: 4,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: false),
+            belowBarData: BarAreaData(
+              show: true,
+              color: AppColors.primaryColor.withValues(alpha: 0.2),
+            ),
+          ),
+          LineChartBarData(
+            spots: const [
+              FlSpot(1, 300),
+              FlSpot(2, 400),
+              FlSpot(3, 650),
+              FlSpot(4, 450),
+              FlSpot(5, 550),
+              FlSpot(6, 700),
+            ],
+            isCurved: true,
+            color: Colors.grey,
+            barWidth: 2,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: false),
+          ),
+        ],
+      ),
     );
   }
 }
