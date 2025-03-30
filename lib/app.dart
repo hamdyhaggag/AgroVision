@@ -69,6 +69,7 @@ class AgroVision extends StatelessWidget {
             title: 'AgroVision',
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
+              fontFamily: 'SYNE',
               colorScheme: const ColorScheme.light(
                 primary: AppColors.primaryColor,
               ),

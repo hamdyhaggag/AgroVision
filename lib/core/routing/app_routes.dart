@@ -19,7 +19,8 @@ class AppRoutes {
   static const String chatList = '/chat-list';
   static const String communityChat = '/community-chat';
   static const String consultationChat = '/consultation-chat';
-  static const String farmAnalytics = '/farmAnalytics';
+  static const String orderAnalytics = '/orderAnalytics';
+  static const String orderManagement = '/orderManagement';
   static const String cropsManagment = '/cropsManagment';
   static const String farmInventory = '/farmInventory';
   static const String settingsScreen = '/settingsScreen';

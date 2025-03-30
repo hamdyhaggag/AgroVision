@@ -18,8 +18,9 @@ import '../../features/chat/Ui/chat_screen.dart';
 import '../../features/disease_detection/Ui/detection_records.dart';
 import '../../features/home/Ui/crop_health.dart';
 import '../../features/home/Ui/drawer/crops_managment.dart';
-import '../../features/home/Ui/drawer/farm_analytics.dart';
 import '../../features/home/Ui/drawer/farm_inventory.dart';
+import '../../features/home/Ui/drawer/order_analytics.dart';
+import '../../features/home/Ui/drawer/order_management.dart';
 import '../../features/home/Ui/drawer/settings_screen.dart';
 
 import '../../features/home/Ui/notifications_screen.dart';
@@ -108,13 +109,17 @@ class AppRouter {
           builder: (_) => const FarmerChatScreen(),
         );
 
-      case '/farmAnalytics':
+      case '/orderAnalytics':
         return MaterialPageRoute(
-          builder: (_) => const FarmAnalyticsScreen(),
+          builder: (_) => const OrderAnalytics(),
         );
       case '/cropsManagment':
         return MaterialPageRoute(
           builder: (_) => const CropsManagementScreen(),
+        );
+      case '/orderManagement':
+        return MaterialPageRoute(
+          builder: (_) => const OrderManagementScreen(),
         );
       case '/farmInventory':
         return MaterialPageRoute(

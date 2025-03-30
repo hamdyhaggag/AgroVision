@@ -533,9 +533,17 @@ class AppDrawer extends StatelessWidget {
                 _buildDrawerItem(
                   context,
                   icon: Icons.analytics_outlined,
-                  title: 'Farm Analytics',
+                  title: 'Order Analytics',
                   subtitle: 'Performance insights & reports',
-                  route: '/farmAnalytics',
+                  route: '/orderAnalytics',
+                ),
+                _buildDivider(),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.analytics_outlined,
+                  title: 'Order Management',
+                  subtitle: 'Order Management & tracking',
+                  route: '/orderManagement',
                 ),
                 _buildDivider(),
                 _buildDrawerItem(
