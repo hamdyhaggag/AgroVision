@@ -214,12 +214,12 @@ class OrderAnalytics extends StatelessWidget {
   }
 
   Widget _buildClientsSection(BuildContext context, bool isMobile) {
-    final totalHorizontalPadding = isMobile ? 16 * 2 : 24 * 2;
-    final totalSpacing = isMobile ? 16 : 16 * 3;
-    final cardWidth = (MediaQuery.of(context).size.width -
-            totalHorizontalPadding -
-            totalSpacing) /
-        (isMobile ? 2 : 4);
+    final clients = [
+      Client(name: "Ken Graphic Inc.", type: "Design Agency", orders: 183),
+      Client(name: "Fullspeedo Crew", type: "Photograph Agency", orders: 99),
+      Client(name: "Highspeed Studios", type: "Network Service", orders: 48),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -230,10 +230,12 @@ class OrderAnalytics extends StatelessWidget {
             children: [
               Text(
                 'Top Clients',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontFamily: 'SYNE', fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontFamily: 'Syne',
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.blackColor,
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -244,7 +246,12 @@ class OrderAnalytics extends StatelessWidget {
                     ),
                   );
                 },
-                child: const Text('View all'),
+                child: Text('View all',
+                    style: TextStyle(
+                      fontFamily: 'Syne',
+                      color: AppColors.blackColor,
+                      fontWeight: FontWeight.w600,
+                    )),
               ),
             ],
           ),
@@ -253,12 +260,7 @@ class OrderAnalytics extends StatelessWidget {
         Wrap(
           spacing: 16,
           runSpacing: 16,
-          children: List.generate(4, (_) {
-            return SizedBox(
-              width: cardWidth,
-              child: const _ClientCard(),
-            );
-          }),
+          children: clients.map((client) => const _ClientCard()).toList(),
         )
       ],
     );
@@ -552,22 +554,27 @@ class _ClientCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 3,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () {},
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const FullClientsView(),
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
                 child: const Text(
                   'IB',
                   style: TextStyle(
-                    color: Colors.blue,
+                    color: AppColors.primaryColor,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'SYNE',
                   ),
