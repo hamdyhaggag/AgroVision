@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/widgets/custom_appbar.dart';
 
-import 'package:flutter/material.dart';
-
 class InvoiceSectionView extends StatelessWidget {
   const InvoiceSectionView({super.key});
 
@@ -36,15 +34,8 @@ class InvoiceSectionView extends StatelessWidget {
         invoices.fold(0.0, (sum, invoice) => sum + invoice.amount);
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        title: const Text('Invoice Payments',
-            style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Syne',
-                color: AppColors.primaryColor)),
+      appBar: CustomAppBar(
+        title: 'Invoice Payments',
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: AppColors.primaryColor),
