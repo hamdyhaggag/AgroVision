@@ -43,22 +43,36 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: AppColors.primaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
-        onPressed: () => _navigateToCreateOrder(context),
-      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        child: ListView.separated(
-          physics: const BouncingScrollPhysics(),
-          itemCount: filteredOrders.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final order = filteredOrders[index];
-            return _OrderCard(order: order);
-          },
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.separated(
+                physics: const BouncingScrollPhysics(),
+                itemCount: filteredOrders.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final order = filteredOrders[index];
+                  return _OrderCard(order: order);
+                },
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryColor,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () => _navigateToCreateOrder(context),
+              child: const Text(
+                'Create Order',
+                style: TextStyle(fontFamily: 'SYNE'),
+              ),
+            ),
+          ],
         ),
       ),
     );
