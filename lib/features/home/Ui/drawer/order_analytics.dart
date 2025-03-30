@@ -33,43 +33,77 @@ class OrderAnalytics extends StatelessWidget {
   }
 
   Widget _buildStatsSection(BuildContext context, bool isMobile) {
-    return SizedBox(
-      height: isMobile ? 160 : 140,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: 3,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
-        itemBuilder: (context, index) {
-          final stats = [
-            {
-              'title': 'Total Balance',
-              'value': '\$21,560.57',
-              'icon': Icons.account_balance_wallet_rounded,
-              'color': Colors.green
-            },
-            {
-              'title': 'Invoice Sent',
-              'value': '421',
-              'icon': Icons.send_rounded,
-              'color': Colors.blue
-            },
-            {
-              'title': 'Completed',
-              'value': '874',
-              'icon': Icons.check_circle_rounded,
-              'color': Colors.orange
-            },
-          ];
-          return _StatCard(
-            title: stats[index]['title'] as String,
-            value: stats[index]['value'] as String,
-            icon: stats[index]['icon'] as IconData,
-            color: stats[index]['color'] as Color,
-            width: isMobile ? 180 : 200,
+    final stats = [
+      {
+        'title': 'Total Balance',
+        'value': '\$21,560.57',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.green
+      },
+      {
+        'title': 'Invoice Sent',
+        'value': '421',
+        'icon': Icons.send_rounded,
+        'color': Colors.blue
+      },
+      {
+        'title': 'Completed',
+        'value': '874',
+        'icon': Icons.check_circle_rounded,
+        'color': Colors.orange
+      },
+    ];
+
+    return isMobile
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _StatCard(
+                      title: stats[0]['title'] as String,
+                      value: stats[0]['value'] as String,
+                      icon: stats[0]['icon'] as IconData,
+                      color: stats[0]['color'] as Color,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _StatCard(
+                      title: stats[1]['title'] as String,
+                      value: stats[1]['value'] as String,
+                      icon: stats[1]['icon'] as IconData,
+                      color: stats[1]['color'] as Color,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _StatCard(
+                title: stats[2]['title'] as String,
+                value: stats[2]['value'] as String,
+                icon: stats[2]['icon'] as IconData,
+                color: stats[2]['color'] as Color,
+                centerContent: true,
+              ),
+            ],
+          )
+        : SizedBox(
+            height: 140,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              separatorBuilder: (_, __) => const SizedBox(width: 16),
+              itemBuilder: (context, index) => _StatCard(
+                title: stats[index]['title'] as String,
+                value: stats[index]['value'] as String,
+                icon: stats[index]['icon'] as IconData,
+                color: stats[index]['color'] as Color,
+                width: 200,
+              ),
+            ),
           );
-        },
-      ),
-    );
   }
 
   Widget _buildChartSection(BuildContext context) {
@@ -236,20 +270,25 @@ class _StatCard extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color color;
-  final double width;
-  const _StatCard(
-      {required this.title,
-      required this.value,
-      required this.icon,
-      required this.color,
-      this.width = 200});
+  final double? width;
+  final bool centerContent;
+
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+    this.width,
+    this.centerContent = false,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: width,
+      width: width ?? double.infinity,
+      constraints: const BoxConstraints(minHeight: 140),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -261,31 +300,58 @@ class _StatCard extends StatelessWidget {
         ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: centerContent
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
+        mainAxisAlignment: centerContent
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
+          if (!centerContent)
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 24),
             ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontFamily: 'SYNE',
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.6)),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontFamily: 'SYNE', fontWeight: FontWeight.w700, color: color),
+          if (!centerContent) const SizedBox(height: 16),
+          Column(
+            crossAxisAlignment: centerContent
+                ? CrossAxisAlignment.center
+                : CrossAxisAlignment.start,
+            children: [
+              if (centerContent)
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 24),
+                ),
+              if (centerContent) const SizedBox(height: 16),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontFamily: 'SYNE',
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.6),
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontFamily: 'SYNE',
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+              ),
+            ],
           ),
         ],
       ),
@@ -306,11 +372,11 @@ class _InvoiceChart extends StatelessWidget {
           horizontalInterval: 200,
           verticalInterval: 1,
           getDrawingHorizontalLine: (value) => FlLine(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             strokeWidth: 1,
           ),
           getDrawingVerticalLine: (value) => FlLine(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             strokeWidth: 1,
           ),
         ),
