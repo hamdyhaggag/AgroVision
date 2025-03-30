@@ -1,4 +1,5 @@
 import 'package:agro_vision/core/themes/app_colors.dart';
+import 'package:agro_vision/shared/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 
 class OrderManagementScreen extends StatefulWidget {
@@ -31,11 +32,8 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Order Management',
-            style: TextStyle(fontWeight: FontWeight.w600)),
-        centerTitle: true,
-        elevation: 1,
+      appBar: CustomAppBar(
+        title: 'Order Management',
         actions: [
           IconButton(
             icon: Icon(Icons.filter_alt_outlined, color: Colors.grey[800]),
@@ -68,7 +66,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
               ),
               onPressed: () => _navigateToCreateOrder(context),
               child: const Text(
-                'Create Order',
+                'Create Invoice',
                 style: TextStyle(fontFamily: 'SYNE'),
               ),
             ),
@@ -342,8 +340,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Invoice'),
+      appBar: CustomAppBar(
+        title: 'Create Invoice',
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
