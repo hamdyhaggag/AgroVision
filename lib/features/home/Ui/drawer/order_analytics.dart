@@ -161,6 +161,12 @@ class OrderAnalytics extends StatelessWidget {
   }
 
   Widget _buildClientsSection(BuildContext context, bool isMobile) {
+    final totalHorizontalPadding = isMobile ? 16 * 2 : 24 * 2;
+    final totalSpacing = isMobile ? 16 : 16 * 3;
+    final cardWidth = (MediaQuery.of(context).size.width -
+            totalHorizontalPadding -
+            totalSpacing) /
+        (isMobile ? 2 : 4);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -175,18 +181,16 @@ class OrderAnalytics extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: isMobile ? 2 : 4,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 2.0,
-          ),
-          itemCount: 4,
-          itemBuilder: (context, index) => const _ClientCard(),
-        ),
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: List.generate(4, (_) {
+            return SizedBox(
+              width: cardWidth,
+              child: const _ClientCard(),
+            );
+          }),
+        )
       ],
     );
   }
@@ -355,6 +359,7 @@ class _InvoiceTile extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
       ),
       trailing: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -390,70 +395,64 @@ class _InvoiceTile extends StatelessWidget {
 enum InvoiceStatus { paid, pending, overdue }
 
 class _ClientCard extends StatelessWidget {
-  const _ClientCard();
+  const _ClientCard({super.key});
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Text(
-                'IB',
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'SYNE',
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {},
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: Colors.blue.withOpacity(0.1),
+                child: const Text(
+                  'IB',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'SYNE',
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'IBM Corp.',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyLarge
-                    ?.copyWith(fontFamily: 'SYNE', fontWeight: FontWeight.w500),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'IBM Corp.',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontFamily: 'SYNE',
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Last order: \$12,500',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontFamily: 'SYNE',
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6),
+                          ),
+                    ),
+                  ],
+                ),
               ),
-              Text(
-                'Last order: \$12,500',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontFamily: 'SYNE',
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.6)),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
               ),
             ],
           ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
-          ),
-        ],
+        ),
       ),
     );
   }
