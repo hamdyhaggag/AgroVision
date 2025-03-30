@@ -1,3 +1,4 @@
+import 'package:agro_vision/features/home/Ui/drawer/view_all_order_analytics.dart';
 import 'package:flutter/material.dart';
 import '../../../../shared/widgets/custom_appbar.dart';
 
@@ -121,11 +122,15 @@ class OrderAnalytics extends StatelessWidget {
                     ?.copyWith(fontFamily: 'SYNE', fontWeight: FontWeight.w600),
               ),
               TextButton(
-                onPressed: () {},
-                child: const Text(
-                  'View all',
-                  style: TextStyle(color: Colors.grey),
-                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const InvoiceSectionView(),
+                    ),
+                  );
+                },
+                child: const Text('View all'),
               ),
             ],
           ),
@@ -196,12 +201,14 @@ class OrderAnalytics extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  // Navigate to the full clients view
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const FullClientsView(),
+                    ),
+                  );
                 },
-                child: const Text(
-                  'View all',
-                  style: TextStyle(color: Colors.grey),
-                ),
+                child: const Text('View all'),
               ),
             ],
           ),
