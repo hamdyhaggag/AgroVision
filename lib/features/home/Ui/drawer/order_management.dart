@@ -210,7 +210,7 @@ class _OrderCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -430,49 +430,217 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    columns: const [
-                      DataColumn(label: Text('ITEM NAME')),
-                      DataColumn(label: Text('ITEM DESCRIPTION')),
-                      DataColumn(label: Text('RATE')),
-                      DataColumn(label: Text('AMOUNT')),
-                    ],
-                    rows: List<DataRow>.generate(
-                      items.length,
-                      (index) => DataRow(
-                        cells: [
-                          DataCell(_isEditing
-                              ? TextFormField(
-                                  controller: _nameControllers[index],
-                                  decoration: const InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                  ),
-                                )
-                              : Text(items[index]['name']!)),
-                          DataCell(_isEditing
-                              ? TextFormField(
-                                  controller: _descControllers[index],
-                                  decoration: const InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                  ),
-                                )
-                              : Text(items[index]['desc']!)),
-                          DataCell(_isEditing
-                              ? TextFormField(
-                                  controller: _rateControllers[index],
-                                  decoration: const InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                )
-                              : Text(items[index]['rate']!)),
-                          DataCell(Text(items[index]['amount']!)),
-                        ],
-                      ),
-                    ),
-                  )),
+              Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: AppColors.primaryColor.withOpacity(0.2)),
+                  ),
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                            columnSpacing: 32,
+                            headingRowColor: MaterialStateColor.resolveWith(
+                              (states) =>
+                                  AppColors.primaryColor.withOpacity(0.05),
+                            ),
+                            dataRowHeight: 56,
+                            headingRowHeight: 48,
+                            horizontalMargin: 16,
+                            dividerThickness: 1,
+                            columns: const [
+                              DataColumn(
+                                label: Text('ITEM NAME',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primaryColor,
+                                    )),
+                              ),
+                              DataColumn(
+                                label: Text('DESCRIPTION',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primaryColor,
+                                    )),
+                              ),
+                              DataColumn(
+                                label: Text('RATE',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primaryColor,
+                                    )),
+                              ),
+                              DataColumn(
+                                label: Text('AMOUNT',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primaryColor,
+                                    )),
+                              )
+                            ],
+                            rows: List<DataRow>.generate(
+                                items.length,
+                                (index) => DataRow(
+                                      color: MaterialStateColor.resolveWith(
+                                          (states) {
+                                        return index.isEven
+                                            ? Colors.grey.shade50
+                                            : Colors.white;
+                                      }),
+                                      cells: [
+                                        DataCell(
+                                          ConstrainedBox(
+                                            constraints: const BoxConstraints(
+                                                maxWidth: 200),
+                                            child: _isEditing
+                                                ? TextFormField(
+                                                    controller:
+                                                        _nameControllers[index],
+                                                    style: TextStyle(
+                                                      color:
+                                                          Colors.grey.shade800,
+                                                      fontSize: 14,
+                                                    ),
+                                                    decoration: InputDecoration(
+                                                      contentPadding:
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 12),
+                                                      border:
+                                                          OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                        borderSide:
+                                                            BorderSide.none,
+                                                      ),
+                                                      filled: true,
+                                                      fillColor:
+                                                          Colors.grey.shade100,
+                                                    ),
+                                                  )
+                                                : Text(
+                                                    items[index]['name']!,
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color:
+                                                          Colors.grey.shade800,
+                                                    ),
+                                                  ),
+                                          ),
+                                        ),
+                                        DataCell(
+                                          ConstrainedBox(
+                                            constraints: const BoxConstraints(
+                                                maxWidth: 300),
+                                            child: _isEditing
+                                                ? TextFormField(
+                                                    controller:
+                                                        _descControllers[index],
+                                                    style: TextStyle(
+                                                      color:
+                                                          Colors.grey.shade800,
+                                                      fontSize: 14,
+                                                    ),
+                                                    maxLines: 2,
+                                                    decoration: InputDecoration(
+                                                      contentPadding:
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 12,
+                                                              vertical: 8),
+                                                      border:
+                                                          OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                        borderSide:
+                                                            BorderSide.none,
+                                                      ),
+                                                      filled: true,
+                                                      fillColor:
+                                                          Colors.grey.shade100,
+                                                    ),
+                                                  )
+                                                : Text(
+                                                    items[index]['desc']!,
+                                                    style: TextStyle(
+                                                      color:
+                                                          Colors.grey.shade600,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                          ),
+                                        ),
+                                        DataCell(
+                                          Container(
+                                            alignment: Alignment.centerRight,
+                                            child: _isEditing
+                                                ? SizedBox(
+                                                    width: 100,
+                                                    child: TextFormField(
+                                                      controller:
+                                                          _rateControllers[
+                                                              index],
+                                                      textAlign:
+                                                          TextAlign.right,
+                                                      style: TextStyle(
+                                                        color: Colors
+                                                            .grey.shade800,
+                                                        fontSize: 14,
+                                                      ),
+                                                      keyboardType:
+                                                          TextInputType.number,
+                                                      decoration:
+                                                          InputDecoration(
+                                                        contentPadding:
+                                                            EdgeInsets
+                                                                .symmetric(
+                                                                    horizontal:
+                                                                        12),
+                                                        border:
+                                                            OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                          borderSide:
+                                                              BorderSide.none,
+                                                        ),
+                                                        filled: true,
+                                                        fillColor: Colors
+                                                            .grey.shade100,
+                                                        prefixText: '\$ ',
+                                                      ),
+                                                    ),
+                                                  )
+                                                : Text(
+                                                    '\$${items[index]['rate']}',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color:
+                                                          Colors.grey.shade800,
+                                                    ),
+                                                  ),
+                                          ),
+                                        ),
+                                        DataCell(
+                                          Container(
+                                            alignment: Alignment.centerRight,
+                                            child: Text(
+                                              items[index]['amount']!,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.primaryColor,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ))),
+                      ))),
               const SizedBox(height: 24),
               Column(
                 children: [
@@ -482,19 +650,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: 'Amount (EGP)',
-                      border: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: AppColors.primaryColor)),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: AppColors.primaryColor)),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
                     initialValue: '5,000.00',
-                    keyboardType: TextInputType.number,
+                    decoration: _inputDecoration('Amount (EGP)'),
                   ),
                 ],
               ),
@@ -519,7 +676,17 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      border: const OutlineInputBorder(),
+      labelStyle: const TextStyle(color: Colors.grey),
+      floatingLabelStyle: const TextStyle(color: AppColors.primaryColor),
+      border: const OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.grey),
+      ),
+      enabledBorder: const OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.grey),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderSide: BorderSide(color: AppColors.primaryColor),
+      ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
   }
@@ -548,9 +715,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     ).then((pickedDate) {
-      if (pickedDate != null) {
-        // Update date state
-      }
+      if (pickedDate != null) {}
     });
   }
 }
@@ -572,11 +737,11 @@ class OrderDetailScreen extends StatelessWidget {
         centerTitle: false,
         actions: [
           IconButton(
-            icon: Icon(Icons.print, color: colors.onBackground),
+            icon: Icon(Icons.print, color: colors.onSurface),
             onPressed: () {},
           ),
           IconButton(
-            icon: Icon(Icons.more_vert, color: colors.onBackground),
+            icon: Icon(Icons.more_vert, color: colors.onSurface),
             onPressed: () {},
           ),
         ],
@@ -606,7 +771,7 @@ class OrderDetailScreen extends StatelessWidget {
       elevation: 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: colors.outline.withOpacity(0.1)),
+        side: BorderSide(color: colors.outline.withValues(alpha: 0.1)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),

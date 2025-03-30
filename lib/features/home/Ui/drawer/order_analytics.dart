@@ -93,7 +93,7 @@ class OrderAnalytics extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -142,7 +142,7 @@ class OrderAnalytics extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               )
@@ -247,12 +247,15 @@ class _StatCard extends StatelessWidget {
       width: width,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [color.withOpacity(0.05), color.withOpacity(0.15)],
+          colors: [
+            color.withValues(alpha: 0.05),
+            color.withValues(alpha: 0.15)
+          ],
         ),
       ),
       child: Column(
@@ -261,7 +264,7 @@ class _StatCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),
@@ -271,8 +274,10 @@ class _StatCard extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontFamily: 'SYNE',
-                color:
-                    Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.6)),
           ),
           const SizedBox(height: 8),
           Text(
@@ -369,7 +374,7 @@ class _InvoiceTile extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: statusColor!.withOpacity(0.1),
+          color: statusColor!.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(
@@ -389,7 +394,8 @@ class _InvoiceTile extends StatelessWidget {
         'Due $date',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
             fontFamily: 'SYNE',
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
       ),
       trailing: Column(
         mainAxisSize: MainAxisSize.min,
@@ -407,7 +413,7 @@ class _InvoiceTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -428,7 +434,7 @@ class _InvoiceTile extends StatelessWidget {
 enum InvoiceStatus { paid, pending, overdue }
 
 class _ClientCard extends StatelessWidget {
-  const _ClientCard({super.key});
+  const _ClientCard();
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -443,7 +449,7 @@ class _ClientCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: Colors.blue.withOpacity(0.1),
+                backgroundColor: Colors.blue.withValues(alpha: 0.1),
                 child: const Text(
                   'IB',
                   style: TextStyle(
@@ -473,7 +479,7 @@ class _ClientCard extends StatelessWidget {
                             color: Theme.of(context)
                                 .colorScheme
                                 .onSurface
-                                .withOpacity(0.6),
+                                .withValues(alpha: 0.6),
                           ),
                     ),
                   ],
@@ -481,7 +487,10 @@ class _ClientCard extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.3),
               ),
             ],
           ),
@@ -499,7 +508,7 @@ class _Divider extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Divider(
         height: 1,
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
       ),
     );
   }
