@@ -110,12 +110,24 @@ class OrderAnalytics extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(
-            'Latest Invoice Payments',
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(fontFamily: 'SYNE', fontWeight: FontWeight.w600),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Latest Invoice Payments',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontFamily: 'SYNE', fontWeight: FontWeight.w600),
+              ),
+              TextButton(
+                onPressed: () {},
+                child: const Text(
+                  'View all',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 16),
@@ -172,12 +184,26 @@ class OrderAnalytics extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(
-            'Top Clients',
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(fontFamily: 'SYNE', fontWeight: FontWeight.w600),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Top Clients',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontFamily: 'SYNE', fontWeight: FontWeight.w600),
+              ),
+              TextButton(
+                onPressed: () {
+                  // Navigate to the full clients view
+                },
+                child: const Text(
+                  'View all',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 16),
