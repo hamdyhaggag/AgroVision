@@ -13,9 +13,9 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
   final List<Order> orders = [
     Order(
       id: 1024,
-      dueDate: '2025-03-15',
-      clientName: 'Hamdy',
-      contact: '+1234567890',
+      dueDate: '2020-10-24',
+      clientName: 'Omar Kareem',
+      contact: '+0123456789',
       amount: 1500.00,
       status: 'Completed',
     ),
@@ -271,6 +271,59 @@ class CreateOrderScreen extends StatefulWidget {
 
 class _CreateOrderScreenState extends State<CreateOrderScreen> {
   final _formKey = GlobalKey<FormState>();
+  bool _isEditing = false;
+  late List<TextEditingController> _nameControllers;
+  late List<TextEditingController> _descControllers;
+  late List<TextEditingController> _rateControllers;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeControllers();
+  }
+
+  @override
+  void dispose() {
+    for (var c in _nameControllers) {
+      c.dispose();
+    }
+    for (var c in _descControllers) {
+      c.dispose();
+    }
+    for (var c in _rateControllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  void _initializeControllers() {
+    _nameControllers = List.generate(
+      items.length,
+      (index) => TextEditingController(text: items[index]['name']),
+    );
+    _descControllers = List.generate(
+      items.length,
+      (index) => TextEditingController(text: items[index]['desc']),
+    );
+    _rateControllers = List.generate(
+      items.length,
+      (index) => TextEditingController(text: items[index]['rate']),
+    );
+  }
+
+  void _toggleEditMode() {
+    setState(() {
+      _isEditing = !_isEditing;
+      if (!_isEditing) {
+        for (int i = 0; i < items.length; i++) {
+          items[i]['name'] = _nameControllers[i].text;
+          items[i]['desc'] = _descControllers[i].text;
+          items[i]['rate'] = _rateControllers[i].text;
+        }
+      }
+    });
+  }
+
   final List<Map<String, String>> items = [
     {
       'name': 'Fresh Potato 2025',
@@ -348,33 +401,80 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.calendar_today,
                     color: AppColors.primaryColor),
-                title: const Text('October 31st, 2020',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit, color: AppColors.primaryColor),
-                  onPressed: () {},
+                title: _isEditing
+                    ? TextButton(
+                        onPressed: _handleEditDate,
+                        child: const Text('October 31st, 2020',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      )
+                    : const Text('October 31st, 2020',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        _isEditing ? Icons.save : Icons.edit_outlined,
+                        color: AppColors.primaryColor,
+                        size: 22,
+                      ),
+                      onPressed: _toggleEditMode,
+                      tooltip: _isEditing ? 'Save Changes' : 'Edit',
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline,
+                          size: 24, color: AppColors.primaryColor),
+                      onPressed: _addNewItem,
+                      tooltip: 'Add New Item',
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 24),
               SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('ITEM NAME')),
-                    DataColumn(label: Text('ITEM DESCRIPTION')),
-                    DataColumn(label: Text('RATE')),
-                    DataColumn(label: Text('AMOUNT')),
-                  ],
-                  rows: items
-                      .map((item) => DataRow(cells: [
-                            DataCell(Text(item['name']!)),
-                            DataCell(Text(item['desc']!)),
-                            DataCell(Text(item['rate']!)),
-                            DataCell(Text(item['amount']!)),
-                          ]))
-                      .toList(),
-                ),
-              ),
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    columns: const [
+                      DataColumn(label: Text('ITEM NAME')),
+                      DataColumn(label: Text('ITEM DESCRIPTION')),
+                      DataColumn(label: Text('RATE')),
+                      DataColumn(label: Text('AMOUNT')),
+                    ],
+                    rows: List<DataRow>.generate(
+                      items.length,
+                      (index) => DataRow(
+                        cells: [
+                          DataCell(_isEditing
+                              ? TextFormField(
+                                  controller: _nameControllers[index],
+                                  decoration: const InputDecoration(
+                                    border: UnderlineInputBorder(),
+                                  ),
+                                )
+                              : Text(items[index]['name']!)),
+                          DataCell(_isEditing
+                              ? TextFormField(
+                                  controller: _descControllers[index],
+                                  decoration: const InputDecoration(
+                                    border: UnderlineInputBorder(),
+                                  ),
+                                )
+                              : Text(items[index]['desc']!)),
+                          DataCell(_isEditing
+                              ? TextFormField(
+                                  controller: _rateControllers[index],
+                                  decoration: const InputDecoration(
+                                    border: UnderlineInputBorder(),
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                )
+                              : Text(items[index]['rate']!)),
+                          DataCell(Text(items[index]['amount']!)),
+                        ],
+                      ),
+                    ),
+                  )),
               const SizedBox(height: 24),
               Column(
                 children: [
@@ -415,11 +515,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primaryColor,
-        onPressed: _addNewItem,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
     );
   }
 
@@ -446,6 +541,19 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     if (_formKey.currentState!.validate()) {
       Navigator.pop(context);
     }
+  }
+
+  void _handleEditDate() {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    ).then((pickedDate) {
+      if (pickedDate != null) {
+        // Update date state
+      }
+    });
   }
 }
 
