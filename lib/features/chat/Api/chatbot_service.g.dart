@@ -14,7 +14,7 @@ class _ChatbotService implements ChatbotService {
     this.baseUrl,
     this.errorLogger,
   }) {
-    baseUrl ??= 'https://bbe2-197-48-37-106.ngrok-free.app/';
+    baseUrl ??= 'https://ab2f-41-238-179-181.ngrok-free.app/';
   }
 
   final Dio _dio;

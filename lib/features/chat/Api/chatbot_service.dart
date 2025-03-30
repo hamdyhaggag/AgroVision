@@ -6,7 +6,7 @@ import 'package:agro_vision/models/chat_message.dart';
 
 part 'chatbot_service.g.dart';
 
-@RestApi(baseUrl: 'https://bbe2-197-48-37-106.ngrok-free.app/')
+@RestApi(baseUrl: 'https://ab2f-41-238-179-181.ngrok-free.app/')
 abstract class ChatbotService {
   factory ChatbotService(Dio dio) = _ChatbotService;
 
