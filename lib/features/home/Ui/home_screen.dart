@@ -588,7 +588,7 @@ class AppDrawer extends StatelessWidget {
     return Divider(
       height: 1,
       thickness: 0.5,
-      color: AppColors.primaryColor.withOpacity(0.1),
+      color: AppColors.primaryColor.withValues(alpha: 0.1),
       indent: 56,
       endIndent: 16,
     );
@@ -608,7 +608,7 @@ class AppDrawer extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primaryColor.withOpacity(0.1),
+            color: AppColors.primaryColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, size: 24, color: AppColors.primaryColor),
@@ -628,13 +628,13 @@ class AppDrawer extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: 'SYNE',
                   fontSize: 12,
-                  color: AppColors.primaryColor.withOpacity(0.7),
+                  color: AppColors.primaryColor.withValues(alpha: 0.7),
                 ),
               )
             : null,
         trailing: Icon(
           Icons.chevron_right_rounded,
-          color: AppColors.primaryColor.withOpacity(0.5),
+          color: AppColors.primaryColor.withValues(alpha: 0.5),
         ),
         onTap: () {
           Navigator.pushNamed(context, route);
@@ -660,8 +660,8 @@ class DrawerHeaderWidget extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primaryColor.withOpacity(0.9),
-            AppColors.primaryColor.withOpacity(0.7),
+            AppColors.primaryColor.withValues(alpha: 0.9),
+            AppColors.primaryColor.withValues(alpha: 0.7),
           ],
         ),
         borderRadius: const BorderRadius.only(
@@ -677,7 +677,7 @@ class DrawerHeaderWidget extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 width: 2,
               ),
             ),
@@ -706,7 +706,7 @@ class DrawerHeaderWidget extends StatelessWidget {
               fontFamily: 'SYNE',
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               letterSpacing: 1.2,
             ),
           ),

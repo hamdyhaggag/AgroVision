@@ -13,15 +13,62 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
   List<String> selectedStatuses = [];
   final List<Order> orders = [
     Order(
-      id: 1024,
-      dueDate: '2020-10-24',
-      clientName: 'Omar Kareem',
-      contact: '+0123456789',
-      amount: 1500.00,
+      id: 1028,
+      dueDate: '2025-04-02',
+      clientName: 'Nile Agriculture Co.',
+      contact: '+201112223344',
+      amount: 9450.00,
+      status: 'Completed',
+    ),
+    Order(
+      id: 1029,
+      dueDate: '2025-05-18',
+      clientName: 'Green Valley Farms',
+      contact: '+442071234567',
+      amount: 16750.00,
+      status: 'Pending',
+    ),
+    Order(
+      id: 1030,
+      dueDate: '2025-06-10',
+      clientName: 'Organics farms',
+      contact: '+4915223456789',
+      amount: 4200.00,
+      status: 'Processing',
+    ),
+    Order(
+      id: 1031,
+      dueDate: '2025-03-15',
+      clientName: 'Sunrise Organics',
+      contact: '+33123456789',
+      amount: 6350.00,
+      status: 'Cancelled',
+    ),
+    Order(
+      id: 1032,
+      dueDate: '2025-04-30',
+      clientName: 'Alexandra Dubois',
+      contact: '+33712345678',
+      amount: 2800.00,
+      status: 'Pending',
+    ),
+    Order(
+      id: 1033,
+      dueDate: '2025-05-05',
+      clientName: 'Delta Agro',
+      contact: '+201099887766',
+      amount: 11500.00,
+      status: 'Completed',
+    ),
+    Order(
+      id: 1034,
+      dueDate: '2025-06-20',
+      clientName: 'Pacific Growers',
+      contact: '+61400111222',
+      amount: 23400.00,
       status: 'Completed',
     ),
   ];
-
   List<Order> get filteredOrders {
     if (selectedStatuses.isEmpty) return orders;
     return orders
@@ -434,7 +481,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                        color: AppColors.primaryColor.withOpacity(0.2)),
+                        color: AppColors.primaryColor.withValues(alpha: 0.2)),
                   ),
                   child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
@@ -442,9 +489,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                         scrollDirection: Axis.horizontal,
                         child: DataTable(
                             columnSpacing: 32,
-                            headingRowColor: MaterialStateColor.resolveWith(
-                              (states) =>
-                                  AppColors.primaryColor.withOpacity(0.05),
+                            headingRowColor: WidgetStateColor.resolveWith(
+                              (states) => AppColors.primaryColor
+                                  .withValues(alpha: 0.05),
                             ),
                             dataRowHeight: 56,
                             headingRowHeight: 48,
@@ -483,7 +530,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                             rows: List<DataRow>.generate(
                                 items.length,
                                 (index) => DataRow(
-                                      color: MaterialStateColor.resolveWith(
+                                      color: WidgetStateColor.resolveWith(
                                           (states) {
                                         return index.isEven
                                             ? Colors.grey.shade50
@@ -505,7 +552,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                                     ),
                                                     decoration: InputDecoration(
                                                       contentPadding:
-                                                          EdgeInsets.symmetric(
+                                                          const EdgeInsets
+                                                              .symmetric(
                                                               horizontal: 12),
                                                       border:
                                                           OutlineInputBorder(
@@ -547,7 +595,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                                     maxLines: 2,
                                                     decoration: InputDecoration(
                                                       contentPadding:
-                                                          EdgeInsets.symmetric(
+                                                          const EdgeInsets
+                                                              .symmetric(
                                                               horizontal: 12,
                                                               vertical: 8),
                                                       border:
@@ -595,10 +644,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                                       decoration:
                                                           InputDecoration(
                                                         contentPadding:
-                                                            EdgeInsets
+                                                            const EdgeInsets
                                                                 .symmetric(
-                                                                    horizontal:
-                                                                        12),
+                                                                horizontal: 12),
                                                         border:
                                                             OutlineInputBorder(
                                                           borderRadius:
@@ -630,7 +678,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                             alignment: Alignment.centerRight,
                                             child: Text(
                                               items[index]['amount']!,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                 fontWeight: FontWeight.w600,
                                                 color: AppColors.primaryColor,
                                                 fontSize: 14,
