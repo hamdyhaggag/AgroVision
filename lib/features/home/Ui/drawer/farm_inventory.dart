@@ -338,11 +338,7 @@ class AddNewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add New Product',
-            style: TextStyle(
-                fontFamily: 'SYNE', fontWeight: FontWeight.w700, fontSize: 18)),
-      ),
+      appBar: const CustomAppBar(title: 'Add New Product'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
