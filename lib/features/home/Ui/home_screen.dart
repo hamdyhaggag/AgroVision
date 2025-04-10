@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
@@ -369,6 +368,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildErrorState(String message) {
+    final isLocationError = message.contains('Location services are disabled');
+
     return SafeArea(
       child: Center(
         child: SingleChildScrollView(
@@ -377,28 +378,38 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Lottie.asset(
-                'assets/animations/error.json',
-                width: 230,
+                isLocationError
+                    ? 'assets/animations/location_error.json'
+                    : 'assets/animations/error.json',
+                width: 250,
                 frameRate: const FrameRate(60),
               ),
               const SizedBox(height: 32),
-              Text('Oops! Something Went Wrong',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
-                    letterSpacing: 0.2,
-                  )),
+              Text(
+                isLocationError
+                    ? 'Location Services Required'
+                    : 'Oops! Something Went Wrong',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                  letterSpacing: 0.2,
+                ),
+              ),
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text(message,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 15,
-                      height: 1.4,
-                    )),
+                child: Text(
+                  isLocationError
+                      ? 'Please enable location services to get accurate weather information for your area.'
+                      : message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 15,
+                    height: 1.4,
+                  ),
+                ),
               ),
               const SizedBox(height: 32),
               FilledButton(
@@ -411,11 +422,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 onPressed: () => context.read<HomeCubit>().getWeatherData(),
-                child: const Text('Try Again',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15,
-                    )),
+                child: const Text(
+                  'Try Again',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
+                  ),
+                ),
               ),
             ],
           ),
