@@ -106,6 +106,8 @@ class _ChatListScreenState extends State<ChatListScreen>
 
   Widget _buildSessionList(BuildContext context, List<ChatSession> sessions) {
     return ListView.separated(
+      addAutomaticKeepAlives: true,
+      cacheExtent: 1000,
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       physics: const BouncingScrollPhysics(),
       itemCount: sessions.length,
@@ -164,7 +166,8 @@ class _ChatListScreenState extends State<ChatListScreen>
                                 ),
                               ),
                               Text(
-                                DateFormat('HH:mm').format(session.createdAt),
+                                DateFormat('HH:mm', context.locale.toString())
+                                    .format(session.createdAt),
                                 style: const TextStyle(
                                   color: AppColors.textSecondary,
                                   fontSize: 12,

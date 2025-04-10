@@ -62,6 +62,7 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
         _initializeAnimations();
       } else {
         _controller.dispose();
+        _dotAnimations.clear();
       }
     }
     super.didUpdateWidget(oldWidget);
@@ -193,6 +194,8 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
               width: 200,
               height: 150,
               fit: BoxFit.cover,
+              errorBuilder: (ctx, error, stack) =>
+                  const Icon(Icons.broken_image),
             ),
     );
   }
@@ -219,14 +222,19 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
   @override
   void initState() {
     super.initState();
-    // Initialize the player controller which will be used to generate the waveform.
-    _playerController = PlayerController();
-    _preparePlayer();
+    _audioPlayer.onPlayerComplete.listen((_) {
+      setState(() => isPlaying = false);
+      _playerController = PlayerController();
+      _preparePlayer();
+    });
   }
 
   Future<void> _preparePlayer() async {
-    // Preload the audio file to extract waveform data.
-    await _playerController.preparePlayer(path: widget.filePath);
+    try {
+      await _playerController.preparePlayer(path: widget.filePath);
+    } catch (e) {
+      debugPrint('Error preparing audio: $e');
+    }
   }
 
   Future<void> _togglePlayPause() async {

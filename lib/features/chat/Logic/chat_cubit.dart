@@ -173,10 +173,15 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  ChatSession _getCurrentSession() => state.sessions.firstWhere(
-        (s) => s.id == state.currentSessionId,
-        orElse: () => state.sessions.last,
-      );
+  ChatSession _getCurrentSession() {
+    if (state.sessions.isEmpty) {
+      throw Exception('No sessions available');
+    }
+    return state.sessions.firstWhere(
+      (s) => s.id == state.currentSessionId,
+      orElse: () => state.sessions.last,
+    );
+  }
 
   ChatSession _createUpdatedSession(ChatSession session, String text) =>
       session.copyWith(
@@ -235,7 +240,8 @@ class ChatCubit extends Cubit<ChatState> {
 
     final pendingCopy = List<Message>.from(_pendingMessages);
     _pendingMessages.clear();
-
+    final currentMessages = _getCurrentSession().messages;
+    pendingCopy.removeWhere((msg) => currentMessages.contains(msg));
     for (final message in pendingCopy) {
       if (message.imageUrl != null) {
         sendImageMessage(
