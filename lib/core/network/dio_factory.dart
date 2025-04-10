@@ -15,7 +15,7 @@ class DioFactory {
 
   static Dio getChatDio() {
     return Dio(BaseOptions(
-      baseUrl: 'https://ab2f-41-238-179-181.ngrok-free.app/',
+      baseUrl: 'https://immortal-basically-lemur.ngrok-free.app/',
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       headers: {
