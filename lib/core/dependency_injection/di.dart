@@ -2,9 +2,6 @@ import 'package:get_it/get_it.dart';
 import '../../features/authentication/Data/repos/login_repo.dart';
 import '../../features/authentication/Logic/login cubit/login_cubit.dart';
 import '../../features/authentication/Logic/logout cubit/logout_cubit.dart';
-import '../../features/authentication/Logic/services/auth_service.dart';
-import '../../features/authentication/Logic/services/session_service.dart';
-import '../../features/authentication/Logic/services/settings_service.dart';
 import '../../features/chat/Logic/chat_cubit.dart';
 import '../../features/chat/api/chatbot_service.dart';
 import '../../features/chat/chat_repository.dart';
@@ -13,6 +10,7 @@ import '../network/dio_factory.dart';
 
 final getIt = GetIt.instance;
 
+// lib/core/dependency_injection/di.dart
 Future<void> setupGetIt() async {
   // Main Dio instances
   final dio = DioFactory.getDio();
@@ -22,19 +20,9 @@ Future<void> setupGetIt() async {
   getIt.registerLazySingleton<ApiService>(() => ApiService(dio));
   getIt.registerLazySingleton<ChatbotService>(() => ChatbotService(chatDio));
 
-  // Add these FIRST before ChatRepository
-  getIt.registerLazySingleton<AuthService>(() => AuthService());
-  getIt.registerLazySingleton<SessionService>(() => SessionService());
-  getIt.registerLazySingleton<SettingsService>(() => SettingsService());
-
-  // Correct ChatRepository registration (remove the duplicate)
+  // Register repositories
   getIt.registerLazySingleton<ChatRepository>(
-    () => ChatRepository(
-      chatbotService: getIt<ChatbotService>(),
-      authService: getIt<AuthService>(),
-      sessionService: getIt<SessionService>(),
-      settingsService: getIt<SettingsService>(),
-    ),
+    () => ChatRepository(chatbotService: getIt<ChatbotService>()),
   );
 
   // Authentication
@@ -42,6 +30,6 @@ Future<void> setupGetIt() async {
   getIt.registerLazySingleton<LoginCubit>(() => LoginCubit(getIt()));
   getIt.registerLazySingleton<LogoutCubit>(() => LogoutCubit(getIt()));
 
-  // Chat Cubit
+  // Add this line if using MultiBlocProvider
   getIt.registerFactory<ChatCubit>(() => ChatCubit(getIt<ChatRepository>()));
 }
