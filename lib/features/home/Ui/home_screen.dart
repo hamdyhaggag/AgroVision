@@ -351,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 baseColor: Colors.grey[300]!,
                 highlightColor: Colors.grey[100]!,
                 child: Container(
-                  height: 180,
+                  height: 290,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -363,11 +363,89 @@ class _HomeScreenState extends State<HomeScreen> {
                 baseColor: Colors.grey[300]!,
                 highlightColor: Colors.grey[100]!,
                 child: Container(
-                  height: 200,
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 20,
+                        width: 100,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(height: 16),
+                      ...List.generate(
+                        2,
+                        (index) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                height: 16,
+                                width: 120,
+                                color: Colors.white,
+                              ),
+                              Container(
+                                height: 16,
+                                width: 60,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 25,
+                            width: 25,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 12),
+                          Container(
+                            height: 20,
+                            width: 100,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: 1.2,
+                      ),
+                      itemCount: 4,
+                      itemBuilder: (context, index) => Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ]),
