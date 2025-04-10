@@ -372,18 +372,50 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       child: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Lottie.asset('assets/animations/error.json', width: 150),
-              const SizedBox(height: 20),
-              Text(message,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 16)),
-              const SizedBox(height: 20),
+              Lottie.asset(
+                'assets/animations/error.json',
+                width: 230,
+                frameRate: const FrameRate(60),
+              ),
+              const SizedBox(height: 32),
+              Text('Oops! Something Went Wrong',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                    letterSpacing: 0.2,
+                  )),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(message,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 15,
+                      height: 1.4,
+                    )),
+              ),
+              const SizedBox(height: 32),
               FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 onPressed: () => context.read<HomeCubit>().getWeatherData(),
-                child: const Text('Retry'),
+                child: const Text('Try Again',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    )),
               ),
             ],
           ),
@@ -440,67 +472,108 @@ class DevicesCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          ...sensors.map((sensor) => _buildSensorRow(sensor)).toList(),
+          ...sensors.map((sensor) => _buildSensorRow(context, sensor)),
         ],
       ),
     );
   }
 
-  Widget _buildSensorRow(Map<String, dynamic> sensor) {
+  Widget _buildSensorRow(BuildContext context, Map<String, dynamic> sensor) {
     final status = sensor['status']?.toString() ?? '';
     final isActive = status.toLowerCase() == 'active';
     final statusColor = isActive ? Colors.green : Colors.red;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  "${sensor['name']} ${sensor['id']}",
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+    return InkWell(
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            content: Row(
+              children: [
+                Icon(Icons.sensors_outlined, color: Colors.white, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Field Sensor Alert! ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'Soil metrics are looking optimal 🌱',
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ],
+                    ),
+                    style: TextStyle(color: Colors.white),
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Text(
-                status,
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
-                  color: statusColor,
-                ),
-              ),
-            ],
+              ],
+            ),
+            duration: const Duration(seconds: 3),
           ),
-          if (!isActive && sensor['issue'] != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4.0),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.warning_amber_rounded,
-                    size: 16,
-                    color: Colors.orange.shade400,
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    "${sensor['name']} ${sensor['id']}",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    sensor['issue'],
-                    style: TextStyle(
-                      fontSize: 12,
+                ),
+                Text(
+                  status,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    color: statusColor,
+                  ),
+                ),
+              ],
+            ),
+            if (!isActive && sensor['issue'] != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      size: 16,
                       color: Colors.orange.shade400,
                     ),
-                  ),
-                ],
-              ),
-            )
-        ],
+                    const SizedBox(width: 4),
+                    Text(
+                      sensor['issue'],
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange.shade400,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+          ],
+        ),
       ),
     );
   }
@@ -511,8 +584,8 @@ final List<Map<String, dynamic>> sensors = [
     'id': '#SM201',
     'name': 'Soil Moisture Sensor',
     'type': 'moisture',
-    'status': 'Active',
-    // 'issue': 'Signal issue since 08:02 AM',
+    'status': 'inctive',
+    'issue': 'Signal issue since 6/4/2025 at 08:02 AM',
   },
 ];
 
