@@ -508,39 +508,104 @@ class DevicesCard extends StatelessWidget {
       onTap: () {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: AppColors.primaryColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
             behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(16),
-            content: Row(
-              children: [
-                Icon(Icons.sensors_outlined, color: Colors.white, size: 24),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Field Sensor Alert! ',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'Soil metrics are looking optimal 🌱',
-                          style: TextStyle(fontSize: 13),
-                        ),
-                      ],
-                    ),
-                    style: TextStyle(color: Colors.white),
+            margin: const EdgeInsets.all(20),
+            duration: const Duration(seconds: 4),
+            content: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
+                ],
+                border: Border.all(
+                  color: Colors.grey.shade200,
+                  width: 1,
                 ),
-              ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.check_circle_rounded,
+                          color: Colors.green.shade600,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sensor Status Update',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade800,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Optimal Soil Conditions',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    height: 1,
+                    color: Colors.grey.shade100,
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.green.shade600,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        backgroundColor: Colors.green.shade50,
+                      ),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      },
+                      child: const Text(
+                        'Dismiss',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            duration: const Duration(seconds: 3),
           ),
         );
       },
