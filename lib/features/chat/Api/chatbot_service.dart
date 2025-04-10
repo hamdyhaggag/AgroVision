@@ -4,6 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:agro_vision/models/chat_message.dart';
 
+import '../../../models/new_session_request.dart';
+import '../../../models/session_response.dart';
+
 part 'chatbot_service.g.dart';
 
 @RestApi(baseUrl: 'https://immortal-basically-lemur.ngrok-free.app/')
@@ -12,6 +15,9 @@ abstract class ChatbotService {
 
   @POST('text_convo')
   Future<ChatResponse> sendTextMessage(@Body() ChatRequestBody body);
+
+  @POST('new_session')
+  Future<SessionResponse> createNewSession(@Body() NewSessionRequest body);
 
   @POST('image_convo')
   @MultiPart()

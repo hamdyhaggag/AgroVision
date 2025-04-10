@@ -36,17 +36,17 @@ class ChatCubit extends Cubit<ChatState> {
     super.emit(state);
   }
 
-  void createNewSession() {
-    final newSession = ChatSession(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      messages: [],
-      createdAt: DateTime.now(),
-    );
-    emit(ChatSuccess(
-      sessions: [...state.sessions, newSession],
-      currentSessionId: newSession.id,
-    ));
-  }
+  // void createNewSession() {
+  //   final newSession = ChatSession(
+  //     id: DateTime.now().millisecondsSinceEpoch.toString(),
+  //     messages: [],
+  //     createdAt: DateTime.now(),
+  //   );
+  //   emit(ChatSuccess(
+  //     sessions: [...state.sessions, newSession],
+  //     currentSessionId: newSession.id,
+  //   ));
+  // }
 
   void deleteSession(String sessionId) {
     final updatedSessions =
@@ -97,6 +97,7 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> sendTextMessage(String text) async {
     final currentSession = _getCurrentSession();
+    const String userId = "55";
     var updatedSession = _createUpdatedSession(currentSession, text);
 
     if (updatedSession.title == null) {
@@ -107,11 +108,49 @@ class ChatCubit extends Cubit<ChatState> {
     emit(ChatLoading(
         sessions: updatedSessions, currentSessionId: currentSession.id));
 
+    final requestBody = ChatRequestBody(
+      query: text,
+      userId: userId,
+      sessionId: currentSession.id,
+    );
+
     try {
-      final response = await repository.sendText(text);
+      final response = await repository.sendText(requestBody);
       _handleSuccessResponse(updatedSession, response.answer);
     } catch (e) {
       _handleError(e, updatedSessions, currentSession, text);
+    }
+  }
+
+  Future<void> createNewSession() async {
+    final currentState = state;
+    if (currentState is ChatSuccess) {
+      try {
+        emit(ChatLoading(
+          sessions: currentState.sessions,
+          currentSessionId: currentState.currentSessionId,
+        ));
+
+        final response =
+            await repository.createNewSession("55"); // Use actual user ID
+        final newSession = ChatSession(
+          id: response.sessionId,
+          messages: [],
+          createdAt: DateTime.now(),
+        );
+
+        final updatedSessions = [...currentState.sessions, newSession];
+        emit(ChatSuccess(
+          sessions: updatedSessions,
+          currentSessionId: newSession.id,
+        ));
+      } catch (e) {
+        emit(ChatError(
+          sessions: currentState.sessions,
+          currentSessionId: currentState.currentSessionId,
+          error: e.toString(),
+        ));
+      }
     }
   }
 

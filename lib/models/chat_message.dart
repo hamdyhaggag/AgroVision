@@ -1,9 +1,18 @@
 class ChatRequestBody {
   final String query;
+  final String userId;
+  final String sessionId;
 
-  ChatRequestBody({required this.query});
-
-  Map<String, dynamic> toJson() => {'query': query};
+  ChatRequestBody({
+    required this.query,
+    required this.userId,
+    required this.sessionId,
+  });
+  Map<String, dynamic> toJson() => {
+        'query': query,
+        'user_id': userId,
+        'session_id': sessionId,
+      };
 }
 
 class ChatResponse {

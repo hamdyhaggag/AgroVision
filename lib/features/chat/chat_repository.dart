@@ -3,6 +3,9 @@ import 'package:dio/dio.dart';
 import 'package:agro_vision/features/chat/api/chatbot_service.dart';
 import 'package:agro_vision/models/chat_message.dart';
 
+import '../../models/new_session_request.dart';
+import '../../models/session_response.dart';
+
 class NetworkUnavailableException implements Exception {
   @override
   String toString() => 'Internet connection unavailable';
@@ -21,28 +24,40 @@ class ChatRepository {
 
   ChatRepository({required this.chatbotService});
 
-  Future<ChatResponse> sendText(String text) async {
+  Future<ChatResponse> sendText(ChatRequestBody body) async {
     try {
-      final response =
-      await chatbotService.sendTextMessage(ChatRequestBody(query: text));
+      final response = await chatbotService.sendTextMessage(body);
+
       return response;
     } on DioException catch (e) {
       if (_isNetworkError(e)) {
         throw NetworkUnavailableException();
       }
       if (e.response?.statusCode == 404) {
-        throw ChatException('API endpoint not found. Check server configuration');
+        throw ChatException(
+            'API endpoint not found. Check server configuration');
       }
       throw ChatException('Failed to send message: ${e.message}');
     }
   }
 
+  Future<SessionResponse> createNewSession(String userId) async {
+    try {
+      return await chatbotService.createNewSession(NewSessionRequest(userId));
+    } on DioException catch (e) {
+      if (_isNetworkError(e)) {
+        throw NetworkUnavailableException();
+      }
+      throw ChatException('Failed to create session: ${e.message}');
+    }
+  }
+
   Future<ChatResponse> sendImage(
-      File image,
-      String question,
-      String mode,
-      String speak,
-      ) async {
+    File image,
+    String question,
+    String mode,
+    String speak,
+  ) async {
     try {
       final response = await chatbotService.sendImageMessage(
         image,
