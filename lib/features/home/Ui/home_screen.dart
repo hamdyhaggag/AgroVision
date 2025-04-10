@@ -457,6 +457,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildErrorState(String message) {
     final isLocationError = message.contains('Location services are disabled');
+    final isNetworkError =
+        message.contains('connection') || message.contains('network');
 
     return SafeArea(
       child: Center(
@@ -468,7 +470,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Lottie.asset(
                 isLocationError
                     ? 'assets/animations/location_error.json'
-                    : 'assets/animations/error.json',
+                    : isNetworkError
+                        ? 'assets/animations/no_internet.json'
+                        : 'assets/animations/error.json',
                 width: 250,
                 frameRate: const FrameRate(60),
               ),
@@ -476,7 +480,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 isLocationError
                     ? 'Location Services Required'
-                    : 'Oops! Something Went Wrong',
+                    : isNetworkError
+                        ? 'Connection Error'
+                        : 'Oops! Something Went Wrong',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
@@ -490,7 +496,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   isLocationError
                       ? 'Please enable location services to get accurate weather information for your area.'
-                      : message,
+                      : isNetworkError
+                          ? 'Unable to connect to the server. Please check your internet connection and try again.'
+                          : message,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.grey[600],
