@@ -90,13 +90,14 @@ class _ChatListScreenState extends State<ChatListScreen>
         floatingActionButton: _currentTabIndex == 1
             ? BlocBuilder<ChatCubit, ChatState>(
                 builder: (context, state) {
-                  return state.sessions.isNotEmpty
-                      ? FloatingActionButton(
-                          onPressed: () =>
-                              context.read<ChatCubit>().createNewSession(),
-                          child: const Icon(Icons.add),
-                        )
-                      : const SizedBox.shrink();
+                  if (state.sessions.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return FloatingActionButton(
+                    onPressed: () =>
+                        context.read<ChatCubit>().createNewSession(),
+                    child: const Icon(Icons.add),
+                  );
                 },
               )
             : null,
@@ -631,8 +632,19 @@ Widget _buildHeaderSection(BuildContext context) {
           ],
         ),
         _buildFeatureChips(),
-        const SizedBox(height: 20),
-        _buildStartButton(context),
+        const SizedBox(height: 25),
+        BlocListener<ChatCubit, ChatState>(
+          listener: (context, state) {
+            if (state is ChatError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('server offline'),
+                ),
+              );
+            }
+          },
+          child: _buildStartButton(context),
+        ),
       ],
     ),
   );
@@ -654,9 +666,10 @@ Widget _buildStartButton(BuildContext context) {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                  color: AppColors.primaryColor.withValues(alpha: 0.2),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4))
+                color: AppColors.primaryColor.withValues(alpha: 0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              )
             ],
             gradient: const LinearGradient(
               colors: [AppColors.primaryColor, AppColors.accentColor],

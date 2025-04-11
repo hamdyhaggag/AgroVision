@@ -1,7 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meta/meta.dart';
+import 'package:path/path.dart';
 
 import '../../../core/helpers/cache_helper.dart';
 import '../../../models/chat_message.dart';
@@ -111,33 +112,37 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> createNewSession() async {
-    final currentState = state;
-    if (currentState is ChatSuccess) {
-      try {
-        emit(ChatLoading(
-          sessions: currentState.sessions,
-          currentSessionId: currentState.currentSessionId,
-        ));
+    try {
+      emit(ChatLoading(
+        sessions: state.sessions,
+        currentSessionId: state.currentSessionId,
+      ));
 
-        final response = await repository.createNewSession("55");
-        final newSession = ChatSession(
-          id: response.sessionId,
-          messages: [],
-          createdAt: DateTime.now(),
+      final response = await repository.createNewSession("55");
+      final newSession = ChatSession(
+        id: response.sessionId,
+        messages: [],
+        createdAt: DateTime.now(),
+      );
+
+      emit(ChatSuccess(
+        sessions: [...state.sessions, newSession],
+        currentSessionId: newSession.id,
+      ));
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Scrollable.ensureVisible(
+          context as BuildContext,
+          alignment: 0.5,
+          duration: const Duration(milliseconds: 300),
         );
-
-        final updatedSessions = [...currentState.sessions, newSession];
-        emit(ChatSuccess(
-          sessions: updatedSessions,
-          currentSessionId: newSession.id,
-        ));
-      } catch (e) {
-        emit(ChatError(
-          sessions: currentState.sessions,
-          currentSessionId: currentState.currentSessionId,
-          error: e.toString(),
-        ));
-      }
+      });
+    } catch (e) {
+      emit(ChatError(
+        sessions: state.sessions,
+        currentSessionId: state.currentSessionId,
+        error: e.toString(),
+      ));
     }
   }
 
