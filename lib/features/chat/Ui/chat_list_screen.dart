@@ -121,9 +121,51 @@ class _ChatListScreenState extends State<ChatListScreen>
 
         return Dismissible(
           key: Key(session.id),
-          background: Container(color: AppColors.errorColor),
-          secondaryBackground: Container(color: AppColors.primaryColor),
-          confirmDismiss: (direction) async => false,
+          background: Container(
+            color: AppColors.errorColor,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(left: 20),
+            child: const Icon(Icons.delete, color: Colors.white),
+          ),
+          secondaryBackground: Container(
+            color: AppColors.primaryColor,
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.only(right: 20),
+            child: const Icon(Icons.edit, color: Colors.white),
+          ),
+          confirmDismiss: (direction) async {
+            if (direction == DismissDirection.startToEnd) {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Delete Session'),
+                  content:
+                      const Text('Are you sure you want to delete this chat?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('Delete',
+                          style: TextStyle(color: AppColors.errorColor)),
+                    ),
+                  ],
+                ),
+              );
+              return confirm ?? false;
+            } else if (direction == DismissDirection.endToStart) {
+              _showRenameDialog(context, session);
+              return false;
+            }
+            return false;
+          },
+          onDismissed: (direction) {
+            if (direction == DismissDirection.startToEnd) {
+              context.read<ChatCubit>().deleteSession(session.id);
+            }
+          },
           child: Material(
             borderRadius: BorderRadius.circular(16),
             color: AppColors.surfaceColor,
