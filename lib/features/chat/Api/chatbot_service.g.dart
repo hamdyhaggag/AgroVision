@@ -97,6 +97,8 @@ class _ChatbotService implements ChatbotService {
     String question,
     String mode,
     String speak,
+    String userId,
+    String sessionId,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -120,6 +122,14 @@ class _ChatbotService implements ChatbotService {
     _data.fields.add(MapEntry(
       'speak',
       speak,
+    ));
+    _data.fields.add(MapEntry(
+      'user_id',
+      userId,
+    ));
+    _data.fields.add(MapEntry(
+      'session_id',
+      sessionId,
     ));
     final _options = _setStreamType<ChatResponse>(Options(
       method: 'POST',

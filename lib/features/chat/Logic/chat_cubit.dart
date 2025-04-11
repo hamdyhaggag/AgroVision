@@ -36,18 +36,6 @@ class ChatCubit extends Cubit<ChatState> {
     super.emit(state);
   }
 
-  // void createNewSession() {
-  //   final newSession = ChatSession(
-  //     id: DateTime.now().millisecondsSinceEpoch.toString(),
-  //     messages: [],
-  //     createdAt: DateTime.now(),
-  //   );
-  //   emit(ChatSuccess(
-  //     sessions: [...state.sessions, newSession],
-  //     currentSessionId: newSession.id,
-  //   ));
-  // }
-
   void deleteSession(String sessionId) {
     final updatedSessions =
         state.sessions.where((s) => s.id != sessionId).toList();
@@ -131,8 +119,7 @@ class ChatCubit extends Cubit<ChatState> {
           currentSessionId: currentState.currentSessionId,
         ));
 
-        final response =
-            await repository.createNewSession("55"); // Use actual user ID
+        final response = await repository.createNewSession("55");
         final newSession = ChatSession(
           id: response.sessionId,
           messages: [],
@@ -161,6 +148,9 @@ class ChatCubit extends Cubit<ChatState> {
     String speak,
   ) async {
     final currentSession = _getCurrentSession();
+    const String userId = "55";
+    final sessionId = currentSession.id;
+
     final updatedSession = currentSession.copyWith(
       messages: [
         ...currentSession.messages,
@@ -178,7 +168,14 @@ class ChatCubit extends Cubit<ChatState> {
         sessions: updatedSessions, currentSessionId: currentSession.id));
 
     try {
-      final response = await repository.sendImage(image, question, mode, speak);
+      final response = await repository.sendImage(
+        image,
+        question,
+        mode,
+        speak,
+        sessionId,
+        userId,
+      );
       _handleSuccessResponse(updatedSession, response.answer);
     } catch (e) {
       _handleError(e, updatedSessions, currentSession, question, file: image);

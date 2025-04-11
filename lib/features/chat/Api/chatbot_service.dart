@@ -26,6 +26,8 @@ abstract class ChatbotService {
     @Part(name: 'question') String question,
     @Part(name: 'mode') String mode,
     @Part(name: 'speak') String speak,
+    @Part(name: 'user_id') String userId,
+    @Part(name: 'session_id') String sessionId,
   );
 
   @POST('voice_convo')

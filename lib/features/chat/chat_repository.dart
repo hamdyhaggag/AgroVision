@@ -57,13 +57,18 @@ class ChatRepository {
     String question,
     String mode,
     String speak,
+    String sessionId,
+    String userId,
   ) async {
+    const String userId = "55";
     try {
       final response = await chatbotService.sendImageMessage(
         image,
         question,
         mode,
         speak,
+        userId,
+        sessionId,
       );
       return response;
     } on DioException catch (e) {
