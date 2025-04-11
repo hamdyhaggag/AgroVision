@@ -272,19 +272,17 @@ class _ChatListScreenState extends State<ChatListScreen>
         Container(
           width: 48,
           height: 48,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.primaryColor, AppColors.accentColor],
-            ),
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
+            border: Border.all(
+              color: AppColors.primaryColor,
+              width: 2,
+            ),
           ),
-          child: Center(
-            child: Text(
-              '${index + 1}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
+          child: ClipOval(
+            child: Image.asset(
+              'assets/images/khedr.jpg',
+              fit: BoxFit.cover,
             ),
           ),
         ),
