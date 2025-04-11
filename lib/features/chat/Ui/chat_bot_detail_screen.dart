@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:agro_vision/core/themes/app_colors.dart';
@@ -20,12 +21,82 @@ class ChatBotDetailScreen extends StatefulWidget {
 class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _initialQueryHandled = false;
+  @override
+  void initState() {
+    super.initState();
+    _handleInitialSessionCreation();
+  }
+
+  int _getPendingMessagesCount(String sessionId) {
+    final chatCubit = context.read<ChatCubit>();
+    return chatCubit.pendingMessages
+        .where((m) => m.sessionId == sessionId)
+        .length;
+  }
+
+  void _handleInitialSessionCreation() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final routeArgs = ModalRoute.of(context)?.settings.arguments;
+      if (routeArgs is Map<String, dynamic> &&
+          routeArgs['newSession'] == true) {
+        final chatCubit = context.read<ChatCubit>();
+        await _ensureNewSession(chatCubit);
+        _sendInitialQuery(chatCubit, routeArgs['initialQuery']);
+      }
+    });
+  }
+
+  Future<void> _ensureNewSession(ChatCubit chatCubit) async {
+    if (chatCubit.state.sessions.isEmpty) {
+      await chatCubit.createNewSession();
+    } else {
+      await chatCubit.createNewSession();
+    }
+    await Future.delayed(const Duration(milliseconds: 50));
+  }
+
+  void _sendInitialQuery(ChatCubit chatCubit, String? query) {
+    if (query?.isNotEmpty ?? false) {
+      chatCubit.sendTextMessage(query!);
+      _initialQueryHandled = true;
+    }
+  }
 
   @override
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _handleInitialQuery(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_initialQueryHandled) return;
+
+      final routeArgs = ModalRoute.of(context)?.settings.arguments;
+      if (routeArgs is Map<String, dynamic>) {
+        final initialQuery = routeArgs['initialQuery'] as String?;
+        if (initialQuery != null && initialQuery.isNotEmpty) {
+          final chatCubit = context.read<ChatCubit>();
+
+          final completer = Completer();
+
+          if (chatCubit.state.sessions.isEmpty) {
+            await chatCubit.createNewSession();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                completer.complete();
+              });
+            });
+            await completer.future;
+          }
+
+          chatCubit.sendTextMessage(initialQuery);
+          _initialQueryHandled = true;
+        }
+      }
+    });
   }
 
   void _showCapabilitiesDialog() {
@@ -118,6 +189,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
             ),
           );
         }
+        _handleInitialQuery(context);
       },
       child: Scaffold(
         appBar: AppBar(
@@ -194,57 +266,68 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
               children: [
                 Expanded(
                   child: BlocListener<ChatCubit, ChatState>(
-                    listener: (context, state) {
-                      if (currentSession.messages.isNotEmpty) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          _scrollController.animateTo(
-                            _scrollController.position.maxScrollExtent,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOut,
-                          );
-                        });
-                      }
-                    },
-                    child: currentSession.messages.isEmpty
-                        ? _buildEmptyState()
-                        : ListView.separated(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 16, horizontal: 8),
-                            itemCount: currentSession.messages.length +
-                                (state is ChatLoading ? 1 : 0),
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
-                              if (index < currentSession.messages.length) {
-                                final message = currentSession.messages[index];
+                      listener: (context, state) {
+                        if (currentSession.messages.isNotEmpty) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            _scrollController.animateTo(
+                              _scrollController.position.maxScrollExtent,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOut,
+                            );
+                          });
+                        }
+                      },
+                      child: currentSession.messages.isEmpty
+                          ? _buildEmptyState()
+                          : ListView.separated(
+                              controller: _scrollController,
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 16, horizontal: 8),
+                              itemCount: currentSession.messages.length +
+                                  (state is ChatLoading ? 1 : 0) +
+                                  _getPendingMessagesCount(currentSession.id),
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 12),
+                              itemBuilder: (context, index) {
+                                final chatCubit = context.read<ChatCubit>();
+                                final pendingMessages = chatCubit
+                                    .pendingMessages
+                                    .where(
+                                        (m) => m.sessionId == currentSession.id)
+                                    .toList();
+
+                                final allMessages = [
+                                  ...currentSession.messages,
+                                  ...pendingMessages,
+                                ];
+
+                                if (index < allMessages.length) {
+                                  final message = allMessages[index];
+                                  return ChatBubble(
+                                    message: message,
+                                    isLoading:
+                                        message.status == MessageStatus.pending,
+                                    onLongPress: () =>
+                                        _showMessageOptions(message),
+                                  );
+                                }
+
                                 return Padding(
                                   padding:
                                       const EdgeInsets.symmetric(horizontal: 8),
                                   child: ChatBubble(
-                                    message: message,
-                                    onLongPress: () =>
-                                        _showMessageOptions(message),
+                                    message: Message(
+                                      text: '',
+                                      isSentByMe: false,
+                                      timestamp: DateTime.now(),
+                                    ),
+                                    isLoading: true,
+                                    loadingColor: AppColors.primaryColor,
+                                    onLongPress: () {},
                                   ),
                                 );
-                              }
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: ChatBubble(
-                                  message: Message(
-                                    text: '',
-                                    isSentByMe: false,
-                                    timestamp: DateTime.now(),
-                                  ),
-                                  isLoading: true,
-                                  loadingColor: AppColors.primaryColor,
-                                  onLongPress: () {},
-                                ),
-                              );
-                            },
-                          ),
-                  ),
+                              },
+                            )),
                 ),
                 _buildInputSection(context),
               ],
@@ -281,6 +364,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
               ),
               child: TextField(
                 controller: _controller,
+                textCapitalization: TextCapitalization.sentences,
                 minLines: 1,
                 maxLines: 4,
                 decoration: InputDecoration(
@@ -312,7 +396,17 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
 
   void _handleSend(String text, BuildContext context) {
     if (text.trim().isEmpty) return;
-    context.read<ChatCubit>().sendTextMessage(text);
+
+    final chatCubit = context.read<ChatCubit>();
+
+    if (chatCubit.state.sessions.isEmpty) {
+      chatCubit.createNewSession().then((_) {
+        chatCubit.sendTextMessage(text);
+      });
+    } else {
+      chatCubit.sendTextMessage(text);
+    }
+
     _controller.clear();
   }
 

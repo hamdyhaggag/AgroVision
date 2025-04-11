@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:path/path.dart';
 
 import '../../../core/helpers/cache_helper.dart';
 import '../../../models/chat_message.dart';
@@ -14,6 +13,7 @@ part 'chat_state.dart';
 class ChatCubit extends Cubit<ChatState> {
   final ChatRepository repository;
   final List<Message> _pendingMessages = [];
+  List<Message> get pendingMessages => _pendingMessages;
 
   ChatCubit(this.repository) : super(const ChatInitial()) {
     _loadCachedSessions();
@@ -84,68 +84,95 @@ class ChatCubit extends Cubit<ChatState> {
     ));
   }
 
+  void addPendingMessage(String text) {
+    final currentSession = _getCurrentSession();
+    final newMessage = Message(
+      text: text,
+      isSentByMe: true,
+      status: MessageStatus.pending,
+      timestamp: DateTime.now(),
+      sessionId: currentSession.id,
+    );
+
+    _pendingMessages.add(newMessage);
+    final updatedSession = currentSession
+        .copyWith(messages: [...currentSession.messages, newMessage]);
+
+    emit(ChatSuccess(
+      sessions: _updateSessions(updatedSession),
+      currentSessionId: currentSession.id,
+    ));
+  }
+
   Future<void> sendTextMessage(String text) async {
     final currentSession = _getCurrentSession();
-    const String userId = "55";
-    var updatedSession = _createUpdatedSession(currentSession, text);
+    const userId = "55";
 
-    if (updatedSession.title == null) {
-      updatedSession = _updateSessionTitle(updatedSession);
-    }
+    final updatedSession = currentSession.copyWith(
+      messages: [
+        ...currentSession.messages,
+        Message(
+          text: text,
+          isSentByMe: true,
+          status: MessageStatus.pending,
+          timestamp: DateTime.now(),
+        ),
+      ],
+    );
 
     final updatedSessions = _updateSessions(updatedSession);
     emit(ChatLoading(
         sessions: updatedSessions, currentSessionId: currentSession.id));
 
-    final requestBody = ChatRequestBody(
-      query: text,
-      userId: userId,
-      sessionId: currentSession.id,
-    );
-
     try {
-      final response = await repository.sendText(requestBody);
+      final response = await repository.sendText(ChatRequestBody(
+        query: text,
+        userId: userId,
+        sessionId: currentSession.id,
+      ));
+
       _handleSuccessResponse(updatedSession, response.answer);
     } catch (e) {
-      _handleError(e, updatedSessions, currentSession, text);
+      emit(ChatSuccess(
+        sessions: updatedSessions,
+        currentSessionId: currentSession.id,
+      ));
+
+      if (e is NetworkUnavailableException) {
+        _pendingMessages.add(Message(
+          text: text,
+          isSentByMe: true,
+          status: MessageStatus.pending,
+          timestamp: DateTime.now(),
+        ));
+      }
     }
   }
 
   Future<void> createNewSession() async {
     try {
-      emit(ChatLoading(
-        sessions: state.sessions,
-        currentSessionId: state.currentSessionId,
-      ));
-
       final response = await repository.createNewSession("55");
-      final newSession = ChatSession(
-        id: response.sessionId,
-        messages: [],
-        createdAt: DateTime.now(),
-      );
-
-      emit(ChatSuccess(
-        sessions: [...state.sessions, newSession],
-        currentSessionId: newSession.id,
-      ));
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Scrollable.ensureVisible(
-          context as BuildContext,
-          alignment: 0.5,
-          duration: const Duration(milliseconds: 300),
-        );
-      });
+      _addNewSession(response.sessionId);
     } catch (e) {
-      emit(ChatError(
-        sessions: state.sessions,
-        currentSessionId: state.currentSessionId,
-        error: e.toString(),
-      ));
+      final localSessionId = 'local_${DateTime.now().millisecondsSinceEpoch}';
+      _addNewSession(localSessionId);
     }
   }
 
+  void _addNewSession(String sessionId) {
+    final newSession = ChatSession(
+      id: sessionId,
+      messages: [],
+      createdAt: DateTime.now(),
+    );
+
+    emit(ChatSuccess(
+      sessions: [...state.sessions, newSession],
+      currentSessionId: newSession.id,
+    ));
+  }
+
+  bool get isOnline => state is! ChatNetworkError;
   Future<void> sendImageMessage(
     File image,
     String question,
@@ -216,25 +243,35 @@ class ChatCubit extends Cubit<ChatState> {
 
   ChatSession _getCurrentSession() {
     if (state.sessions.isEmpty) {
-      throw Exception('No sessions available');
+      final newSession = ChatSession(
+        id: 'default_${DateTime.now().millisecondsSinceEpoch}',
+        messages: [],
+        createdAt: DateTime.now(),
+      );
+      emit(ChatSuccess(
+        sessions: [newSession],
+        currentSessionId: newSession.id,
+      ));
+      return newSession;
     }
+
     return state.sessions.firstWhere(
       (s) => s.id == state.currentSessionId,
       orElse: () => state.sessions.last,
     );
   }
 
-  ChatSession _createUpdatedSession(ChatSession session, String text) =>
-      session.copyWith(
-        messages: [...session.messages, Message(text: text, isSentByMe: true)],
-      );
-
-  ChatSession _updateSessionTitle(ChatSession session) {
-    final userMessages = session.messages.where((m) => m.isSentByMe);
-    return userMessages.isNotEmpty
-        ? session.copyWith(title: userMessages.first.text)
-        : session;
-  }
+  // ChatSession _createUpdatedSession(ChatSession session, String text) =>
+  //     session.copyWith(
+  //       messages: [...session.messages, Message(text: text, isSentByMe: true)],
+  //     );
+  //
+  // ChatSession _updateSessionTitle(ChatSession session) {
+  //   final userMessages = session.messages.where((m) => m.isSentByMe);
+  //   return userMessages.isNotEmpty
+  //       ? session.copyWith(title: userMessages.first.text)
+  //       : session;
+  // }
 
   void _handleSuccessResponse(ChatSession session, String answer) {
     final finalSession = session.copyWith(messages: [

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../chat/Logic/chat_cubit.dart';
 
 class RecommendationDetail extends StatelessWidget {
   final String title;
@@ -195,7 +198,21 @@ class RecommendationDetail extends StatelessWidget {
                   )),
               const SizedBox(height: 32),
               GestureDetector(
-                onTap: () => Navigator.pushNamed(context, '/chatBotDetail'),
+                onTap: () async {
+                  final chatCubit = context.read<ChatCubit>();
+                  await chatCubit.createNewSession();
+
+                  if (context.mounted) {
+                    Navigator.pushNamed(context, '/chatBotDetail', arguments: {
+                      'initialQuery': title,
+                      'newSession': true,
+                    });
+
+                    if (!chatCubit.isOnline) {
+                      chatCubit.addPendingMessage(title);
+                    }
+                  }
+                },
                 child: Container(
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   padding: const EdgeInsets.all(20),

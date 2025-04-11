@@ -35,10 +35,12 @@ class Message {
   final String? audioUrl;
   final String? voiceFilePath;
   final MessageStatus status;
+  final String? sessionId;
 
   Message({
     required this.text,
     required this.isSentByMe,
+    this.sessionId,
     DateTime? timestamp,
     this.imageUrl,
     this.status = MessageStatus.delivered,
