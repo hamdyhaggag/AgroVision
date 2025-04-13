@@ -4,14 +4,14 @@ import 'package:agro_vision/features/chat/Ui/chat_bot_detail_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/core/themes/text_styles.dart';
 import 'package:agro_vision/shared/widgets/custom_botton.dart';
-import '../../../core/utils/functions.dart';
 import '../../../models/disease_model.dart';
-import '../../chat/Ui/chat_list_screen.dart';
+import '../../chat/Logic/chat_cubit.dart';
 
 class PlantDetailsScreen extends StatefulWidget {
   final String? imagePath;
@@ -250,8 +250,37 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                           const SizedBox(height: 16),
                           CustomBottom(
                             text: 'Talk to the Bot',
-                            onPressed: () {
-                              navigateTo(context, const ChatBotDetailScreen());
+                            onPressed: () async {
+                              if (!snapshot.hasData) return;
+
+                              final data = snapshot.data!;
+                              final plantClass = data['class'] ?? 'Unknown';
+                              final reason =
+                                  data['reason'] ?? 'No reason provided';
+                              final control =
+                                  data['control'] ?? 'No control measures';
+
+                              final chatCubit = context.read<ChatCubit>();
+
+                              await chatCubit.createNewSession();
+                              final newSessionId =
+                                  chatCubit.state.sessions.last.id;
+
+                              chatCubit.addBotMessage(
+                                'Diagnosis Result:\n'
+                                '• Disease: $plantClass\n'
+                                '• Reason: $reason\n'
+                                '• Control Measures: $control\n\n'
+                                'How can I assist you further?',
+                                newSessionId,
+                              );
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ChatBotDetailScreen(),
+                                ),
+                              );
                             },
                           ),
                         ],
