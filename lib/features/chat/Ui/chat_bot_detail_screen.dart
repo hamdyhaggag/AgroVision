@@ -19,20 +19,48 @@ class ChatBotDetailScreen extends StatefulWidget {
 }
 
 class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
-  final TextEditingController _controller = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  bool _initialQueryHandled = false;
-  @override
-  void initState() {
-    super.initState();
-    _handleInitialSessionCreation();
-  }
-
   int _getPendingMessagesCount(String sessionId) {
     final chatCubit = context.read<ChatCubit>();
     return chatCubit.pendingMessages
         .where((m) => m.sessionId == sessionId)
         .length;
+  }
+
+  final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  @override
+  void initState() {
+    super.initState();
+    _handleSessionAndPrefill();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final routeArgs = ModalRoute.of(context)?.settings.arguments;
+      if (routeArgs is Map<String, dynamic>) {
+        final prefillMessage = routeArgs['prefillMessage'] as String?;
+        if (prefillMessage != null && prefillMessage.isNotEmpty) {
+          _controller.text = prefillMessage;
+        }
+      }
+    });
+  }
+
+  void _handleSessionAndPrefill() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final routeArgs = ModalRoute.of(context)?.settings.arguments;
+      if (routeArgs is! Map<String, dynamic>) return;
+
+      // Handle session creation first
+      if (routeArgs['newSession'] == true) {
+        final chatCubit = context.read<ChatCubit>();
+        await _ensureNewSession(chatCubit);
+      }
+
+      // Then set prefill message
+      final prefillMessage = routeArgs['prefillMessage'] as String?;
+      if (prefillMessage != null && prefillMessage.isNotEmpty) {
+        _controller.text = prefillMessage;
+      }
+    });
   }
 
   void _handleInitialSessionCreation() {
@@ -42,24 +70,14 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
           routeArgs['newSession'] == true) {
         final chatCubit = context.read<ChatCubit>();
         await _ensureNewSession(chatCubit);
-        _sendInitialQuery(chatCubit, routeArgs['initialQuery']);
       }
     });
   }
 
   Future<void> _ensureNewSession(ChatCubit chatCubit) async {
-    if (chatCubit.state.sessions.isEmpty) {
+    if (chatCubit.state.sessions.isEmpty ||
+        chatCubit.state.currentSessionId == null) {
       await chatCubit.createNewSession();
-    } else {
-      await chatCubit.createNewSession();
-    }
-    await Future.delayed(const Duration(milliseconds: 50));
-  }
-
-  void _sendInitialQuery(ChatCubit chatCubit, String? query) {
-    if (query?.isNotEmpty ?? false) {
-      chatCubit.sendTextMessage(query!);
-      _initialQueryHandled = true;
     }
   }
 
@@ -68,35 +86,6 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _handleInitialQuery(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (_initialQueryHandled) return;
-
-      final routeArgs = ModalRoute.of(context)?.settings.arguments;
-      if (routeArgs is Map<String, dynamic>) {
-        final initialQuery = routeArgs['initialQuery'] as String?;
-        if (initialQuery != null && initialQuery.isNotEmpty) {
-          final chatCubit = context.read<ChatCubit>();
-
-          final completer = Completer();
-
-          if (chatCubit.state.sessions.isEmpty) {
-            await chatCubit.createNewSession();
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                completer.complete();
-              });
-            });
-            await completer.future;
-          }
-
-          chatCubit.sendTextMessage(initialQuery);
-          _initialQueryHandled = true;
-        }
-      }
-    });
   }
 
   void _showCapabilitiesDialog() {
@@ -173,23 +162,18 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                 children: [
                   const Icon(Icons.wifi_off, color: Colors.white),
                   const SizedBox(width: 8),
-                  Expanded(child: Text(state.error)),
+                  Expanded(child: Text(state.error)), // Now safe
                   TextButton(
-                    child: const Text(
-                      'RETRY',
-                      style: TextStyle(color: Colors.white, fontFamily: 'SYNE'),
-                    ),
+                    child: const Text('RETRY'),
                     onPressed: () =>
                         context.read<ChatCubit>().retryPendingMessages(),
                   ),
                 ],
               ),
               backgroundColor: Colors.red[800],
-              duration: const Duration(seconds: 1),
             ),
           );
         }
-        _handleInitialQuery(context);
       },
       child: Scaffold(
         appBar: AppBar(
@@ -394,12 +378,22 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
     );
   }
 
+// In ChatBotDetailScreen's _handleSend:
   void _handleSend(String text, BuildContext context) {
     if (text.trim().isEmpty) return;
 
     final chatCubit = context.read<ChatCubit>();
+    final currentSession = chatCubit.state.sessions.firstWhere(
+      (s) => s.id == chatCubit.state.currentSessionId,
+      orElse: () => ChatSession(
+        id: 'default',
+        messages: [],
+        createdAt: DateTime.now(),
+      ),
+    );
 
-    if (chatCubit.state.sessions.isEmpty) {
+    // Ensure session exists before sending
+    if (currentSession.messages.isEmpty) {
       chatCubit.createNewSession().then((_) {
         chatCubit.sendTextMessage(text);
       });

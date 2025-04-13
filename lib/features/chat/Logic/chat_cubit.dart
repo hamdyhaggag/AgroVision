@@ -42,46 +42,33 @@ class ChatCubit extends Cubit<ChatState> {
         state.sessions.where((s) => s.id != sessionId).toList();
     final newCurrentSessionId =
         updatedSessions.isNotEmpty ? updatedSessions.last.id : null;
-
     emit(ChatSuccess(
-      sessions: updatedSessions,
-      currentSessionId: newCurrentSessionId,
-    ));
+        sessions: updatedSessions, currentSessionId: newCurrentSessionId));
   }
 
   void renameSession(String sessionId, String newTitle) {
     final updatedSessions = state.sessions.map((session) {
-      if (session.id == sessionId) return session.copyWith(title: newTitle);
-      return session;
+      return session.id == sessionId
+          ? session.copyWith(title: newTitle)
+          : session;
     }).toList();
-
     emit(ChatSuccess(
-      sessions: updatedSessions,
-      currentSessionId: state.currentSessionId,
-    ));
+        sessions: updatedSessions, currentSessionId: state.currentSessionId));
   }
 
   void setCurrentSession(String sessionId) {
-    emit(ChatSuccess(
-      sessions: state.sessions,
-      currentSessionId: sessionId,
-    ));
+    emit(ChatSuccess(sessions: state.sessions, currentSessionId: sessionId));
   }
 
   void deleteMessage(Message message) {
     final updatedSessions = state.sessions.map((session) {
-      if (session.id == state.currentSessionId) {
-        return session.copyWith(
-          messages: session.messages.where((m) => m != message).toList(),
-        );
-      }
-      return session;
+      return session.id == state.currentSessionId
+          ? session.copyWith(
+              messages: session.messages.where((m) => m != message).toList())
+          : session;
     }).toList();
-
     emit(ChatSuccess(
-      sessions: updatedSessions,
-      currentSessionId: state.currentSessionId,
-    ));
+        sessions: updatedSessions, currentSessionId: state.currentSessionId));
   }
 
   void addPendingMessage(String text) {
@@ -93,51 +80,38 @@ class ChatCubit extends Cubit<ChatState> {
       timestamp: DateTime.now(),
       sessionId: currentSession.id,
     );
-
     _pendingMessages.add(newMessage);
     final updatedSession = currentSession
         .copyWith(messages: [...currentSession.messages, newMessage]);
-
     emit(ChatSuccess(
-      sessions: _updateSessions(updatedSession),
-      currentSessionId: currentSession.id,
-    ));
+        sessions: _updateSessions(updatedSession),
+        currentSessionId: currentSession.id));
   }
 
   Future<void> sendTextMessage(String text) async {
     final currentSession = _getCurrentSession();
     const userId = "55";
-
-    final updatedSession = currentSession.copyWith(
-      messages: [
-        ...currentSession.messages,
-        Message(
+    final updatedSession = currentSession.copyWith(messages: [
+      ...currentSession.messages,
+      Message(
           text: text,
           isSentByMe: true,
           status: MessageStatus.pending,
-          timestamp: DateTime.now(),
-        ),
-      ],
-    );
-
+          timestamp: DateTime.now())
+    ]);
     final updatedSessions = _updateSessions(updatedSession);
     emit(ChatLoading(
         sessions: updatedSessions, currentSessionId: currentSession.id));
-
     try {
       final response = await repository.sendText(ChatRequestBody(
         query: text,
         userId: userId,
         sessionId: currentSession.id,
       ));
-
       _handleSuccessResponse(updatedSession, response.answer);
     } catch (e) {
       emit(ChatSuccess(
-        sessions: updatedSessions,
-        currentSessionId: currentSession.id,
-      ));
-
+          sessions: updatedSessions, currentSessionId: currentSession.id));
       if (e is NetworkUnavailableException) {
         _pendingMessages.add(Message(
           text: text,
@@ -160,54 +134,31 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void _addNewSession(String sessionId) {
-    final newSession = ChatSession(
-      id: sessionId,
-      messages: [],
-      createdAt: DateTime.now(),
-    );
-
-    emit(ChatSuccess(
-      sessions: [...state.sessions, newSession],
-      currentSessionId: newSession.id,
-    ));
+    final newSession =
+        ChatSession(id: sessionId, messages: [], createdAt: DateTime.now());
+    final newSessions = [...state.sessions, newSession];
+    emit(ChatSuccess(sessions: newSessions, currentSessionId: newSession.id));
   }
 
-  bool get isOnline => state is! ChatNetworkError;
   Future<void> sendImageMessage(
-    File image,
-    String question,
-    String mode,
-    String speak,
-  ) async {
+      File image, String question, String mode, String speak) async {
     final currentSession = _getCurrentSession();
-    const String userId = "55";
+    const userId = "55";
     final sessionId = currentSession.id;
-
-    final updatedSession = currentSession.copyWith(
-      messages: [
-        ...currentSession.messages,
-        Message(
+    final updatedSession = currentSession.copyWith(messages: [
+      ...currentSession.messages,
+      Message(
           text: question,
           isSentByMe: true,
           imageUrl: image.path,
-          status: MessageStatus.pending,
-        ),
-      ],
-    );
-
+          status: MessageStatus.pending)
+    ]);
     final updatedSessions = _updateSessions(updatedSession);
     emit(ChatLoading(
         sessions: updatedSessions, currentSessionId: currentSession.id));
-
     try {
       final response = await repository.sendImage(
-        image,
-        question,
-        mode,
-        speak,
-        sessionId,
-        userId,
-      );
+          image, question, mode, speak, sessionId, userId);
       _handleSuccessResponse(updatedSession, response.answer);
     } catch (e) {
       _handleError(e, updatedSessions, currentSession, question, file: image);
@@ -217,22 +168,17 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> sendVoiceMessage(File voiceFile,
       {String speak = 'false', String language = 'en'}) async {
     final currentSession = _getCurrentSession();
-    final updatedSession = currentSession.copyWith(
-      messages: [
-        ...currentSession.messages,
-        Message(
+    final updatedSession = currentSession.copyWith(messages: [
+      ...currentSession.messages,
+      Message(
           text: '',
           isSentByMe: true,
           voiceFilePath: voiceFile.path,
-          status: MessageStatus.pending,
-        ),
-      ],
-    );
-
+          status: MessageStatus.pending)
+    ]);
     final updatedSessions = _updateSessions(updatedSession);
     emit(ChatLoading(
         sessions: updatedSessions, currentSessionId: currentSession.id));
-
     try {
       final response = await repository.sendVoice(voiceFile, speak, language);
       _handleSuccessResponse(updatedSession, response.answer);
@@ -248,41 +194,23 @@ class ChatCubit extends Cubit<ChatState> {
         messages: [],
         createdAt: DateTime.now(),
       );
-      emit(ChatSuccess(
-        sessions: [newSession],
-        currentSessionId: newSession.id,
-      ));
+      emit(
+          ChatSuccess(sessions: [newSession], currentSessionId: newSession.id));
       return newSession;
     }
-
     return state.sessions.firstWhere(
       (s) => s.id == state.currentSessionId,
       orElse: () => state.sessions.last,
     );
   }
 
-  // ChatSession _createUpdatedSession(ChatSession session, String text) =>
-  //     session.copyWith(
-  //       messages: [...session.messages, Message(text: text, isSentByMe: true)],
-  //     );
-  //
-  // ChatSession _updateSessionTitle(ChatSession session) {
-  //   final userMessages = session.messages.where((m) => m.isSentByMe);
-  //   return userMessages.isNotEmpty
-  //       ? session.copyWith(title: userMessages.first.text)
-  //       : session;
-  // }
-
   void _handleSuccessResponse(ChatSession session, String answer) {
     final finalSession = session.copyWith(messages: [
       ...session.messages,
       Message(text: answer, isSentByMe: false, status: MessageStatus.delivered)
     ]);
-
     emit(ChatSuccess(
-      sessions: _updateSessions(finalSession),
-      currentSessionId: session.id,
-    ));
+        sessions: _updateSessions(finalSession), currentSessionId: session.id));
   }
 
   void _handleError(dynamic error, List<ChatSession> sessions,
@@ -296,7 +224,6 @@ class ChatCubit extends Cubit<ChatState> {
         imageUrl: file?.path,
         voiceFilePath: file?.path,
       ));
-
       emit(ChatNetworkError(
         sessions: sessions,
         currentSessionId: session.id,
@@ -315,7 +242,6 @@ class ChatCubit extends Cubit<ChatState> {
 
   void retryPendingMessages() {
     if (state is! ChatNetworkError) return;
-
     final pendingCopy = List<Message>.from(_pendingMessages);
     _pendingMessages.clear();
     final currentMessages = _getCurrentSession().messages;
@@ -323,11 +249,7 @@ class ChatCubit extends Cubit<ChatState> {
     for (final message in pendingCopy) {
       if (message.imageUrl != null) {
         sendImageMessage(
-          File(message.imageUrl!),
-          message.text,
-          'text',
-          'false',
-        );
+            File(message.imageUrl!), message.text, 'text', 'false');
       } else if (message.voiceFilePath != null) {
         sendVoiceMessage(File(message.voiceFilePath!));
       } else {
@@ -336,8 +258,9 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  List<ChatSession> _updateSessions(ChatSession updatedSession) =>
-      state.sessions
-          .map((s) => s.id == updatedSession.id ? updatedSession : s)
-          .toList();
+  List<ChatSession> _updateSessions(ChatSession updatedSession) {
+    return state.sessions
+        .map((s) => s.id == updatedSession.id ? updatedSession : s)
+        .toList();
+  }
 }
