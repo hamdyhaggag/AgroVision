@@ -1,11 +1,6 @@
-// import 'package:agro_vision/features/home/Ui/add_new_note.dart';
-// import '../../features/home/Ui/edit_note_screen.dart';
-// // import '../../features/home/Ui/notes_screen.dart';
 import 'package:agro_vision/features/authentication/UI/congratulation_screen.dart';
 import 'package:agro_vision/features/home/Ui/widgets/add_task_screen.dart';
 import 'package:agro_vision/features/home/Ui/logout_screen.dart';
-// import 'package:agro_vision/features/home/Ui/fields_screen.dart';
-import 'package:agro_vision/features/home/Ui/profile/profile_screen.dart';
 import 'package:agro_vision/features/home/Ui/widgets/task_list_screen.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/UI/create_password_screen.dart';
@@ -17,14 +12,12 @@ import '../../features/chat/Ui/chat_bot_detail_screen.dart';
 import '../../features/chat/Ui/chat_screen.dart';
 import '../../features/disease_detection/Ui/detection_records.dart';
 import '../../features/home/Ui/crop_health.dart';
-import '../../features/home/Ui/drawer/crops_managment.dart';
 import '../../features/home/Ui/drawer/farm_inventory.dart';
 import '../../features/home/Ui/drawer/order_analytics.dart';
 import '../../features/home/Ui/drawer/order_management.dart';
 import '../../features/home/Ui/drawer/settings_screen.dart';
 
 import '../../features/home/Ui/notifications_screen.dart';
-import '../../features/home/Ui/profile/edit_profile_screen.dart';
 import '../../features/home/Ui/screen_layout.dart';
 import '../../features/monitoring/UI/sensor_data_screen.dart';
 import '../../features/onboarding/Ui/onboarding_screen.dart';
@@ -113,10 +106,7 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => const OrderAnalytics(),
         );
-      case '/cropsManagment':
-        return MaterialPageRoute(
-          builder: (_) => const CropsManagementScreen(),
-        );
+
       case '/orderManagement':
         return MaterialPageRoute(
           builder: (_) => const OrderManagementScreen(),
@@ -134,14 +124,6 @@ class AppRouter {
       case '/settingsScreen':
         return MaterialPageRoute(
           builder: (_) => const SettingsScreen(),
-        );
-      case '/profileScreen':
-        return MaterialPageRoute(
-          builder: (_) => const ProfileScreen(),
-        );
-      case '/editProfileScreen':
-        return MaterialPageRoute(
-          builder: (_) => const EditProfileScreen(),
         );
       case AppRoutes.cropHealth:
         return MaterialPageRoute(builder: (_) => const CropHealth());

@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(width: 8),
         InkWell(
-          onTap: () => Navigator.pushNamed(context, AppRoutes.profileScreen),
+          onTap: () => Navigator.pushNamed(context, AppRoutes.settingsScreen),
           child: Container(
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
@@ -782,14 +782,6 @@ class AppDrawer extends StatelessWidget {
                   title: 'Order Management',
                   subtitle: 'Order Management & tracking',
                   route: '/orderManagement',
-                ),
-                _buildDivider(),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.agriculture_outlined,
-                  title: 'Crops Management',
-                  subtitle: 'Crop cycles & planning',
-                  route: '/cropsManagement',
                 ),
                 _buildDivider(),
                 _buildDrawerItem(
