@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 class DiseaseDetectionService {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'https://1906-102-44-182-87.ngrok-free.app',
+      baseUrl: 'https://positive-tiger-endlessly.ngrok-free.app',
       connectTimeout: const Duration(seconds: 5),
       receiveTimeout: const Duration(seconds: 5),
     ),

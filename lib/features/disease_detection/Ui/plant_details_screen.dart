@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:agro_vision/features/chat/Ui/chat_bot_detail_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
@@ -43,7 +44,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
   Future<Map<String, dynamic>> fetchPlantDetails(
       File imageFile, String plantName) async {
     const String apiUrl =
-        'https://1906-102-44-182-87.ngrok-free.app/predict'; // Your API endpoint
+        'https://positive-tiger-endlessly.ngrok-free.app/predict'; // Your API endpoint
 
     try {
       FormData formData = FormData.fromMap({
@@ -250,7 +251,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                           CustomBottom(
                             text: 'Talk to the Bot',
                             onPressed: () {
-                              navigateTo(context, ChatListScreen());
+                              navigateTo(context, const ChatBotDetailScreen());
                             },
                           ),
                         ],
