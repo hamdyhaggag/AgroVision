@@ -1,9 +1,7 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:agro_vision/models/chat_message.dart';
-
 import '../../../models/new_session_request.dart';
 import '../../../models/session_response.dart';
 

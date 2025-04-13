@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../chat/Logic/chat_cubit.dart';
 
 class RecommendationDetail extends StatelessWidget {
@@ -201,16 +200,11 @@ class RecommendationDetail extends StatelessWidget {
                 onTap: () async {
                   final chatCubit = context.read<ChatCubit>();
                   await chatCubit.createNewSession();
-
                   if (context.mounted) {
                     Navigator.pushNamed(context, '/chatBotDetail', arguments: {
-                      'initialQuery': title,
+                      'prefillMessage': title,
                       'newSession': true,
                     });
-
-                    if (!chatCubit.isOnline) {
-                      chatCubit.addPendingMessage(title);
-                    }
                   }
                 },
                 child: Container(
