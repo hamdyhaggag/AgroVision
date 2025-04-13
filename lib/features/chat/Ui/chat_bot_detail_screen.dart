@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/models/chat_message.dart';
 import 'package:flutter/material.dart';
@@ -28,11 +27,11 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
 
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     _handleSessionAndPrefill();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final routeArgs = ModalRoute.of(context)?.settings.arguments;
       if (routeArgs is Map<String, dynamic>) {
@@ -48,28 +47,13 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final routeArgs = ModalRoute.of(context)?.settings.arguments;
       if (routeArgs is! Map<String, dynamic>) return;
-
-      // Handle session creation first
       if (routeArgs['newSession'] == true) {
         final chatCubit = context.read<ChatCubit>();
         await _ensureNewSession(chatCubit);
       }
-
-      // Then set prefill message
       final prefillMessage = routeArgs['prefillMessage'] as String?;
       if (prefillMessage != null && prefillMessage.isNotEmpty) {
         _controller.text = prefillMessage;
-      }
-    });
-  }
-
-  void _handleInitialSessionCreation() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final routeArgs = ModalRoute.of(context)?.settings.arguments;
-      if (routeArgs is Map<String, dynamic> &&
-          routeArgs['newSession'] == true) {
-        final chatCubit = context.read<ChatCubit>();
-        await _ensureNewSession(chatCubit);
       }
     });
   }
@@ -162,7 +146,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                 children: [
                   const Icon(Icons.wifi_off, color: Colors.white),
                   const SizedBox(width: 8),
-                  Expanded(child: Text(state.error)), // Now safe
+                  Expanded(child: Text(state.error)),
                   TextButton(
                     child: const Text('RETRY'),
                     onPressed: () =>
@@ -279,12 +263,10 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                                     .where(
                                         (m) => m.sessionId == currentSession.id)
                                     .toList();
-
                                 final allMessages = [
                                   ...currentSession.messages,
                                   ...pendingMessages,
                                 ];
-
                                 if (index < allMessages.length) {
                                   final message = allMessages[index];
                                   return ChatBubble(
@@ -295,7 +277,6 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                                         _showMessageOptions(message),
                                   );
                                 }
-
                                 return Padding(
                                   padding:
                                       const EdgeInsets.symmetric(horizontal: 8),
@@ -378,10 +359,8 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
     );
   }
 
-// In ChatBotDetailScreen's _handleSend:
   void _handleSend(String text, BuildContext context) {
     if (text.trim().isEmpty) return;
-
     final chatCubit = context.read<ChatCubit>();
     final currentSession = chatCubit.state.sessions.firstWhere(
       (s) => s.id == chatCubit.state.currentSessionId,
@@ -391,8 +370,6 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
         createdAt: DateTime.now(),
       ),
     );
-
-    // Ensure session exists before sending
     if (currentSession.messages.isEmpty) {
       chatCubit.createNewSession().then((_) {
         chatCubit.sendTextMessage(text);
@@ -400,7 +377,6 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
     } else {
       chatCubit.sendTextMessage(text);
     }
-
     _controller.clear();
   }
 
@@ -530,7 +506,6 @@ class _AttachmentButton extends StatelessWidget {
       imageQuality: 85,
       maxWidth: 1024,
     );
-
     if (pickedFile != null) {
       final question = await showDialog<String>(
         context: context,
@@ -561,7 +536,6 @@ class _AttachmentButton extends StatelessWidget {
           );
         },
       );
-
       if (question?.isNotEmpty ?? false) {
         context.read<ChatCubit>().sendImageMessage(
               File(pickedFile.path),

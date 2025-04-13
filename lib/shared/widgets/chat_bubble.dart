@@ -100,18 +100,15 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
               ),
               child: Column(
                 crossAxisAlignment: widget.isLoading
-                    ? CrossAxisAlignment.center
+                    ? CrossAxisAlignment.start
                     : CrossAxisAlignment.start,
                 children: [
-                  if (widget.message.imageUrl != null && !widget.isLoading)
+                  if (widget.message.imageUrl != null)
                     _buildImagePreview(widget.message.imageUrl!),
-
                   if (widget.message.voiceFilePath != null && !widget.isLoading)
                     _buildVoiceMessage(widget.message.voiceFilePath!),
-
-                  if (widget.isLoading) _buildTypingIndicator(),
-
-                  // Always show text if present
+                  if (widget.isLoading && !widget.message.isSentByMe)
+                    _buildTypingIndicator(),
                   if (widget.message.text.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(
@@ -122,8 +119,6 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                       ),
                     ),
                   ],
-
-                  // Always show timestamp
                   const SizedBox(height: 4),
                   Text(
                     DateFormat('HH:mm').format(widget.message.timestamp),
@@ -267,12 +262,10 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Play/Pause button.
           IconButton(
             icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
             onPressed: _togglePlayPause,
           ),
-          // Audio waveform widget.
           Expanded(
             child: AudioFileWaveforms(
               playerController: _playerController,

@@ -110,17 +110,17 @@ final class ChatError extends ChatState {
 }
 
 class ChatNetworkError extends ChatState {
-  final String error; // Non-nullable error
+  final String error;
   final String lastMessage;
   final List<Message> pendingMessages;
 
   const ChatNetworkError({
     required super.sessions,
     required super.currentSessionId,
-    required this.error, // Direct non-nullable property
+    required this.error,
     required this.lastMessage,
     required this.pendingMessages,
-  }) : super(error: error); // Pass to super constructor
+  }) : super(error: error);
 
   @override
   ChatNetworkError copyWith({
