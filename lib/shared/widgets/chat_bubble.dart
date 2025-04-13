@@ -169,29 +169,51 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
   Widget _buildImagePreview(String url) {
     final isNetworkImage = url.startsWith('http');
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: isNetworkImage
-          ? CachedNetworkImage(
-              imageUrl: url,
-              width: 200,
-              height: 150,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                color: Colors.grey[200],
-                width: 200,
-                height: 150,
+    Widget imageWidget;
+    if (isNetworkImage) {
+      imageWidget = CachedNetworkImage(
+        imageUrl: url,
+        width: 200,
+        height: 150,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          color: Colors.grey[200],
+          width: 200,
+          height: 150,
+        ),
+        errorWidget: (context, url, error) => const Icon(Icons.error),
+      );
+    } else {
+      imageWidget = Image.file(
+        File(url),
+        width: 200,
+        height: 150,
+        fit: BoxFit.cover,
+        errorBuilder: (ctx, error, stack) => const Icon(Icons.broken_image),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: InteractiveViewer(
+                child: isNetworkImage
+                    ? CachedNetworkImage(imageUrl: url)
+                    : Image.file(File(url)),
               ),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
-            )
-          : Image.file(
-              File(url),
-              width: 200,
-              height: 150,
-              fit: BoxFit.cover,
-              errorBuilder: (ctx, error, stack) =>
-                  const Icon(Icons.broken_image),
             ),
+          ),
+        );
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: imageWidget,
+      ),
     );
   }
 
