@@ -33,10 +33,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadProfileImage() async {
     await CacheHelper.ensureInitialized();
     final imagePath = CacheHelper.getString(key: 'profileImage');
-    if (imagePath.isNotEmpty && File(imagePath).existsSync()) {
-      setState(() => _profileImage = File(imagePath));
+    if (imagePath.isNotEmpty) {
+      final file = File(imagePath);
+      if (await file.exists()) {
+        setState(() => _profileImage = file);
+      }
     }
-    return;
   }
 
   Future<void> _pickImage() async {

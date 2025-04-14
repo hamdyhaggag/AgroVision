@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:agro_vision/features/home/Logic/home_cubit.dart';
 
+import '../../../core/helpers/cache_helper.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../models/weather_model.dart';
@@ -124,13 +126,28 @@ class _HomeScreenState extends State<HomeScreen> {
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.primaryColor, width: 1.5),
             ),
-            child: const CircleAvatar(
-              radius: 18,
-              backgroundImage: AssetImage('assets/images/user.png'),
-            ),
+            child: _buildProfileAvatar(),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildProfileAvatar() {
+    return FutureBuilder<String>(
+      future: Future.value(CacheHelper.getString(key: 'profileImage')),
+      builder: (context, snapshot) {
+        final imagePath = snapshot.data ?? '';
+        final hasValidImage =
+            imagePath.isNotEmpty && File(imagePath).existsSync();
+
+        return CircleAvatar(
+          radius: 18,
+          backgroundImage: hasValidImage
+              ? FileImage(File(imagePath))
+              : const AssetImage('assets/images/user.png') as ImageProvider,
+        );
+      },
     );
   }
 
