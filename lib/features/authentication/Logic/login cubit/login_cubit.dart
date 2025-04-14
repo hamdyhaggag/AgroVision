@@ -20,6 +20,7 @@ class LoginCubit extends Cubit<LoginState> {
     final response = await _loginRepo.login(loginRequestBody);
     response.when(success: (loginResponse) async {
       await CacheHelper.ensureInitialized();
+      CacheHelper.saveData(key: 'isLoggedIn', value: true);
 
       if (kDebugMode) {
         print('🔵 RAW NAME: ${loginResponse.name}');

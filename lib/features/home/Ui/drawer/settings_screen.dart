@@ -1,13 +1,60 @@
+import 'dart:io';
+
 import 'package:agro_vision/shared/widgets/custom_appbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/helpers/cache_helper.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/themes/app_colors.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  File? _profileImage;
+  late Future<String> _userNameFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _userNameFuture = _getUserName();
+    _loadProfileImage();
+  }
+
+  Future<void> _loadProfileImage() async {
+    await CacheHelper.ensureInitialized();
+    final imagePath = CacheHelper.getString(key: 'profileImage');
+    if (imagePath.isNotEmpty && File(imagePath).existsSync()) {
+      setState(() {
+        _profileImage = File(imagePath);
+      });
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final imageFile = File(pickedFile.path);
+      await CacheHelper.saveData(key: 'profileImage', value: imageFile.path);
+
+      setState(() {
+        _profileImage = imageFile;
+      });
+    }
+  }
+
+  Future<String> _getUserName() async {
+    await CacheHelper.ensureInitialized();
+    return CacheHelper.getString(key: 'userName');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,26 +66,30 @@ class SettingsScreen extends StatelessWidget {
           children: [
             Column(
               children: [
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border:
-                        Border.all(color: AppColors.primaryColor, width: 4.0),
-                  ),
-                  child: Center(
-                    child: Image.asset(
-                      'assets/images/user.png',
-                      height: 120,
-                      width: 120,
-                      fit: BoxFit.cover,
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.primaryColor,
+                        width: 4.0,
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 56,
+                      backgroundImage: _profileImage != null
+                          ? FileImage(_profileImage!)
+                          : const AssetImage('assets/images/user.png')
+                              as ImageProvider,
                     ),
                   ),
                 ),
                 const SizedBox(height: 16.0),
                 FutureBuilder<String>(
-                  future: _getUserName(),
+                  future: _userNameFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
@@ -128,14 +179,5 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<String> _getUserName() async {
-    await CacheHelper.ensureInitialized();
-    final name = CacheHelper.getString(key: 'userName');
-    if (kDebugMode) {
-      print('📲 SETTINGS RETRIEVAL: $name');
-    }
-    return name;
   }
 }

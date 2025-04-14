@@ -90,4 +90,17 @@ class CacheHelper {
       await init();
     }
   }
+
+  void logout() {
+    CacheHelper.saveData(key: 'isLoggedIn', value: false);
+  }
+
+  static Future<void> saveProfileImage(String imagePath) async {
+    await saveData(key: 'profileImage', value: imagePath);
+  }
+
+  static Future<String> getProfileImage() async {
+    await ensureInitialized();
+    return sharedPreferences!.getString('profileImage') ?? '';
+  }
 }
