@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:agro_vision/shared/widgets/custom_appbar.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/helpers/cache_helper.dart';
@@ -25,20 +24,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _userNameFuture = _getUserName();
-    _loadProfileImage().then((_) {
-      setState(() => _isLoadingImage = false);
-    });
+    _loadProfileImage().then((_) => setState(() => _isLoadingImage = false));
+    CacheHelper.profileImageNotifier.addListener(_handleImageUpdate);
   }
 
+  @override
+  void dispose() {
+    CacheHelper.profileImageNotifier.removeListener(_handleImageUpdate);
+    super.dispose();
+  }
+
+  void _handleImageUpdate() => _loadProfileImage();
+
   Future<void> _loadProfileImage() async {
-    await CacheHelper.ensureInitialized();
-    final imagePath = CacheHelper.getString(key: 'profileImage');
+    final imagePath = CacheHelper.profileImageNotifier.value.isNotEmpty
+        ? CacheHelper.profileImageNotifier.value
+        : CacheHelper.getString(key: 'profileImage');
+
     if (imagePath.isNotEmpty) {
       final file = File(imagePath);
       if (await file.exists()) {
         setState(() => _profileImage = file);
+        return;
       }
     }
+    setState(() => _profileImage = null);
   }
 
   Future<void> _pickImage() async {
@@ -46,19 +56,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      final imageFile = File(pickedFile.path);
-      await CacheHelper.saveData(key: 'profileImage', value: imageFile.path);
+      final imagePath = pickedFile.path;
+      await CacheHelper.saveData(key: 'profileImage', value: imagePath);
+      CacheHelper.profileImageNotifier.value = imagePath;
 
       setState(() {
-        _profileImage = imageFile;
+        _profileImage = File(imagePath);
         _successMessage = 'Profile picture updated successfully! 🌟';
         _showSuccess = true;
       });
 
       Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) {
-          setState(() => _showSuccess = false);
-        }
+        if (mounted) setState(() => _showSuccess = false);
       });
     }
   }
@@ -157,9 +166,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           return const CircularProgressIndicator();
                         }
                         final userName = snapshot.data ?? '';
-                        if (kDebugMode) {
-                          print('🟣 Displaying Username: $userName');
-                        }
                         return Text(
                           userName.isNotEmpty ? userName : 'User',
                           style:

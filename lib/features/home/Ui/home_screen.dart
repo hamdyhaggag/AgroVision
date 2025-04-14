@@ -134,18 +134,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProfileAvatar() {
-    return FutureBuilder<String>(
-      future: Future.value(CacheHelper.getString(key: 'profileImage')),
-      builder: (context, snapshot) {
-        final imagePath = snapshot.data ?? '';
-        final hasValidImage =
-            imagePath.isNotEmpty && File(imagePath).existsSync();
+    return ValueListenableBuilder<String>(
+      valueListenable: CacheHelper.profileImageNotifier,
+      builder: (context, imagePath, _) {
+        return FutureBuilder<String>(
+          future: Future.value(CacheHelper.getString(key: 'profileImage')),
+          builder: (context, snapshot) {
+            final cachedPath = snapshot.data ?? '';
+            final valid =
+                cachedPath.isNotEmpty && File(cachedPath).existsSync();
 
-        return CircleAvatar(
-          radius: 18,
-          backgroundImage: hasValidImage
-              ? FileImage(File(imagePath))
-              : const AssetImage('assets/images/user.png') as ImageProvider,
+            return CircleAvatar(
+              radius: 18,
+              backgroundImage: valid
+                  ? FileImage(File(cachedPath))
+                  : const AssetImage('assets/images/user.png') as ImageProvider,
+            );
+          },
         );
       },
     );

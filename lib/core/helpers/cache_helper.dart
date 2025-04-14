@@ -103,4 +103,7 @@ class CacheHelper {
     await ensureInitialized();
     return sharedPreferences!.getString('profileImage') ?? '';
   }
+
+  static final ValueNotifier<String> profileImageNotifier =
+      ValueNotifier<String>('');
 }
