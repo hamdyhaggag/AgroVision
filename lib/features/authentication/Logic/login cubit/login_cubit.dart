@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/helpers/cache_helper.dart';
 import '../../Data/model/login_request_body.dart';
@@ -17,8 +18,22 @@ class LoginCubit extends Cubit<LoginState> {
   void emitLoginStates(LoginRequestBody loginRequestBody) async {
     emit(const LoginState.loading());
     final response = await _loginRepo.login(loginRequestBody);
-    response.when(success: (loginResponse) {
-      CacheHelper.saveData(key: 'isLoggedIn', value: true);
+    response.when(success: (loginResponse) async {
+      await CacheHelper.ensureInitialized();
+
+      if (kDebugMode) {
+        print('🔵 RAW NAME: ${loginResponse.name}');
+      }
+
+      await CacheHelper.saveData(
+        key: 'userName',
+        value: loginResponse.name,
+      );
+
+      final savedName = CacheHelper.getString(key: 'userName');
+      if (kDebugMode) {
+        print('🆗 IMMEDIATE CHECK: $savedName');
+      }
 
       emit(LoginState.success(loginResponse));
     }, failure: (error) {
@@ -26,7 +41,11 @@ class LoginCubit extends Cubit<LoginState> {
     });
   }
 
-  void logout() {
-    CacheHelper.saveData(key: 'isLoggedIn', value: false);
+  void logout() async {
+    await CacheHelper.ensureInitialized();
+    await CacheHelper.removeData(key: 'userName');
+    if (kDebugMode) {
+      print('🚪 LOGGED OUT - Cleared userName');
+    }
   }
 }

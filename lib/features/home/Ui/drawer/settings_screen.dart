@@ -1,6 +1,8 @@
 import 'package:agro_vision/shared/widgets/custom_appbar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/helpers/cache_helper.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/themes/app_colors.dart';
 
@@ -35,12 +37,26 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16.0),
-                Text(
-                  'Ahmed Ali',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'SYNE',
-                      ),
+                FutureBuilder<String>(
+                  future: _getUserName(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+
+                    final userName = snapshot.data ?? '';
+                    if (kDebugMode) {
+                      print('🟣 Displaying Username: $userName');
+                    }
+
+                    return Text(
+                      userName.isNotEmpty ? userName : 'User',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'SYNE',
+                          ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 4.0),
                 Text(
@@ -51,10 +67,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 32.0),
-
-            // Settings List
             ListTile(
               leading: const Icon(Icons.person_outline),
               title: const Text(
@@ -115,5 +128,14 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<String> _getUserName() async {
+    await CacheHelper.ensureInitialized();
+    final name = CacheHelper.getString(key: 'userName');
+    if (kDebugMode) {
+      print('📲 SETTINGS RETRIEVAL: $name');
+    }
+    return name;
   }
 }

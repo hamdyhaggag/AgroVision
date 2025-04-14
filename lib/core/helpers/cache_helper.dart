@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:agro_vision/models/chat_message.dart';
 
@@ -18,6 +19,13 @@ class CacheHelper {
     required String key,
     required dynamic value,
   }) async {
+    await ensureInitialized();
+    if (value is String) {
+      await sharedPreferences!.setString(key, value);
+      if (kDebugMode) {
+        print('💾 SAVED $key: $value');
+      }
+    }
     log("saving >>> $value into local >>> with key $key");
     if (value is String) await sharedPreferences!.setString(key, value);
     if (value is int) await sharedPreferences!.setInt(key, value);
@@ -40,8 +48,20 @@ class CacheHelper {
     return jsonList.map((json) => Message.fromJson(json)).toList();
   }
 
-  static String getString({required String key}) =>
-      sharedPreferences!.getString(key) ?? "";
+  static String getString({required String key}) {
+    if (sharedPreferences == null) {
+      if (kDebugMode) {
+        print('⚠️ SharedPreferences not initialized!');
+      }
+      return '';
+    }
+    final value = sharedPreferences!.getString(key) ?? '';
+    if (kDebugMode) {
+      print('🔑 Retrieved $key: ${value.isEmpty ? '[empty]' : value}');
+    }
+    return value;
+  }
+
   static int getInteger({required String key}) =>
       sharedPreferences!.getInt(key) ?? 0;
   static bool getBoolean({required String key}) =>
@@ -63,5 +83,11 @@ class CacheHelper {
     final sessionsJson =
         sessions.map((session) => jsonEncode(session.toJson())).toList();
     prefs.setStringList(_sessionsKey, sessionsJson);
+  }
+
+  static Future<void> ensureInitialized() async {
+    if (sharedPreferences == null) {
+      await init();
+    }
   }
 }
