@@ -77,7 +77,11 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
       final response = await _dio.post(
         apiUrl,
         data: formData,
-        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+        options: Options(
+          headers: {'Content-Type': 'multipart/form-data'},
+          sendTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
+        ),
       );
 
       if (response.statusCode == 200) {
@@ -85,10 +89,22 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
         await saveReport(data);
         return data;
       } else {
-        throw Exception('Failed to load plant details');
+        throw 'Server returned unexpected status: ${response.statusCode}';
       }
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw 'Connection timed out. Please check your internet connection.';
+      } else if (e.response != null) {
+        throw 'Server error: ${e.response?.statusCode}';
+      } else {
+        throw 'Network error: ${e.message}';
+      }
+    } on SocketException {
+      throw 'No internet connection. Please check your network settings.';
     } catch (e) {
-      throw Exception('Error fetching data: $e');
+      throw 'Failed to process request: ${e.toString()}';
     }
   }
 
@@ -160,10 +176,85 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                         child: CircularProgressIndicator(
                             color: AppColors.primaryColor));
                   } else if (snapshot.hasError) {
-                    return Center(
-                        child: Text('Error: ${snapshot.error}',
-                            style: TextStyles.bodyText
-                                .copyWith(color: Colors.red)));
+                    return Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.info_outline_rounded,
+                                    size: 34,
+                                    color: Colors.red.shade700,
+                                  ),
+                                ),
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: Container(
+                                    width: 16,
+                                    height: 16,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.shade700,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            Text(
+                              'Something Went Wrong',
+                              style: TextStyles.heading2.copyWith(
+                                fontSize: 20,
+                                color: AppColors.errorColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _parseErrorMessage(snapshot.error.toString()),
+                              style: TextStyles.bodyText.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.8),
+                                fontSize: 15,
+                                height: 1.4,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            SizedBox(
+                              width: double.infinity,
+                              child: CustomBottom(
+                                text: 'Try Again',
+                                onPressed: () => setState(() {
+                                  plantDetailsFuture = fetchPlantDetails(
+                                      File(widget.imagePath!));
+                                }),
+                                icon: Icons.refresh_rounded,
+                                iconColor: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
                   } else if (snapshot.hasData) {
                     final data = snapshot.data!;
                     final plantClass =
@@ -222,14 +313,6 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                               style: TextStyles.bodyText,
                               children: [
                                 TextSpan(text: control),
-                                TextSpan(
-                                  text: ' Read more',
-                                  style: const TextStyle(
-                                      color: AppColors.primaryColor,
-                                      fontWeight: FontWeight.bold),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {},
-                                ),
                               ],
                             ),
                           ),
@@ -282,5 +365,27 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
         ],
       ),
     );
+  }
+
+  String _parseErrorMessage(String error) {
+    debugPrint('Error received: $error');
+
+    const errorMap = {
+      'connection timed out': 'Network connection timed out',
+      'no internet connection': 'Internet connection required',
+      'server error': 'Problem with our servers',
+      'timed out': 'Network connection timed out',
+      'failed host lookup': 'Internet connection required',
+      '500': 'Problem with our servers',
+    };
+
+    final errorLower = error.toLowerCase();
+
+    return errorMap.entries
+        .firstWhere(
+          (entry) => errorLower.contains(entry.key.toLowerCase()),
+          orElse: () => const MapEntry('', 'Something unexpected occurred'),
+        )
+        .value;
   }
 }
