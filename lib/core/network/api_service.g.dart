@@ -14,7 +14,7 @@ class _ApiService implements ApiService {
     this.baseUrl,
     this.errorLogger,
   }) {
-    baseUrl ??= 'https://api.agrovision.ltd/api/';
+    baseUrl ??= 'https://final.agrovision.ltd/api/';
   }
 
   final Dio _dio;

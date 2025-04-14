@@ -7,8 +7,8 @@ class SensorDataService {
 
   Future<Map<String, dynamic>> fetchSensorData() async {
     try {
-      final response =
-          await dio.get('https://api.agrovision.ltd/api/firebase/last-record');
+      final response = await dio
+          .get('https://final.agrovision.ltd/api/firebase/last-record');
       if (response.statusCode == 200 && response.data['success'] == true) {
         return response.data['data'] as Map<String, dynamic>;
       } else {
