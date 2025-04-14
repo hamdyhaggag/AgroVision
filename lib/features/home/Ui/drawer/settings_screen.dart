@@ -19,22 +19,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late Future<String> _userNameFuture;
   bool _showSuccess = false;
   String _successMessage = '';
+  bool _isLoadingImage = true;
 
   @override
   void initState() {
     super.initState();
     _userNameFuture = _getUserName();
-    _loadProfileImage();
+    _loadProfileImage().then((_) {
+      setState(() => _isLoadingImage = false);
+    });
   }
 
   Future<void> _loadProfileImage() async {
     await CacheHelper.ensureInitialized();
     final imagePath = CacheHelper.getString(key: 'profileImage');
     if (imagePath.isNotEmpty && File(imagePath).existsSync()) {
-      setState(() {
-        _profileImage = File(imagePath);
-      });
+      setState(() => _profileImage = File(imagePath));
     }
+    return;
   }
 
   Future<void> _pickImage() async {
@@ -92,13 +94,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            CircleAvatar(
-                              radius: 56,
-                              backgroundImage: _profileImage != null
-                                  ? FileImage(_profileImage!)
-                                  : const AssetImage('assets/images/user.png')
-                                      as ImageProvider,
-                            ),
+                            if (_isLoadingImage)
+                              Container(
+                                width: 112,
+                                height: 112,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFEEEEEE),
+                                  shape: BoxShape.circle,
+                                ),
+                              )
+                            else
+                              CircleAvatar(
+                                radius: 56,
+                                backgroundImage: _profileImage != null
+                                    ? FileImage(_profileImage!)
+                                    : const AssetImage('assets/images/user.png')
+                                        as ImageProvider,
+                              ),
                             Positioned(
                               bottom: 0,
                               right: 0,
