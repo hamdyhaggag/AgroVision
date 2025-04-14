@@ -13,6 +13,7 @@ class CustomBottom extends StatelessWidget {
     this.iconSize,
     this.iconColor,
     this.textStyle,
+    this.isLoading = false,
   });
 
   final String text;
@@ -24,34 +25,50 @@ class CustomBottom extends StatelessWidget {
   final Color? iconColor;
   final TextStyle? textStyle;
 
+  final bool isLoading;
+
   @override
   Widget build(BuildContext context) {
+    final Color buttonColor =
+        isLoading ? Colors.white : (color ?? AppColors.primaryColor);
+    final Color borderColor = buttonColor.withValues(alpha: 0.2);
+
     return SizedBox(
       width: 347.w,
       height: 48.h,
       child: MaterialButton(
-        color: color ?? AppColors.primaryColor,
-        textColor: Colors.white,
+        color: buttonColor,
+        textColor: isLoading ? AppColors.primaryColor : Colors.white,
         padding: EdgeInsets.symmetric(horizontal: 24.w),
         elevation: 0,
-        hoverElevation: 1,
-        focusElevation: 1,
-        highlightElevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14.r),
           side: BorderSide(
-            color: color?.withValues(alpha: 0.2) ??
-                AppColors.primaryColor.withValues(alpha: 0.2),
+            color: borderColor,
             width: 1.r,
           ),
         ),
-        onPressed: onPressed,
-        child: _buildButtonContent(),
+        onPressed: isLoading ? null : onPressed,
+        child: _buildButtonContent(buttonColor),
       ),
     );
   }
 
-  Widget _buildButtonContent() {
+  Widget _buildButtonContent(Color buttonColor) {
+    if (isLoading) {
+      return Center(
+        child: SizedBox(
+          width: 24.w,
+          height: 24.h,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: buttonColor == Colors.white
+                ? AppColors.primaryColor
+                : Colors.white,
+          ),
+        ),
+      );
+    }
     if (icon != null) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,

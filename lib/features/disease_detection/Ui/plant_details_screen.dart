@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:agro_vision/features/chat/Ui/chat_bot_detail_screen.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,7 +51,7 @@ class PlantDetailsScreen extends StatefulWidget {
 class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
   final Dio _dio = Dio()..interceptors.add(PrettyDioLogger());
   Future<Map<String, dynamic>>? plantDetailsFuture;
-
+  bool _isStartingChat = false;
   @override
   void initState() {
     super.initState();
@@ -319,37 +318,46 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                           const SizedBox(height: 16),
                           CustomBottom(
                             text: 'Talk to the Bot',
+                            isLoading: _isStartingChat,
                             onPressed: () async {
-                              if (!snapshot.hasData) return;
+                              if (!snapshot.hasData || _isStartingChat) return;
 
-                              final data = snapshot.data!;
-                              final plantClass = data['class'] ?? 'Unknown';
-                              final reason =
-                                  data['reason'] ?? 'No reason provided';
-                              final control =
-                                  data['control'] ?? 'No control measures';
+                              setState(() => _isStartingChat = true);
 
-                              final chatCubit = context.read<ChatCubit>();
+                              try {
+                                final data = snapshot.data!;
+                                final chatCubit = context.read<ChatCubit>();
 
-                              final newSession =
-                                  await chatCubit.createNewSession();
-                              if (newSession == null) return;
+                                final newSession =
+                                    await chatCubit.createNewSession();
+                                if (newSession == null) return;
 
-                              chatCubit.addBotMessage(
-                                'Diagnosis Result:\n'
-                                '• Disease: $plantClass\n'
-                                '• Reason: $reason\n'
-                                '• Control Measures: $control\n\n'
-                                'How can I assist you further?',
-                                newSession.id,
-                              );
+                                chatCubit.addBotMessage(
+                                  'Diagnosis Result:\n'
+                                  '• Disease: ${data['class']}\n'
+                                  '• Reason: ${data['reason']}\n'
+                                  '• Control Measures: ${data['control']}\n\n'
+                                  'How can I assist you further?',
+                                  newSession.id,
+                                );
 
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ChatBotDetailScreen(),
-                                ),
-                              );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const ChatBotDetailScreen(),
+                                  ),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content: Text(
+                                      'Failed to start chat: ${e.toString()}'),
+                                ));
+                              } finally {
+                                if (mounted) {
+                                  setState(() => _isStartingChat = false);
+                                }
+                              }
                             },
                           ),
                         ],
