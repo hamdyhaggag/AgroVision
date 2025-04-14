@@ -80,12 +80,19 @@ class ChatRepository {
   }
 
   Future<ChatResponse> sendVoice(
-      File voiceFile, String speak, String language) async {
+      File voiceFile,
+      String speak,
+      String language,
+      String userId,
+      String sessionId,
+      ) async {
     try {
       final response = await chatbotService.sendVoiceMessage(
         voiceFile,
         speak,
         language,
+        userId,
+        sessionId,
       );
       return response;
     } on DioException catch (e) {

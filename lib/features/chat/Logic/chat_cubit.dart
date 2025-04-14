@@ -178,6 +178,8 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> sendVoiceMessage(File voiceFile,
       {String speak = 'false', String language = 'en'}) async {
     final currentSession = _getCurrentSession();
+    const userId = "55";
+    final sessionId = currentSession.id;
     final updatedSession = currentSession.copyWith(messages: [
       ...currentSession.messages,
       Message(
@@ -190,7 +192,13 @@ class ChatCubit extends Cubit<ChatState> {
     emit(ChatLoading(
         sessions: updatedSessions, currentSessionId: currentSession.id));
     try {
-      final response = await repository.sendVoice(voiceFile, speak, language);
+      final response = await repository.sendVoice(
+        voiceFile,
+        speak,
+        language,
+        userId,
+        sessionId,
+      );
       _handleSuccessResponse(updatedSession, response.answer);
     } catch (e) {
       _handleError(e, updatedSessions, currentSession, '', file: voiceFile);

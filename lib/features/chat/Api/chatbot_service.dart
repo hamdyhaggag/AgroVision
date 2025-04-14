@@ -34,5 +34,7 @@ abstract class ChatbotService {
     @Part(name: 'audio_file') File voiceFile,
     @Part(name: 'speak') String speak,
     @Part(name: 'language') String language,
+    @Part(name: 'user_id') String userId,
+    @Part(name: 'session_id') String sessionId,
   );
 }
