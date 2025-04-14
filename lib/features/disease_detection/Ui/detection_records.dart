@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:agro_vision/features/disease_detection/Ui/plant_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
@@ -27,13 +28,25 @@ class _DetectionRecordsState extends State<DetectionRecords> {
   Future<void> _loadReports() async {
     final prefs = await SharedPreferences.getInstance();
     final reportStrings = prefs.getStringList('diseaseReports') ?? [];
-    final loadedReports = reportStrings
+
+    final validReports = reportStrings.where((report) {
+      try {
+        jsonDecode(report);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }).toList();
+
+    if (validReports.length != reportStrings.length) {
+      await prefs.setStringList('diseaseReports', validReports);
+    }
+
+    final loadedReports = validReports
         .map((report) => DiseaseModel.fromJson(jsonDecode(report)))
         .toList();
 
-    setState(() {
-      diseases = loadedReports;
-    });
+    setState(() => diseases = loadedReports);
   }
 
   Future<void> _deleteSelectedReports() async {
@@ -82,10 +95,19 @@ class _DetectionRecordsState extends State<DetectionRecords> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'Detection Records',
-        isHome: true,
+      appBar: AppBar(
+        title: isSelectionMode
+            ? Text('${selectedReports.length} Selected')
+            : const Text('Detection Records'),
         actions: [
+          if (isSelectionMode)
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => setState(() {
+                selectedReports.clear();
+                isSelectionMode = false;
+              }),
+            ),
           if (isSelectionMode)
             IconButton(
               icon: const Icon(Icons.delete),
@@ -113,6 +135,7 @@ class _DetectionRecordsState extends State<DetectionRecords> {
                   onLongPress: () {
                     setState(() {
                       isSelectionMode = true;
+                      selectedReports.add(index);
                     });
                   },
                   onTap: () {
@@ -124,6 +147,14 @@ class _DetectionRecordsState extends State<DetectionRecords> {
                           selectedReports.add(index);
                         }
                       });
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              PlantDetailsScreen.fromCachedDisease(disease),
+                        ),
+                      );
                     }
                   },
                   child: Card(
@@ -150,7 +181,6 @@ class _DetectionRecordsState extends State<DetectionRecords> {
                                 });
                               },
                             ),
-                          // Image Section
                           Container(
                             width: 100,
                             height: 100,
@@ -163,7 +193,6 @@ class _DetectionRecordsState extends State<DetectionRecords> {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          // Text Section
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,7 +257,6 @@ class _DetectionRecordsState extends State<DetectionRecords> {
     );
   }
 
-  /// Returns the correct ImageProvider based on whether the path is a file or an asset.
   ImageProvider _getImageProvider(String path) {
     if (File(path).existsSync()) {
       return FileImage(File(path));

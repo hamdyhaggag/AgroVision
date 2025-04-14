@@ -15,17 +15,38 @@ import '../../chat/Logic/chat_cubit.dart';
 
 class PlantDetailsScreen extends StatefulWidget {
   final String? imagePath;
-  final String? selectedPlant;
+  final String plantType;
+  final Map<String, dynamic>? cachedData;
 
   const PlantDetailsScreen({
     super.key,
     this.imagePath,
-    this.selectedPlant,
-  }) : assert(imagePath != null || selectedPlant != null,
-            'Either imagePath or selectedPlant must be provided.');
+    required this.plantType,
+    this.cachedData,
+  }) : assert(imagePath != null, 'Image path must be provided');
 
   @override
   State<PlantDetailsScreen> createState() => _PlantDetailsScreenState();
+
+  factory PlantDetailsScreen.fromDisease(DiseaseModel disease) {
+    return PlantDetailsScreen(
+      imagePath: disease.imageUrl,
+      plantType: disease.status,
+    );
+  }
+
+  factory PlantDetailsScreen.fromCachedDisease(DiseaseModel disease) {
+    return PlantDetailsScreen(
+      imagePath: disease.imageUrl,
+      plantType: disease.status,
+      cachedData: {
+        'class': disease.status,
+        'confidence': disease.confidence,
+        'reason': disease.reason,
+        'control': disease.control,
+      },
+    );
+  }
 }
 
 class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
@@ -35,22 +56,22 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.imagePath != null) {
-      plantDetailsFuture = fetchPlantDetails(
-          File(widget.imagePath!), widget.selectedPlant ?? 'Unknown');
+    if (widget.cachedData != null) {
+      plantDetailsFuture = Future.value(widget.cachedData);
+    } else if (widget.imagePath != null) {
+      plantDetailsFuture = fetchPlantDetails(File(widget.imagePath!));
     }
   }
 
-  Future<Map<String, dynamic>> fetchPlantDetails(
-      File imageFile, String plantName) async {
+  Future<Map<String, dynamic>> fetchPlantDetails(File imageFile) async {
     const String apiUrl =
-        'https://positive-tiger-endlessly.ngrok-free.app/predict'; // Your API endpoint
+        'https://positive-tiger-endlessly.ngrok-free.app/predict';
 
     try {
       FormData formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(imageFile.path,
             filename: imageFile.path.split('/').last),
-        'plant': plantName,
+        'plant': widget.plantType.toLowerCase(),
       });
 
       final response = await _dio.post(
@@ -74,12 +95,17 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
   Future<void> saveReport(Map<String, dynamic> report) async {
     final prefs = await SharedPreferences.getInstance();
     final existingReports = prefs.getStringList('diseaseReports') ?? [];
+
     final newReport = DiseaseModel(
-      date: DateTime.now().toString(),
-      status: report['class'] ?? 'Unknown',
+      date: DateTime.now().toIso8601String(),
+      status: report['class']?.toString() ?? 'Unknown',
       isComplete: true,
       imageUrl: widget.imagePath!,
+      reason: report['reason']?.toString() ?? '',
+      control: report['control']?.toString() ?? '',
+      confidence: (report['confidence'] as num?)?.toDouble() ?? 0.0,
     );
+
     existingReports.add(jsonEncode(newReport.toJson()));
     await prefs.setStringList('diseaseReports', existingReports);
   }
@@ -94,27 +120,15 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
         children: [
           Stack(
             children: [
-              if (widget.imagePath != null)
-                Container(
-                  height: size.height * 0.45,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: FileImage(File(widget.imagePath!)),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                )
-              else
-                Container(
-                  height: size.height * 0.3,
-                  color: AppColors.greyLight,
-                  child: Center(
-                    child: Text(
-                      widget.selectedPlant ?? 'Unknown Plant',
-                      style: TextStyles.heading1,
-                    ),
+              Container(
+                height: size.height * 0.45,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: FileImage(File(widget.imagePath!)),
+                    fit: BoxFit.cover,
                   ),
                 ),
+              ),
               Positioned(
                 top: size.height * 0.43,
                 child: ClipRRect(
@@ -128,11 +142,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                     child: const Padding(
                       padding:
                           EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          SizedBox(height: 14),
-                        ],
-                      ),
+                      child: Row(children: [SizedBox(height: 14)]),
                     ),
                   ),
                 ),
@@ -147,17 +157,13 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primaryColor,
-                      ),
-                    );
+                        child: CircularProgressIndicator(
+                            color: AppColors.primaryColor));
                   } else if (snapshot.hasError) {
                     return Center(
-                      child: Text(
-                        'Error: ${snapshot.error}',
-                        style: TextStyles.bodyText.copyWith(color: Colors.red),
-                      ),
-                    );
+                        child: Text('Error: ${snapshot.error}',
+                            style: TextStyles.bodyText
+                                .copyWith(color: Colors.red)));
                   } else if (snapshot.hasData) {
                     final data = snapshot.data!;
                     final plantClass =
@@ -177,31 +183,22 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                               const Icon(Icons.check_circle,
                                   color: Colors.green),
                               const SizedBox(width: 8),
-                              Text(
-                                'We identified the plant!',
-                                style: TextStyles.bodyText
-                                    .copyWith(color: Colors.green),
-                              ),
+                              Text('We identified the plant!',
+                                  style: TextStyles.bodyText
+                                      .copyWith(color: Colors.green)),
                             ],
                           ),
                           const SizedBox(height: 16),
-                          Text(
-                            plantClass,
-                            style: TextStyles.heading1,
-                          ),
+                          Text(plantClass, style: TextStyles.heading1),
                           const SizedBox(height: 16),
                           Row(
                             children: [
-                              Text(
-                                'Confidence Score',
-                                style: TextStyles.bodyText,
-                              ),
+                              Text('Confidence Score',
+                                  style: TextStyles.bodyText),
                               const Spacer(),
-                              Text(
-                                '${confidence.toStringAsFixed(2)}%',
-                                style: TextStyles.bodyText
-                                    .copyWith(fontWeight: FontWeight.bold),
-                              ),
+                              Text('${confidence.toStringAsFixed(2)}%',
+                                  style: TextStyles.bodyText
+                                      .copyWith(fontWeight: FontWeight.bold)),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -211,36 +208,25 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                             color: AppColors.primaryColor,
                           ),
                           const SizedBox(height: 16),
-                          Text(
-                            'Reason',
-                            style: TextStyles.heading2,
-                          ),
+                          Text('Reason', style: TextStyles.heading2),
                           const SizedBox(height: 8),
-                          Text(
-                            reason,
-                            style: TextStyles.bodyText,
-                            maxLines: 5,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          Text(reason,
+                              style: TextStyles.bodyText,
+                              maxLines: 5,
+                              overflow: TextOverflow.ellipsis),
                           const SizedBox(height: 16),
-                          Text(
-                            'Control',
-                            style: TextStyles.heading2,
-                          ),
+                          Text('Control', style: TextStyles.heading2),
                           const SizedBox(height: 8),
                           RichText(
                             text: TextSpan(
                               style: TextStyles.bodyText,
                               children: [
-                                TextSpan(
-                                  text: control,
-                                ),
+                                TextSpan(text: control),
                                 TextSpan(
                                   text: ' Read more',
                                   style: const TextStyle(
-                                    color: AppColors.primaryColor,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                      color: AppColors.primaryColor,
+                                      fontWeight: FontWeight.bold),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {},
                                 ),
@@ -262,9 +248,9 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
 
                               final chatCubit = context.read<ChatCubit>();
 
-                              await chatCubit.createNewSession();
-                              final newSessionId =
-                                  chatCubit.state.sessions.last.id;
+                              final newSession =
+                                  await chatCubit.createNewSession();
+                              if (newSession == null) return;
 
                               chatCubit.addBotMessage(
                                 'Diagnosis Result:\n'
@@ -272,7 +258,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                                 '• Reason: $reason\n'
                                 '• Control Measures: $control\n\n'
                                 'How can I assist you further?',
-                                newSessionId,
+                                newSession.id,
                               );
 
                               Navigator.push(
@@ -287,9 +273,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                       ),
                     );
                   } else {
-                    return const Center(
-                      child: Text('No data available'),
-                    );
+                    return const Center(child: Text('No data available'));
                   }
                 },
               ),

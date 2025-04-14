@@ -123,19 +123,29 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  Future<void> createNewSession() async {
+  Future<ChatSession> createNewSession() async {
     try {
       final response = await repository.createNewSession("55");
-      _addNewSession(response.sessionId);
+      final newSession = ChatSession(
+        id: response.sessionId,
+        messages: [],
+        createdAt: DateTime.now(),
+      );
+      _addNewSession(newSession);
+      return newSession;
     } catch (e) {
       final localSessionId = 'local_${DateTime.now().millisecondsSinceEpoch}';
-      _addNewSession(localSessionId);
+      final newSession = ChatSession(
+        id: localSessionId,
+        messages: [],
+        createdAt: DateTime.now(),
+      );
+      _addNewSession(newSession);
+      return newSession;
     }
   }
 
-  void _addNewSession(String sessionId) {
-    final newSession =
-        ChatSession(id: sessionId, messages: [], createdAt: DateTime.now());
+  void _addNewSession(ChatSession newSession) {
     final newSessions = [...state.sessions, newSession];
     emit(ChatSuccess(sessions: newSessions, currentSessionId: newSession.id));
   }
@@ -238,6 +248,28 @@ class ChatCubit extends Cubit<ChatState> {
         error: error.toString(),
       ));
     }
+  }
+
+  void addBotMessage(String message, String sessionId) {
+    final botMessage = Message(
+      text: message,
+      isSentByMe: false,
+      status: MessageStatus.delivered,
+      timestamp: DateTime.now(),
+      sessionId: sessionId,
+    );
+
+    final updatedSessions = state.sessions.map((session) {
+      if (session.id == sessionId) {
+        return session.copyWith(messages: [...session.messages, botMessage]);
+      }
+      return session;
+    }).toList();
+
+    emit(ChatSuccess(
+      sessions: updatedSessions,
+      currentSessionId: sessionId,
+    ));
   }
 
   void retryPendingMessages() {
