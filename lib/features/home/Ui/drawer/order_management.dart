@@ -5,6 +5,7 @@ import '../../../../core/helpers/cache_helper.dart';
 import '../../../../core/network/api_service.dart';
 import '../../../../core/network/dio_factory.dart';
 import '../../../../models/api_order.dart';
+import '../../../../shared/widgets/custom_appbar.dart';
 import '../../Api/orders_repo.dart';
 import '../../Logic/orders_cubit/orders_cubit.dart';
 import 'widgets/order_details_screen.dart';
@@ -76,8 +77,8 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
             ..fetchOrders(userId),
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          title: const Text('Order Management'),
+        appBar: CustomAppBar(
+          title: 'Order Management',
           actions: [
             IconButton(
               icon: Icon(Icons.filter_alt_outlined, color: Colors.grey[800]),
@@ -191,7 +192,10 @@ class _ErrorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Text(message, style: const TextStyle(color: Colors.red)),
+        Text(message,
+            style: const TextStyle(
+              color: Colors.red,
+            )),
         ElevatedButton(
           onPressed: () => context
               .read<OrdersCubit>()
@@ -234,15 +238,18 @@ class _OrderCard extends StatelessWidget {
                   style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
+                      fontFamily: 'Poppins',
                       color: Colors.grey[600])),
               const Spacer(),
               Icon(Icons.calendar_today, size: 14, color: Colors.grey[500]),
               const SizedBox(width: 4),
               Text(formatDate(order.createdAt),
                   style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500)),
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Poppins',
+                  )),
             ]),
             const SizedBox(height: 12),
             _InfoRow(
@@ -260,6 +267,7 @@ class _OrderCard extends StatelessWidget {
                   style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
+                      fontFamily: 'Poppins',
                       color: Colors.black87)),
               const Spacer(),
               Container(
@@ -274,10 +282,11 @@ class _OrderCard extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text(order.status.toUpperCase(),
                       style: TextStyle(
-                          color: statusColor,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.3)),
+                        color: statusColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                      )),
                 ]),
               )
             ])
@@ -322,9 +331,11 @@ class _InfoRow extends StatelessWidget {
       const SizedBox(width: 4),
       Text(value,
           style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87)),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+            fontFamily: 'Poppins',
+          )),
     ]);
   }
 }

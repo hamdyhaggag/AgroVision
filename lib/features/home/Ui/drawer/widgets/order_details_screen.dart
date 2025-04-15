@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/themes/app_colors.dart';
+import '../../../../../shared/widgets/custom_appbar.dart';
 import '../order_management.dart';
 
 class OrderDetailScreen extends StatelessWidget {
@@ -18,9 +19,8 @@ class OrderDetailScreen extends StatelessWidget {
     final colors = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Order Details',
-            style: TextStyle(fontWeight: FontWeight.w600)),
+      appBar: CustomAppBar(
+        title: 'Order Details',
         actions: [
           IconButton(
               icon: Icon(Icons.print, color: colors.onSurface),
@@ -81,6 +81,7 @@ class OrderDetailScreen extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           color: colors.primary,
                           letterSpacing: -0.5,
+                          fontFamily: 'Poppins',
                         )),
                   ]),
                 ]),
@@ -157,7 +158,12 @@ class OrderDetailScreen extends StatelessWidget {
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Icon(icon, size: 16, color: color),
         const SizedBox(width: 8),
-        Expanded(child: Text(text, style: TextStyle(color: color))),
+        Expanded(
+            child: Text(text,
+                style: TextStyle(
+                  color: color,
+                  fontFamily: 'Poppins',
+                ))),
       ]),
     );
   }
@@ -199,6 +205,7 @@ class OrderDetailScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
+            fontFamily: 'Poppins',
             color: isTotal ? AppColors.primaryColor : Colors.black87,
           )),
     ]);
@@ -216,6 +223,7 @@ class OrderDetailScreen extends StatelessWidget {
               style: TextStyle(
                 color: colors.onPrimaryContainer,
                 fontWeight: FontWeight.w500,
+                fontFamily: 'Poppins',
               )),
         ]),
       ),
@@ -248,6 +256,7 @@ class OrderDetailScreen extends StatelessWidget {
         Text(value,
             style: theme.textTheme.bodyMedium!.copyWith(
               fontWeight: FontWeight.w600,
+              fontFamily: 'Poppins',
             )),
       ]),
     );
