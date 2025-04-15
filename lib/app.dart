@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'core/dependency_injection/di.dart';
+import 'core/helpers/cache_helper.dart';
 import 'core/helpers/location_helper.dart';
+import 'core/network/api_service.dart';
 import 'core/network/dio_factory.dart';
 import 'core/network/weather_service.dart';
 import 'core/routing/app_router.dart';
@@ -17,8 +19,11 @@ import 'features/chat/Logic/chat_cubit.dart';
 import 'features/chat/chat_repository.dart';
 import 'features/disease_detection/Api/disease_detection_service.dart';
 import 'features/disease_detection/Logic/disease_cubit.dart';
+import 'features/home/Api/orders_repo.dart';
 import 'features/home/Logic/home_cubit.dart';
+import 'features/home/Logic/orders_cubit/orders_cubit.dart';
 import 'features/home/Logic/task_cubit/task_cubit.dart';
+import 'features/home/Ui/drawer/order_management.dart';
 import 'features/monitoring/Api/sensor_data_service.dart';
 import 'features/monitoring/Logic/sensor_data_cubit.dart';
 
@@ -63,7 +68,12 @@ class AgroVision extends StatelessWidget {
               create: (context) => TaskCubit(),
             ),
             BlocProvider(
-                create: (context) => ChatCubit(getIt<ChatRepository>()))
+                create: (context) => ChatCubit(getIt<ChatRepository>())),
+            BlocProvider(
+              create: (context) => OrdersCubit(
+                  OrdersRepo(ApiService(DioFactory.getAgrovisionDio())))
+                ..fetchOrders(CacheHelper.getInt('userId')),
+            ),
           ],
           child: MaterialApp(
             title: 'AgroVision',

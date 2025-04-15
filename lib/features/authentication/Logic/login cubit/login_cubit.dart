@@ -19,6 +19,8 @@ class LoginCubit extends Cubit<LoginState> {
     emit(const LoginState.loading());
     final response = await _loginRepo.login(loginRequestBody);
     response.when(success: (loginResponse) async {
+      await CacheHelper.saveData(key: 'token', value: loginResponse.token);
+      await CacheHelper.saveData(key: 'userId', value: loginResponse.id);
       await CacheHelper.ensureInitialized();
       CacheHelper.saveData(key: 'isLoggedIn', value: true);
 

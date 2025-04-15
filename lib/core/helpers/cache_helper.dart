@@ -62,6 +62,8 @@ class CacheHelper {
     return value;
   }
 
+  static int getInt(String key) => sharedPreferences?.getInt(key) ?? -1;
+
   static int getInteger({required String key}) =>
       sharedPreferences!.getInt(key) ?? 0;
   static bool getBoolean({required String key}) =>
@@ -93,11 +95,15 @@ class CacheHelper {
 
   void logout() {
     CacheHelper.saveData(key: 'isLoggedIn', value: false);
+    CacheHelper.removeData(key: 'token');
   }
 
   static Future<void> saveProfileImage(String imagePath) async {
     await saveData(key: 'profileImage', value: imagePath);
   }
+
+  static String getStringg(String key) =>
+      sharedPreferences?.getString(key) ?? '';
 
   static Future<String> getProfileImage() async {
     await ensureInitialized();

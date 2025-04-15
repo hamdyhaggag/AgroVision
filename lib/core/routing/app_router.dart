@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../features/authentication/UI/create_password_screen.dart';
 import '../../features/authentication/UI/forgot password/forgot_password_email.dart';
 import '../../features/authentication/UI/forgot password/forgot_password_phone.dart';
+import '../../features/authentication/UI/login_screen.dart';
 import '../../features/authentication/UI/otp/otp_email_screen.dart';
 import '../../features/authentication/UI/otp/otp_phone_screen.dart';
 import '../../features/chat/Ui/chat_bot_detail_screen.dart';
@@ -76,7 +77,10 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => NotificationsScreen(),
         );
-
+      case '/login':
+        return MaterialPageRoute(
+          builder: (_) => const LoginScreen(),
+        );
       case AppRoutes.sensorDataScreen:
         return MaterialPageRoute(
           builder: (_) => const SensorDataScreen(
