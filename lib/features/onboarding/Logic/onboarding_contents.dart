@@ -21,7 +21,7 @@ List<OnboardingContents> contents = [
     title: "Early detection of plant and soil diseases",
     image: "assets/images/onboarding/onboarding2.svg",
     desc:
-        "our project can detect plant and soil diseases using an existing camera sensor that tracks the plants in real-time day by day.",
+        "our App can detect plant and soil diseases using an existing camera sensor that tracks the plants in real-time day by day.",
   ),
   OnboardingContents(
     title: "Improve agriculture precision",
