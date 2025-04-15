@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/helpers/cache_helper.dart';
 import '../../../../core/network/api_service.dart';
 import '../../../../core/network/dio_factory.dart';
@@ -99,18 +100,31 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
           },
           builder: (context, state) {
             if (state is OrdersLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return RefreshIndicator(
+                onRefresh: () async =>
+                    context.read<OrdersCubit>().fetchOrders(userId),
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: 6,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (_, __) => const _ShimmerOrderCard(),
+                ),
+              );
             }
             if (state is OrdersError) {
               return _ErrorWidget(message: state.message);
             }
             if (state is OrdersLoaded) {
-              return _buildOrderList(selectedStatuses.isEmpty
-                  ? orders
-                  : orders
-                      .where((order) =>
-                          selectedStatuses.contains(order.status.toLowerCase()))
-                      .toList());
+              return RefreshIndicator(
+                onRefresh: () async =>
+                    context.read<OrdersCubit>().fetchOrders(userId),
+                child: _buildOrderList(selectedStatuses.isEmpty
+                    ? orders
+                    : orders
+                        .where((order) => selectedStatuses
+                            .contains(order.status.toLowerCase()))
+                        .toList()),
+              );
             }
             return const Center(child: CircularProgressIndicator());
           },
@@ -181,6 +195,92 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
   void _updateFilters(
       List<String> current, String status, bool? value, Function setState) {
     setState(() => value! ? current.add(status) : current.remove(status));
+  }
+}
+
+class _ShimmerOrderCard extends StatelessWidget {
+  const _ShimmerOrderCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 100,
+                  height: 16,
+                  color: Colors.white,
+                ),
+                const Spacer(),
+                Container(
+                  width: 120,
+                  height: 14,
+                  color: Colors.white,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildShimmerRow(),
+            const SizedBox(height: 8),
+            _buildShimmerRow(),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Container(
+                  width: 80,
+                  height: 18,
+                  color: Colors.white,
+                ),
+                const Spacer(),
+                Container(
+                  width: 100,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.white,
+                  ),
+                )
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerRow() {
+    return Row(
+      children: [
+        Container(
+          width: 16,
+          height: 16,
+          color: Colors.white,
+        ),
+        const SizedBox(width: 8),
+        Container(
+          width: 60,
+          height: 14,
+          color: Colors.white,
+        ),
+        const SizedBox(width: 4),
+        Container(
+          width: 100,
+          height: 14,
+          color: Colors.white,
+        ),
+      ],
+    );
   }
 }
 
