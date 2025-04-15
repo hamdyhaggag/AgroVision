@@ -59,27 +59,27 @@ class LoginScreen extends StatelessWidget {
                   height: 22.h,
                 ),
                 const EmailAndPassword(),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 4, left: 4),
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.pushNamed(
-                            context, AppRoutes.forgotPasswordPhone);
-                      },
-                      child: Text(
-                        'Forgot Password?',
-                        style: TextStyle(
-                          color: AppColors.primaryColor,
-                          fontFamily: 'SYNE',
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                // Align(
+                //   alignment: Alignment.centerLeft,
+                //   child: Padding(
+                //     padding: const EdgeInsets.only(top: 4, left: 4),
+                //     child: InkWell(
+                //       onTap: () {
+                //         Navigator.pushNamed(
+                //             context, AppRoutes.forgotPasswordPhone);
+                //       },
+                //       child: Text(
+                //         'Forgot Password?',
+                //         style: TextStyle(
+                //           color: AppColors.primaryColor,
+                //           fontFamily: 'SYNE',
+                //           fontSize: 12.sp,
+                //           fontWeight: FontWeight.w600,
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
                 SizedBox(
                   height: 15.h,
                 ),
