@@ -25,17 +25,15 @@ class SensorDataScreenState extends State<SensorDataScreen> {
       appBar: const CustomAppBar(title: 'Sensor Data', isHome: true),
       body: BlocBuilder<SensorDataCubit, SensorDataState>(
         builder: (context, state) {
-          if (state is SensorDataInitial) {
-            return _buildInitialState(context);
-          } else if (state is SensorDataLoading) {
-            return _buildLoadingState();
-          } else if (state is SensorDataLoaded) {
+          if (state is SensorDataInitial) return _buildInitialState(context);
+          if (state is SensorDataLoading) return _buildLoadingState();
+          if (state is SensorDataLoaded) {
             return _buildLoadedState(context, state.data);
-          } else if (state is SensorDataError) {
-            return _buildErrorState(context, state.error);
-          } else {
-            return const SizedBox.shrink();
           }
+          if (state is SensorDataError) {
+            return _buildErrorState(context, state.error);
+          }
+          return const SizedBox.shrink();
         },
       ),
     );
@@ -79,24 +77,19 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   }
 
   Widget _buildLoadingState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator.adaptive(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation(AppColors.primaryColor),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Fetching Sensor Data',
-            style: TextStyle(
-              fontSize: 16,
-              fontFamily: 'SYNE',
-              color: AppColors.textSecondary.withValues(alpha: 0.8),
-            ),
-          ),
-        ],
+    return ShimmerLoader(
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            _buildShimmerGauge(),
+            const SizedBox(height: 24),
+            _buildShimmerGrid(),
+            const SizedBox(height: 24),
+            _buildShimmerChart(),
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }
@@ -117,6 +110,73 @@ class SensorDataScreenState extends State<SensorDataScreen> {
             _buildChartSection(_selectedSensor),
             const SizedBox(height: 32),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerGauge() {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Container(
+              width: 150,
+              height: 24,
+              decoration: BoxDecoration(
+                color: AppColors.gaugeBackground,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              height: 220,
+              decoration: const BoxDecoration(
+                color: AppColors.gaugeBackground,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        childAspectRatio: 1,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+      ),
+      itemCount: 8,
+      itemBuilder: (context, index) => Container(
+        decoration: BoxDecoration(
+          color: AppColors.gaugeBackground,
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerChart() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        height: 200,
+        decoration: BoxDecoration(
+          color: AppColors.gaugeBackground,
+          borderRadius: BorderRadius.circular(20),
         ),
       ),
     );
@@ -291,20 +351,6 @@ class SensorDataScreenState extends State<SensorDataScreen> {
     );
   }
 
-  Widget _buildRefreshButton(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: CustomBottom(
-          text: 'Refresh Data',
-          onPressed: () => context.read<SensorDataCubit>().loadSensorData(),
-          icon: Icons.refresh_rounded,
-        ),
-      ),
-    );
-  }
-
   Widget _buildErrorState(BuildContext context, String error) {
     return Center(
       child: Padding(
@@ -381,4 +427,59 @@ class _GaugePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class ShimmerLoader extends StatefulWidget {
+  final Widget child;
+  const ShimmerLoader({super.key, required this.child});
+  @override
+  State<ShimmerLoader> createState() => _ShimmerLoaderState();
+}
+
+class _ShimmerLoaderState extends State<ShimmerLoader>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    _opacityAnimation =
+        Tween<double>(begin: 0.5, end: 1.0).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _opacityAnimation.value,
+          child: ShaderMask(
+            shaderCallback: (bounds) => LinearGradient(
+              colors: [
+                AppColors.gaugeBackground.withValues(alpha: 0.9),
+                AppColors.gaugeBackground.withValues(alpha: 0.6),
+                AppColors.gaugeBackground.withValues(alpha: 0.9),
+              ],
+              stops: const [0.0, 0.5, 1.0],
+            ).createShader(bounds),
+            child: widget.child,
+          ),
+        );
+      },
+      child: widget.child,
+    );
+  }
 }
