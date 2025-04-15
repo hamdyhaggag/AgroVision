@@ -771,8 +771,8 @@ final List<Map<String, dynamic>> sensors = [
     'id': '#SM201',
     'name': 'Soil Moisture Sensor',
     'type': 'moisture',
-    'status': 'inctive',
-    'issue': 'Signal issue since 6/4/2025 at 08:02 AM',
+    'status': 'Inactive',
+    'issue': 'Signal issue since 15/4/2025 at 04:02 PM',
   },
 ];
 
