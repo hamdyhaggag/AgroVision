@@ -71,17 +71,25 @@ class _HomeScreenState extends State<HomeScreen> {
         key: _scaffoldKey,
         appBar: _buildAppBar(context),
         drawer: const AppDrawer(),
-        body: BlocBuilder<HomeCubit, HomeState>(
-          builder: (BuildContext context, HomeState state) {
-            if (state is HomeLoading) {
-              return _buildSkeletonLoading();
-            } else if (state is HomeLoaded) {
-              return _buildBody(state.weather);
-            } else if (state is HomeError) {
-              return _buildErrorState(state.message);
-            }
-            return const SizedBox.shrink();
+        body: RefreshIndicator(
+          onRefresh: () async {
+            await context.read<HomeCubit>().getWeatherData();
           },
+          child: BlocBuilder<HomeCubit, HomeState>(
+            builder: (BuildContext context, HomeState state) {
+              if (state is HomeLoading) {
+                return _buildSkeletonLoading();
+              } else if (state is HomeLoaded) {
+                return _buildBody(state.weather);
+              } else if (state is HomeError) {
+                return _buildErrorState(state.message);
+              }
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: const SizedBox.shrink(),
+              );
+            },
+          ),
         ),
       ),
     );
