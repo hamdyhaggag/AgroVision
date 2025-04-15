@@ -103,25 +103,22 @@ class SensorDataScreenState extends State<SensorDataScreen> {
 
   Widget _buildLoadedState(BuildContext context, Map<String, dynamic> data) {
     final sensorValue = _getSensorValue(data, _selectedSensor);
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: [
-                _buildGaugeCard(sensorValue),
-                const SizedBox(height: 24),
-                _buildSensorGrid(),
-                const SizedBox(height: 24),
-                _buildChartSection(_selectedSensor),
-                const SizedBox(height: 32),
-              ],
-            ),
-          ),
+    return RefreshIndicator(
+      onRefresh: () => context.read<SensorDataCubit>().loadSensorData(),
+      color: AppColors.primaryColor,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            _buildGaugeCard(sensorValue),
+            const SizedBox(height: 24),
+            _buildSensorGrid(),
+            const SizedBox(height: 24),
+            _buildChartSection(_selectedSensor),
+            const SizedBox(height: 32),
+          ],
         ),
-        _buildRefreshButton(context),
-      ],
+      ),
     );
   }
 
