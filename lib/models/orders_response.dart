@@ -10,8 +10,9 @@ class ApiOrdersResponse {
 
   ApiOrdersResponse({required this.success, required this.data});
 
-  factory ApiOrdersResponse.fromJson(Map<String, dynamic> json) =>
-      _$ApiOrdersResponseFromJson(json);
-
+  factory ApiOrdersResponse.fromJson(Map<String, dynamic> json) {
+    print('🔍 Parsing API Response: ${json.toString()}'); // Add this line
+    return _$ApiOrdersResponseFromJson(json);
+  }
   Map<String, dynamic> toJson() => _$ApiOrdersResponseToJson(this);
 }

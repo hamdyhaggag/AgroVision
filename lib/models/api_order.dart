@@ -5,35 +5,41 @@ part 'api_order.g.dart';
 @JsonSerializable()
 class ApiOrder {
   final int id;
+  @JsonKey(name: 'user_id')
+  final int userId;
   final String subtotal;
-  final String vat;
+  final String discount;
   final String total;
-  final String state;
+  final String name;
+  final String phone;
   final String city;
   final String country;
   final String status;
-  final String? notes;
-  @JsonKey(name: 'is_shipped_different')
-  final bool isShippedDifferent;
-  @JsonKey(name: 'shipping_address')
-  final String? shippingAddress;
-  @JsonKey(name: 'created_at')
-  final String? createdAt;
-  @JsonKey(name: 'updated_at')
-  final String? updatedAt;
+  @JsonKey(name: 'is_shipping_different')
+  final bool isShippingDifferent;
+  @JsonKey(name: 'delivered_date', nullable: true)
+  final DateTime? deliveredDate;
+  @JsonKey(name: 'canceled_date', nullable: true)
+  final DateTime? canceledDate;
+  @JsonKey(name: 'created_at', nullable: true)
+  final DateTime? createdAt;
+  @JsonKey(name: 'updated_at', nullable: true)
+  final DateTime? updatedAt;
 
   ApiOrder({
     required this.id,
+    required this.userId,
     required this.subtotal,
-    required this.vat,
+    required this.discount,
     required this.total,
-    required this.state,
+    required this.name,
+    required this.phone,
     required this.city,
     required this.country,
     required this.status,
-    this.notes,
-    required this.isShippedDifferent,
-    this.shippingAddress,
+    required this.isShippingDifferent,
+    this.deliveredDate,
+    this.canceledDate,
     this.createdAt,
     this.updatedAt,
   });

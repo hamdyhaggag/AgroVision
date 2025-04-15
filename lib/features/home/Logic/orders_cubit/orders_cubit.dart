@@ -30,7 +30,10 @@ class OrdersCubit extends Cubit<OrdersState> {
         success: (orders) => emit(OrdersLoaded(orders)),
         failure: (error) => emit(OrdersError(error.toString())),
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // Catch unhandled exceptions
+      print('🔥 Unhandled Exception: $e');
+      print('🔥 Stack Trace: $stackTrace');
       emit(OrdersError('Unexpected error: $e'));
     }
   }
