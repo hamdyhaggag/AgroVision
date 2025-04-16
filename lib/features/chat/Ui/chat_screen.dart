@@ -1,3 +1,4 @@
+import 'package:agro_vision/features/chat/services/farmer_chat_api_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,7 +21,7 @@ class FarmerChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => FarmerChatCubit(
-        context.read<ApiService>(),
+        context.read<FarmerChatApiService>(),
       )..loadConversations(),
       child: Scaffold(
         appBar: AppBar(
@@ -86,7 +87,6 @@ class FarmerChatScreen extends StatelessWidget {
               context.read<FarmerChatCubit>().sendMessage(
                     conversationId: conversation.id,
                     message: textController.text,
-                    receiverId: conversation.otherUserId,
                   );
               textController.clear();
             },

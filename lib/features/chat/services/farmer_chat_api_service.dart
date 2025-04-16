@@ -1,11 +1,10 @@
-// farmer_chat_api_service.dart
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:agro_vision/features/chat/models/farmer_chat_model.dart';
 
 part 'farmer_chat_api_service.g.dart';
 
-@RestApi(baseUrl: 'http://127.0.0.1:8000/')
+@RestApi(baseUrl: 'http://final.agrovision.ltd/')
 abstract class FarmerChatApiService {
   factory FarmerChatApiService(Dio dio, {String baseUrl}) =
       _FarmerChatApiService;

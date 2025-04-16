@@ -27,6 +27,7 @@ import 'features/home/Logic/orders_cubit/orders_cubit.dart';
 import 'features/home/Logic/task_cubit/task_cubit.dart';
 import 'features/monitoring/Api/sensor_data_service.dart';
 import 'features/monitoring/Logic/sensor_data_cubit.dart';
+import 'package:provider/provider.dart';
 
 class AgroVision extends StatelessWidget {
   final AppRouter appRouter;
@@ -68,11 +69,13 @@ class AgroVision extends StatelessWidget {
             BlocProvider(
               create: (context) => TaskCubit(),
             ),
-            BlocProvider(
-                create: (context) => ChatCubit(getIt<ChatRepository>())),
-            BlocProvider(
+            Provider<FarmerChatApiService>(
+              create: (context) =>
+                  FarmerChatApiService(DioFactory.getAgrovisionDio()),
+            ),
+            BlocProvider<FarmerChatCubit>(
               create: (context) => FarmerChatCubit(
-                FarmerChatApiService(DioFactory.getFarmerChatDio()),
+                context.read<FarmerChatApiService>(),
               )..loadConversations(),
             ),
             BlocProvider(

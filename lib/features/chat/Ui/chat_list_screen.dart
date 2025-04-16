@@ -8,6 +8,8 @@ import '../../../core/routing/app_routes.dart';
 import '../../../models/chat_session.dart';
 import '../../authentication/Logic/auth cubit/auth_cubit.dart';
 import '../logic/chat_cubit.dart';
+import '../logic/farmer_chat_cubit.dart';
+import '../logic/farmer_chat_state.dart';
 import '../models/farmer_chat_model.dart';
 
 class ChatListScreen extends StatefulWidget {
@@ -730,45 +732,56 @@ Widget _buildFeatureChips() {
   );
 }
 
+// chat_list_screen.dart
 Widget _buildChatList(BuildContext context) {
-  return ListView.separated(
-    padding: const EdgeInsets.all(16),
-    itemCount: 15,
-    separatorBuilder: (context, index) =>
-        Divider(height: 1, color: Colors.grey.shade200),
-    itemBuilder: (context, index) {
-      return ListTile(
-        leading: const CircleAvatar(
-            radius: 24, backgroundImage: AssetImage('assets/images/user.png')),
-        title: Text('User ${index + 1}',
-            style: const TextStyle(
-                fontWeight: FontWeight.w600, fontFamily: 'SYNE')),
-        subtitle: const Text('Last message preview...',
-            overflow: TextOverflow.ellipsis),
-        trailing: const Text('2h', style: TextStyle(color: Colors.grey)),
-        contentPadding: const EdgeInsets.symmetric(vertical: 8),
-// Update the onTap handler in your chat list
-        onTap: () {
-          final currentUserId = context.read<AuthCubit>().currentUser?.id ?? 0;
-          final conversation = Conversation(
-            id: index, // Use real data in production
-            user1Id: currentUserId,
-            user2Id: index + 1, // Example other user ID
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-            messages: [],
-          );
+  final currentUserId = context.read<AuthCubit>().currentUser?.id ?? 0;
 
-          Navigator.pushNamed(
-            context,
-            AppRoutes.farmerChatScreen,
-            arguments: {
-              'conversation': conversation,
-              'currentUserId': currentUserId,
-            },
-          );
-        },
-      );
+  return BlocBuilder<FarmerChatCubit, FarmerChatState>(
+    builder: (context, state) {
+      if (state is FarmerChatLoading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (state is FarmerChatError) {
+        return Center(child: Text(state.errorMessage));
+      }
+      if (state is FarmerChatLoaded) {
+        return ListView.builder(
+          itemCount: state.conversations.length,
+          itemBuilder: (context, index) {
+            final conversation = state.conversations[index];
+            final otherUserId = conversation.user1Id == currentUserId
+                ? conversation.user2Id
+                : conversation.user1Id;
+
+            return ListTile(
+              leading: const CircleAvatar(
+                backgroundImage: AssetImage('assets/images/user.png'),
+              ),
+              title: Text('User $otherUserId'),
+              subtitle: Text(
+                conversation.messages.isNotEmpty
+                    ? conversation.messages.last.message
+                    : 'No messages yet',
+              ),
+              onTap: () =>
+                  _navigateToChat(context, conversation, currentUserId),
+            );
+          },
+        );
+      }
+      return const SizedBox.shrink();
+    },
+  );
+}
+
+void _navigateToChat(
+    BuildContext context, Conversation conversation, int currentUserId) {
+  Navigator.pushNamed(
+    context,
+    AppRoutes.farmerChatScreen,
+    arguments: {
+      'conversation': conversation,
+      'currentUserId': currentUserId,
     },
   );
 }
