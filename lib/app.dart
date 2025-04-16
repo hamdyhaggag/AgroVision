@@ -15,8 +15,10 @@ import 'core/utils/utils.dart';
 import 'features/authentication/Logic/auth cubit/auth_cubit.dart';
 import 'features/authentication/Logic/login cubit/login_cubit.dart';
 import 'features/authentication/Logic/logout cubit/logout_cubit.dart';
+import 'features/chat/Ui/chat_screen.dart';
 import 'features/chat/chat_repository.dart';
 import 'features/chat/logic/chat_cubit.dart';
+import 'features/chat/logic/farmer_chat_cubit.dart';
 import 'features/disease_detection/Api/disease_detection_service.dart';
 import 'features/disease_detection/Logic/disease_cubit.dart';
 import 'features/home/Api/orders_repo.dart';
@@ -68,6 +70,11 @@ class AgroVision extends StatelessWidget {
             ),
             BlocProvider(
                 create: (context) => ChatCubit(getIt<ChatRepository>())),
+            BlocProvider<FarmerChatCubit>(
+              create: (context) => FarmerChatCubit(
+                context.read<ApiService>(), // Access from RepositoryProvider
+              ),
+            ),
             BlocProvider(
               create: (context) => OrdersCubit(
                   OrdersRepo(ApiService(DioFactory.getAgrovisionDio())))

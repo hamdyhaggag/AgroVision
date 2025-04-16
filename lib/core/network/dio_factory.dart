@@ -4,7 +4,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../helpers/cache_helper.dart';
 import '../routing/app_router.dart';
-import '../routing/app_routes.dart';
 import 'api_constants.dart';
 
 class DioFactory {

@@ -8,6 +8,8 @@ import 'app.dart';
 import 'core/dependency_injection/di.dart';
 import 'core/helpers/app_localizations.dart';
 import 'core/helpers/cache_helper.dart';
+import 'core/network/api_service.dart';
+import 'core/network/dio_factory.dart';
 import 'core/routing/app_router.dart';
 import 'bloc_observer_checker.dart';
 
@@ -26,13 +28,20 @@ void main() async {
   Bloc.observer = const BlocObserverChecker();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(
-    EasyLocalization(
-      supportedLocales: AppLocalizations.supportedLocales,
-      fallbackLocale: AppLocalizations.english,
-      path: AppLocalizations.translationsPath,
-      startLocale: AppLocalizations.english,
-      saveLocale: true,
-      child: AgroVision(appRouter: AppRouter()),
+    MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<ApiService>(
+          create: (_) => ApiService(DioFactory.getDio()),
+        ),
+      ],
+      child: EasyLocalization(
+        supportedLocales: AppLocalizations.supportedLocales,
+        fallbackLocale: AppLocalizations.english,
+        path: AppLocalizations.translationsPath,
+        startLocale: AppLocalizations.english,
+        saveLocale: true,
+        child: AgroVision(appRouter: AppRouter()),
+      ),
     ),
   );
 }

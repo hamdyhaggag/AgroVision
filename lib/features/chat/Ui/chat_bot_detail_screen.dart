@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/helpers/voice_recorder_utility.dart';
 import '../../../models/chat_session.dart';
 import '../../../shared/widgets/chat_bubble.dart';
-import '../Logic/chat_cubit.dart';
+import '../logic/chat_cubit.dart';
 
 class ChatBotDetailScreen extends StatefulWidget {
   const ChatBotDetailScreen({super.key});

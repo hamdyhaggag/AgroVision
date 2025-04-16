@@ -2,7 +2,9 @@ import 'package:agro_vision/features/authentication/UI/congratulation_screen.dar
 import 'package:agro_vision/features/home/Ui/widgets/add_task_screen.dart';
 import 'package:agro_vision/features/home/Ui/logout_screen.dart';
 import 'package:agro_vision/features/home/Ui/widgets/task_list_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../features/authentication/Logic/auth cubit/auth_cubit.dart';
 import '../../features/authentication/UI/create_password_screen.dart';
 import '../../features/authentication/UI/forgot password/forgot_password_email.dart';
 import '../../features/authentication/UI/forgot password/forgot_password_phone.dart';
@@ -11,6 +13,7 @@ import '../../features/authentication/UI/otp/otp_email_screen.dart';
 import '../../features/authentication/UI/otp/otp_phone_screen.dart';
 import '../../features/chat/Ui/chat_bot_detail_screen.dart';
 import '../../features/chat/Ui/chat_screen.dart';
+import '../../features/chat/models/farmer_chat_model.dart';
 import '../../features/disease_detection/Ui/detection_records.dart';
 import '../../features/home/Ui/crop_health.dart';
 import '../../features/home/Ui/drawer/farm_inventory.dart';
@@ -102,8 +105,35 @@ class AppRouter {
         );
 
       case AppRoutes.farmerChatScreen:
+        final args = settings.arguments is Map<String, dynamic>
+            ? settings.arguments as Map<String, dynamic>
+            : <String, dynamic>{};
+
+        Conversation? conversation;
+        int currentUserId = 0;
+
+        try {
+          conversation = args['conversation'] as Conversation;
+          currentUserId = args['currentUserId'] as int? ?? 0;
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error parsing chat arguments: $e');
+          }
+        }
+
         return MaterialPageRoute(
-          builder: (_) => const FarmerChatScreen(),
+          builder: (_) => FarmerChatScreen(
+            conversation: conversation ??
+                Conversation(
+                  id: -1,
+                  user1Id: 0,
+                  user2Id: 0,
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now(),
+                  messages: [],
+                ),
+            currentUserId: currentUserId,
+          ),
         );
 
       case '/orderAnalytics':

@@ -127,10 +127,13 @@ class LoginScreen extends StatelessWidget {
   void validateThenDoLogin(BuildContext context) {
     final cubit = context.read<LoginCubit>();
     if (cubit.formKey.currentState!.validate()) {
-      cubit.emitLoginStates(LoginRequestBody(
-        email: cubit.emailController.text,
-        password: cubit.passwordController.text,
-      ));
+      cubit.emitLoginStates(
+        LoginRequestBody(
+          email: cubit.emailController.text,
+          password: cubit.passwordController.text,
+        ),
+        context,
+      );
     }
   }
 }

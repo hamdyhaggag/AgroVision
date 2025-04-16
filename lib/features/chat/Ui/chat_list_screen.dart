@@ -4,8 +4,11 @@ import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../core/constants/app_assets.dart';
+import '../../../core/routing/app_routes.dart';
 import '../../../models/chat_session.dart';
-import '../Logic/chat_cubit.dart';
+import '../../authentication/Logic/auth cubit/auth_cubit.dart';
+import '../logic/chat_cubit.dart';
+import '../models/farmer_chat_model.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -744,7 +747,27 @@ Widget _buildChatList(BuildContext context) {
             overflow: TextOverflow.ellipsis),
         trailing: const Text('2h', style: TextStyle(color: Colors.grey)),
         contentPadding: const EdgeInsets.symmetric(vertical: 8),
-        onTap: () => Navigator.pushNamed(context, '/farmerChatScreen'),
+// Update the onTap handler in your chat list
+        onTap: () {
+          final currentUserId = context.read<AuthCubit>().currentUser?.id ?? 0;
+          final conversation = Conversation(
+            id: index, // Use real data in production
+            user1Id: currentUserId,
+            user2Id: index + 1, // Example other user ID
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            messages: [],
+          );
+
+          Navigator.pushNamed(
+            context,
+            AppRoutes.farmerChatScreen,
+            arguments: {
+              'conversation': conversation,
+              'currentUserId': currentUserId,
+            },
+          );
+        },
       );
     },
   );

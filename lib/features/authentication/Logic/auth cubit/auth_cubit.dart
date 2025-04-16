@@ -1,9 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../Data/model/user_model.dart';
+
 part 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
+  User? _currentUser;
+  User? get currentUser => _currentUser;
+
   static AuthCubit get(context) => BlocProvider.of(context);
 
   AuthCubit() : super(AuthInitial()) {
@@ -16,6 +21,16 @@ class AuthCubit extends Cubit<AuthState> {
   void changeCurrentIndex(int index) {
     currentIndex = index;
     emit(ChangeDotState());
+  }
+
+  void setUser(User user) {
+    _currentUser = user;
+    emit(UserUpdatedState(user));
+  }
+
+  void clearUser() {
+    _currentUser = null;
+    emit(UserClearedState());
   }
 
   void nextPage() {
