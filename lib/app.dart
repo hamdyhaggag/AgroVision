@@ -67,6 +67,8 @@ class AgroVision extends StatelessWidget {
               ),
             ),
             BlocProvider(
+                create: (context) => ChatCubit(getIt<ChatRepository>())),
+            BlocProvider(
               create: (context) => TaskCubit(),
             ),
             Provider<FarmerChatApiService>(
