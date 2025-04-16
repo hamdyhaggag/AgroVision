@@ -182,9 +182,15 @@ class OrderDetailScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(children: [
             _buildSummaryRow('Subtotal', '\$${order.subtotal}'),
-            const Divider(height: 24),
+            const Divider(
+              height: 24,
+              color: AppColors.greyLight,
+            ),
             _buildSummaryRow('Discount', '-\$${order.discount}'),
-            const Divider(height: 24),
+            const Divider(
+              height: 24,
+              color: AppColors.greyLight,
+            ),
             _buildSummaryRow('Total', '\$${order.total}', isTotal: true),
           ]),
         ),
@@ -236,7 +242,10 @@ class OrderDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(children: [
           _buildTotalRow('Payment Method:', 'Credit Card', theme),
-          const Divider(height: 24),
+          const Divider(
+            height: 24,
+            color: AppColors.greyLight,
+          ),
           _buildTotalRow('Transaction ID:', 'PAY-${order.id}123', theme),
         ]),
       ),
@@ -256,7 +265,6 @@ class OrderDetailScreen extends StatelessWidget {
         Text(value,
             style: theme.textTheme.bodyMedium!.copyWith(
               fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins',
             )),
       ]),
     );
