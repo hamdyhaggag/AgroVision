@@ -2,9 +2,9 @@ import 'package:get_it/get_it.dart';
 import '../../features/authentication/Data/repos/login_repo.dart';
 import '../../features/authentication/Logic/login cubit/login_cubit.dart';
 import '../../features/authentication/Logic/logout cubit/logout_cubit.dart';
-import '../../features/chat/Logic/chat_cubit.dart';
 import '../../features/chat/api/chatbot_service.dart';
 import '../../features/chat/chat_repository.dart';
+import '../../features/chat/logic/chat_cubit.dart';
 import '../network/api_service.dart';
 import '../network/dio_factory.dart';
 

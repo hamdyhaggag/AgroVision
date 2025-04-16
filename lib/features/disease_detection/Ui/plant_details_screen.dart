@@ -10,7 +10,7 @@ import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:agro_vision/core/themes/text_styles.dart';
 import 'package:agro_vision/shared/widgets/custom_botton.dart';
 import '../../../models/disease_model.dart';
-import '../../chat/Logic/chat_cubit.dart';
+import '../../chat/logic/chat_cubit.dart';
 
 class PlantDetailsScreen extends StatefulWidget {
   final String? imagePath;

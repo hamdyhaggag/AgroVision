@@ -36,7 +36,7 @@ class OrderAnalytics extends StatelessWidget {
     final stats = [
       {
         'title': 'Total Balance',
-        'value': '\$21,560.57',
+        'value': '\$12,560',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.green
       },
@@ -48,7 +48,7 @@ class OrderAnalytics extends StatelessWidget {
       },
       {
         'title': 'Completed',
-        'value': '874',
+        'value': '286',
         'icon': Icons.check_circle_rounded,
         'color': Colors.orange
       },

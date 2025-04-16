@@ -15,15 +15,14 @@ import 'core/utils/utils.dart';
 import 'features/authentication/Logic/auth cubit/auth_cubit.dart';
 import 'features/authentication/Logic/login cubit/login_cubit.dart';
 import 'features/authentication/Logic/logout cubit/logout_cubit.dart';
-import 'features/chat/Logic/chat_cubit.dart';
 import 'features/chat/chat_repository.dart';
+import 'features/chat/logic/chat_cubit.dart';
 import 'features/disease_detection/Api/disease_detection_service.dart';
 import 'features/disease_detection/Logic/disease_cubit.dart';
 import 'features/home/Api/orders_repo.dart';
 import 'features/home/Logic/home_cubit.dart';
 import 'features/home/Logic/orders_cubit/orders_cubit.dart';
 import 'features/home/Logic/task_cubit/task_cubit.dart';
-import 'features/home/Ui/drawer/order_management.dart';
 import 'features/monitoring/Api/sensor_data_service.dart';
 import 'features/monitoring/Logic/sensor_data_cubit.dart';
 

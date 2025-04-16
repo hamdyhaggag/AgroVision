@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../chat/Logic/chat_cubit.dart';
+
+import '../../../chat/logic/chat_cubit.dart';
 
 class RecommendationDetail extends StatelessWidget {
   final String title;
