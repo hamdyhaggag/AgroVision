@@ -86,6 +86,7 @@ flutter:
     - assets/animations/
     - assets/animations/weather/
     - assets/icon/weather_icons/
+    - assets/images/sensor_icon/
     - shorebird.yaml
     - .env
   fonts:

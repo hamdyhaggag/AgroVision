@@ -218,7 +218,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                             value.toStringAsFixed(1),
                             style: const TextStyle(
                               fontSize: 32,
-                              fontFamily: 'SYNE',
+                              fontFamily: 'poppins',
                               fontWeight: FontWeight.w800,
                               color: AppColors.textPrimary,
                             ),
@@ -246,15 +246,22 @@ class SensorDataScreenState extends State<SensorDataScreen> {
 
   Widget _buildSensorGrid() {
     const sensors = [
-      {'label': 'EC', 'icon': Icons.electric_bolt},
-      {'label': 'Fertility', 'icon': Icons.eco},
-      {'label': 'Humidity', 'icon': Icons.water_drop},
-      {'label': 'PH', 'icon': Icons.science},
-      {'label': 'Temp', 'icon': Icons.thermostat},
-      {'label': 'K', 'icon': Icons.leak_add},
-      {'label': 'N', 'icon': Icons.nature},
-      {'label': 'P', 'icon': Icons.energy_savings_leaf},
+      {'label': 'EC', 'svgPath': 'assets/images/sensor_icon/Ec.svg'},
+      {
+        'label': 'Fertility',
+        'svgPath': 'assets/images/sensor_icon/Fertility.svg'
+      },
+      {
+        'label': 'Humidity',
+        'svgPath': 'assets/images/sensor_icon/Humidity.svg'
+      },
+      {'label': 'PH', 'svgPath': 'assets/images/sensor_icon/Ph.svg'},
+      {'label': 'Temp', 'svgPath': 'assets/images/sensor_icon/Temp.svg'},
+      {'label': 'K', 'svgPath': 'assets/images/sensor_icon/K.svg'},
+      {'label': 'N', 'svgPath': 'assets/images/sensor_icon/N.svg'},
+      {'label': 'P', 'svgPath': 'assets/images/sensor_icon/P.svg'},
     ];
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -270,13 +277,13 @@ class SensorDataScreenState extends State<SensorDataScreen> {
         final sensor = sensors[index];
         return _buildSensorItem(
           label: sensor['label'] as String,
-          icon: sensor['icon'] as IconData,
+          svgPath: sensor['svgPath'] as String,
         );
       },
     );
   }
 
-  Widget _buildSensorItem({required String label, required IconData icon}) {
+  Widget _buildSensorItem({required String label, required String svgPath}) {
     final isSelected = _selectedSensor == label;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -303,8 +310,17 @@ class SensorDataScreenState extends State<SensorDataScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon,
-                    color: isSelected ? Colors.white : AppColors.textSecondary),
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: SvgPicture.asset(
+                    svgPath,
+                    colorFilter: ColorFilter.mode(
+                      isSelected ? Colors.white : AppColors.textSecondary,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Text(
                   label,
