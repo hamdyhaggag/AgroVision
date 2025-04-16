@@ -49,11 +49,6 @@ class OrderDetailScreen extends StatelessWidget {
 
   Widget _buildHeaderSection(ColorScheme colors) {
     return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: colors.outline.withValues(alpha: 0.1)),
-      ),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child:
