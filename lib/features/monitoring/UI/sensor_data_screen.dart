@@ -325,28 +325,132 @@ class SensorDataScreenState extends State<SensorDataScreen> {
 
   Widget _buildChartSection(String selectedSensor) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.textSecondary.withValues(alpha: 0.1),
+              spreadRadius: 2,
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Growth Rate Analysis',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                          letterSpacing: 0.8,
+                        ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.fullscreen,
+                        size: 24,
+                        color: AppColors.textSecondary.withValues(alpha: 0.7)),
+                    onPressed: () => _showFullScreenChart(context),
+                  ),
+                ],
+              ),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: GrowthRateChart(selectedSensor: selectedSensor),
+            const Divider(height: 1, color: Colors.black12),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: GrowthRateChart(
+                    selectedSensor: selectedSensor,
+                    chartStyle: const ChartStyle(
+                      backgroundColor: Colors.transparent,
+                      textColor: AppColors.textPrimary,
+                      lineColor: AppColors.primaryColor,
+                      axisLineColor: Colors.black12,
+                      gridColor: Colors.black12,
+                      borderColor: Colors.transparent,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            _buildChartLegend(),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChartLegend() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 8,
+        children: [
+          _buildLegendItem('Optimal Range', AppColors.successColor),
+          _buildLegendItem('Current Value', AppColors.primaryColor),
+          _buildLegendItem('Historical Avg', AppColors.textSecondary),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(String text, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showFullScreenChart(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(24),
+        child: InteractiveViewer(
+          panEnabled: true,
+          scaleEnabled: true,
+          child: GrowthRateChart(
+            selectedSensor: _selectedSensor,
+            chartStyle: const ChartStyle(
+              backgroundColor: Colors.white,
+              textColor: AppColors.textPrimary,
+              lineColor: AppColors.primaryColor,
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -482,4 +586,22 @@ class _ShimmerLoaderState extends State<ShimmerLoader>
       child: widget.child,
     );
   }
+}
+
+class ChartStyle {
+  final Color backgroundColor;
+  final Color textColor;
+  final Color lineColor;
+  final Color axisLineColor;
+  final Color gridColor;
+  final Color borderColor;
+
+  const ChartStyle({
+    this.backgroundColor = Colors.white,
+    this.textColor = Colors.black,
+    this.lineColor = Colors.blue,
+    this.axisLineColor = Colors.grey,
+    this.gridColor = Colors.grey,
+    this.borderColor = Colors.transparent,
+  });
 }

@@ -1,198 +1,178 @@
+import 'dart:math';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class GrowthRateChart extends StatelessWidget {
-  const GrowthRateChart({super.key, required this.selectedSensor});
+import '../../features/monitoring/UI/sensor_data_screen.dart';
 
-  // Dynamic sensor name passed to the widget
+class GrowthRateChart extends StatelessWidget {
   final String selectedSensor;
+  final ChartStyle chartStyle;
+
+  const GrowthRateChart({
+    super.key,
+    required this.selectedSensor,
+    this.chartStyle = const ChartStyle(),
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTitle(),
-          SizedBox(height: 8.h),
-          _buildHighlightedGrowthRateSection(),
-          SizedBox(height: 16.h),
-          _buildBarChart(),
-          _buildBottomLegend(),
-        ],
-      ),
-    );
-  }
-
-  // Builds the title section dynamically based on the selectedSensor.
-  Widget _buildTitle() {
-    return Row(
-      children: [
-        Icon(Icons.bar_chart, color: Colors.green, size: 24.sp),
-        SizedBox(width: 8.w),
-        Text(
-          '$selectedSensor Rate',
-          style: TextStyle(
-            fontFamily: 'SYNE',
-            fontSize: 22.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.green.shade800,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Builds the section displaying the highlighted growth rate and toggle buttons.
-  Widget _buildHighlightedGrowthRateSection() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-      decoration: BoxDecoration(
-        color: Colors.green.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: Colors.green.shade300, width: 1),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '0.75%',
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green.shade700,
-                ),
-              ),
-              Text(
-                'Weekly Rate',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: Colors.black54,
-                ),
-              ),
-            ],
-          ),
-          ToggleButtons(
-            isSelected: const [true, false, false],
-            onPressed: (index) {
-              // TODO: Implement toggle functionality
-            },
-            borderRadius: BorderRadius.circular(8.r),
-            fillColor: Colors.green.withValues(alpha: 0.2),
-            selectedColor: Colors.green.shade900,
-            color: Colors.black54,
-            constraints: BoxConstraints(
-              minWidth: 40.w,
-              minHeight: 36.h,
-            ),
-            children: const [
-              Text('W'),
-              Text('M'),
-              Text('Y'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Builds the bar chart displaying growth rate data.
-  Widget _buildBarChart() {
-    return SizedBox(
-      height: 220.h,
-      child: BarChart(
-        BarChartData(
-          maxY: 1.5,
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: LineChart(
+        LineChartData(
           gridData: FlGridData(
             show: true,
-            drawVerticalLine: false,
+            drawVerticalLine: true,
+            horizontalInterval: 20,
+            verticalInterval: 1,
             getDrawingHorizontalLine: (value) => FlLine(
-              color: Colors.grey.shade300,
-              strokeWidth: 1,
-              dashArray: [4, 4],
+              color: chartStyle.gridColor,
+              strokeWidth: 0.5,
+            ),
+            getDrawingVerticalLine: (value) => FlLine(
+              color: chartStyle.gridColor,
+              strokeWidth: 0.5,
             ),
           ),
           titlesData: FlTitlesData(
+            show: true,
+            rightTitles: const AxisTitles(),
+            topTitles: const AxisTitles(),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 30,
+                getTitlesWidget: (value, meta) => BottomTitleWidget(
+                  value: value,
+                  meta: meta,
+                  style: chartStyle,
+                ),
+              ),
+            ),
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 40.w,
-                getTitlesWidget: (value, meta) => Text(
-                  '${(value * 100).toInt()}%',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Colors.black87,
-                  ),
+                reservedSize: 40,
+                getTitlesWidget: (value, meta) => LeftTitleWidget(
+                  value: value,
+                  meta: meta,
+                  style: chartStyle,
                 ),
               ),
             ),
           ),
           borderData: FlBorderData(
             show: true,
-            border: Border(
-              bottom: BorderSide(color: Colors.grey.shade400, width: 1),
+            border: Border.all(
+              color: chartStyle.borderColor,
+              width: 1,
             ),
           ),
-          barGroups: List.generate(12, (index) => _buildBarGroup(index)),
+          minX: 0,
+          maxX: 24,
+          minY: 0,
+          maxY: 100,
+          lineBarsData: [
+            LineChartBarData(
+              spots: _generateSampleData(),
+              isCurved: true,
+              color: chartStyle.lineColor,
+              barWidth: 3,
+              isStrokeCapRound: true,
+              dotData: const FlDotData(show: false),
+              belowBarData: BarAreaData(
+                show: true,
+                gradient: LinearGradient(
+                  colors: [
+                    chartStyle.lineColor.withValues(alpha: 0.3),
+                    chartStyle.lineColor.withValues(alpha: 0.0),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+            ),
+          ],
+          lineTouchData: LineTouchData(
+            touchTooltipData: LineTouchTooltipData(
+              getTooltipColor: (touchSpot) => chartStyle.backgroundColor,
+              getTooltipItems: (touchedSpots) => touchedSpots.map((spot) {
+                return LineTooltipItem(
+                  '${spot.y.toStringAsFixed(1)}%',
+                  TextStyle(
+                    color: chartStyle.textColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              }).toList(),
+            ),
+            handleBuiltInTouches: true,
+          ),
         ),
       ),
     );
   }
 
-  // Builds each bar group for the bar chart.
-  BarChartGroupData _buildBarGroup(int index) {
-    return BarChartGroupData(
-      x: index,
-      barRods: [
-        BarChartRodData(
-          toY: (index % 4 == 0 ? 1.2 : 0.8),
-          width: 12.w,
-          gradient: LinearGradient(
-            colors: [
-              Colors.green.shade400,
-              Colors.green.shade700,
-            ],
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-          ),
-          borderRadius: BorderRadius.circular(8.r),
-          backDrawRodData: BackgroundBarChartRodData(
-            show: true,
-            toY: 1.5,
-            color: Colors.grey.shade200,
-          ),
-        ),
-      ],
+  List<FlSpot> _generateSampleData() {
+    return List.generate(25, (index) {
+      final x = index.toDouble();
+      final y = (60 + 30 * sin(x * 0.5)).toDouble();
+      return FlSpot(x, y);
+    });
+  }
+}
+
+class LeftTitleWidget extends StatelessWidget {
+  final double value;
+  final TitleMeta meta;
+  final ChartStyle style;
+
+  const LeftTitleWidget({
+    super.key,
+    required this.value,
+    required this.meta,
+    required this.style,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '${value.toInt()}%',
+      style: TextStyle(
+        color: style.textColor,
+        fontSize: 12.sp,
+        fontWeight: FontWeight.w500,
+      ),
+      textAlign: TextAlign.left,
     );
   }
+}
 
-  // Builds the bottom legend displaying growth rate labels.
-  Widget _buildBottomLegend() {
+class BottomTitleWidget extends StatelessWidget {
+  final double value;
+  final TitleMeta meta;
+  final ChartStyle style;
+
+  const BottomTitleWidget({
+    super.key,
+    required this.value,
+    required this.meta,
+    required this.style,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: 8.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Lowest Rate',
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: Colors.black54,
-            ),
-          ),
-          Text(
-            'Highest Rate',
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: Colors.green.shade700,
-            ),
-          ),
-        ],
+      padding: EdgeInsets.only(top: 8.0.h),
+      child: Text(
+        '${value.toInt()}:00',
+        style: TextStyle(
+          color: style.textColor,
+          fontSize: 10.sp,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
