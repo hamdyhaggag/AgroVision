@@ -35,6 +35,36 @@ class DioFactory {
       ));
   }
 
+  static Dio getFarmerChatDio() {
+    final dio = Dio(BaseOptions(
+      baseUrl: ApiConstants.farmerChatBaseUrl,
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+    ));
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final token = await CacheHelper.getString(key: 'token');
+        if (token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        return handler.next(options);
+      },
+      onError: (error, handler) async {
+        if (error.response?.statusCode == 401) _redirectToLogin();
+        return handler.next(error);
+      },
+    ));
+
+    dio.interceptors.add(PrettyDioLogger(
+      requestHeader: true,
+      responseHeader: true,
+      error: true,
+      compact: false,
+    ));
+
+    return dio;
+  }
+
   static Dio getAgrovisionDio() {
     final dio = Dio(BaseOptions(
       baseUrl: ApiConstants.baseUrl,

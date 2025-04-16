@@ -1,6 +1,6 @@
 class ApiConstants {
   static const String baseUrl = 'https://final.agrovision.ltd/api/';
-  static const String baseUrl2 = 'http:127.0.0.1:8000/';
+  static const String farmerChatBaseUrl = 'http://127.0.0.1:8000/';
   static const String openWeatherBaseUrl =
       'https://api.openweathermap.org/data/2.5';
   static const String login = 'login';
