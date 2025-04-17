@@ -13,6 +13,8 @@ class Conversation {
   final DateTime createdAt;
   @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
+  @JsonKey(name: 'unread_count', defaultValue: 0)
+  final int unreadCount;
   final List<Message> messages;
 
   Conversation({
@@ -21,6 +23,7 @@ class Conversation {
     required this.user2Id,
     required this.createdAt,
     required this.updatedAt,
+    required this.unreadCount,
     this.messages = const [],
   });
 
@@ -41,6 +44,7 @@ class Conversation {
     int? user2Id,
     DateTime? createdAt,
     DateTime? updatedAt,
+    int? unreadCount,
     List<Message>? messages,
   }) {
     return Conversation(
@@ -49,6 +53,7 @@ class Conversation {
       user2Id: user2Id ?? this.user2Id,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      unreadCount: unreadCount ?? this.unreadCount,
       messages: messages ?? this.messages,
     );
   }
@@ -82,9 +87,13 @@ class Message {
     required this.updatedAt,
   });
 
+  // Add timestamp getter for UI compatibility
+  DateTime get timestamp => createdAt;
+
   factory Message.fromJson(Map<String, dynamic> json) =>
       _$MessageFromJson(json);
   Map<String, dynamic> toJson() => _$MessageToJson(this);
+
   Message copyWith({
     int? id,
     int? conversationId,

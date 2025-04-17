@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -112,87 +111,92 @@ class _ChatListScreenState extends State<ChatListScreen>
 
   Widget _buildSessionList(BuildContext context, List<ChatSession> sessions) {
     return RefreshIndicator(
-        onRefresh: () => context.read<ChatCubit>().loadSessions(),
-        child: ListView.separated(
-          addAutomaticKeepAlives: true,
-          cacheExtent: 1000,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          physics: const BouncingScrollPhysics(),
-          itemCount: sessions.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 8),
-          itemBuilder: (context, index) {
-            final session = sessions[index];
-            final lastMessage = session.messages.isNotEmpty
-                ? session.messages.last.text
-                : 'Start the conversation';
-            final hasUnread = session.unreadCount > 0;
+      onRefresh: () => context.read<ChatCubit>().loadSessions(),
+      child: ListView.separated(
+        addAutomaticKeepAlives: true,
+        cacheExtent: 1000,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        physics: const BouncingScrollPhysics(),
+        itemCount: sessions.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 8),
+        itemBuilder: (context, index) {
+          final session = sessions[index];
+          final lastMessage = session.messages.isNotEmpty
+              ? session.messages.last.text
+              : 'Start the conversation';
+          final hasUnread = session.unreadCount > 0;
 
-            return Dismissible(
-              key: Key(session.id),
-              background: Container(
-                color: AppColors.errorColor,
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.only(left: 20),
-                child: const Icon(Icons.delete, color: Colors.white),
-              ),
-              secondaryBackground: Container(
-                color: AppColors.primaryColor,
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20),
-                child: const Icon(Icons.edit, color: Colors.white),
-              ),
-              confirmDismiss: (direction) async {
-                if (direction == DismissDirection.startToEnd) {
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Delete Session'),
-                      content: const Text(
-                          'Are you sure you want to delete this chat?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Delete',
-                              style: TextStyle(color: AppColors.errorColor)),
-                        ),
-                      ],
-                    ),
-                  );
-                  return confirm ?? false;
-                } else if (direction == DismissDirection.endToStart) {
-                  _showRenameDialog(context, session);
-                  return false;
-                }
+          return Dismissible(
+            key: Key(session.id),
+            background: Container(
+              color: AppColors.errorColor,
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.only(left: 20),
+              child: const Icon(Icons.delete, color: Colors.white),
+            ),
+            secondaryBackground: Container(
+              color: AppColors.primaryColor,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              child: const Icon(Icons.edit, color: Colors.white),
+            ),
+            confirmDismiss: (direction) async {
+              if (direction == DismissDirection.startToEnd) {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Delete Session'),
+                    content: const Text(
+                        'Are you sure you want to delete this chat?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Delete',
+                            style: TextStyle(color: AppColors.errorColor)),
+                      ),
+                    ],
+                  ),
+                );
+                return confirm ?? false;
+              } else if (direction == DismissDirection.endToStart) {
+                _showRenameDialog(context, session);
                 return false;
-              },
-              onDismissed: (direction) {
-                if (direction == DismissDirection.startToEnd) {
-                  context.read<ChatCubit>().deleteSession(session.id);
-                }
-              },
-              child: Material(
-                borderRadius: BorderRadius.circular(16),
+              }
+              return false;
+            },
+            onDismissed: (direction) {
+              if (direction == DismissDirection.startToEnd) {
+                context.read<ChatCubit>().deleteSession(session.id);
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
                 color: AppColors.surfaceColor,
-                elevation: 1,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withValues(alpha: 0.1),
+                    spreadRadius: 2,
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              child: Material(
+                color: Colors.transparent,
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(15),
                   onTap: () {
                     context.read<ChatCubit>().setCurrentSession(session.id);
                     Navigator.pushNamed(context, '/chatBotDetail');
                   },
-                  child: Container(
+                  child: Padding(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: hasUnread
-                          ? const Border(
-                              left: BorderSide(
-                                  color: AppColors.primaryColor, width: 4))
-                          : null,
-                    ),
                     child: Row(
                       children: [
                         _buildLeadingAvatar(context, index, hasUnread),
@@ -216,9 +220,7 @@ class _ChatListScreenState extends State<ChatListScreen>
                                     ),
                                   ),
                                   Text(
-                                    DateFormat(
-                                            'HH:mm', context.locale.toString())
-                                        .format(session.createdAt),
+                                    _formatTime(session.createdAt),
                                     style: const TextStyle(
                                       color: AppColors.textSecondary,
                                       fontSize: 12,
@@ -270,9 +272,11 @@ class _ChatListScreenState extends State<ChatListScreen>
                   ),
                 ),
               ),
-            );
-          },
-        ));
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildLeadingAvatar(BuildContext context, int index, bool hasUnread) {
@@ -749,34 +753,166 @@ Widget _buildChatList(BuildContext context) {
       }
       if (state is FarmerChatLoaded) {
         return RefreshIndicator(
+          color: Theme.of(context).primaryColor,
           onRefresh: () => context.read<FarmerChatCubit>().loadConversations(),
-          child: ListView.builder(
-            itemCount: state.conversations.length,
-            itemBuilder: (context, index) {
-              final conversation = state.conversations[index];
-              final otherUserId = conversation.user1Id == currentUserId
-                  ? conversation.user2Id
-                  : conversation.user1Id;
+          child: state.conversations.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No conversations yet\nStart a new chat!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey,
+                    ),
+                  ),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: state.conversations.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final conversation = state.conversations[index];
+                    final otherUserId = conversation.user1Id == currentUserId
+                        ? conversation.user2Id
+                        : conversation.user1Id;
+                    final lastMessage = conversation.messages.isNotEmpty
+                        ? conversation.messages.last
+                        : null;
 
-              return ListTile(
-                leading: const CircleAvatar(
-                  backgroundImage: AssetImage('assets/images/user.png'),
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withValues(alpha: 0.1),
+                            spreadRadius: 2,
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        leading: Stack(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: Colors.grey[200],
+                              radius: 28,
+                              child: Icon(Icons.person,
+                                  size: 24, color: Colors.grey[600]),
+                            ),
+                            Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: Container(
+                                width: 14,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'User $otherUserId',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            if (lastMessage != null)
+                              Text(
+                                _formatTime(lastMessage.timestamp),
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                              ),
+                          ],
+                        ),
+                        subtitle: lastMessage != null
+                            ? Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      lastMessage.message,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: Colors.grey[700],
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                  if (conversation.unreadCount > 0)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).primaryColor,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        conversation.unreadCount.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              )
+                            : const Text(
+                                'Start a conversation',
+                                style: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                        onTap: () => _navigateToChat(context, conversation),
+                      ),
+                    );
+                  },
                 ),
-                title: Text('User $otherUserId'),
-                subtitle: Text(
-                  conversation.messages.isNotEmpty
-                      ? conversation.messages.last.message
-                      : 'No messages yet',
-                ),
-                onTap: () => _navigateToChat(context, conversation),
-              );
-            },
-          ),
         );
       }
       return const SizedBox.shrink();
     },
   );
+}
+
+String _formatTime(DateTime timestamp) {
+  final now = DateTime.now();
+  final difference = now.difference(timestamp);
+
+  if (difference.inDays > 7) {
+    return '${timestamp.day}/${timestamp.month}/${timestamp.year}';
+  } else if (difference.inDays >= 1) {
+    return '${difference.inDays}d ago';
+  } else if (difference.inHours >= 1) {
+    return '${difference.inHours}h ago';
+  } else if (difference.inMinutes >= 1) {
+    return '${difference.inMinutes}m ago';
+  }
+  return 'Just now';
 }
 
 void _navigateToChat(BuildContext context, Conversation conversation) {

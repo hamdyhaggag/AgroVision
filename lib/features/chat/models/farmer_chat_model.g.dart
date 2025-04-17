@@ -12,6 +12,7 @@ Conversation _$ConversationFromJson(Map<String, dynamic> json) => Conversation(
       user2Id: (json['user2_id'] as num).toInt(),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      unreadCount: (json['unread_count'] as num?)?.toInt() ?? 0,
       messages: (json['messages'] as List<dynamic>?)
               ?.map((e) => Message.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -25,6 +26,7 @@ Map<String, dynamic> _$ConversationToJson(Conversation instance) =>
       'user2_id': instance.user2Id,
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
+      'unread_count': instance.unreadCount,
       'messages': instance.messages,
     };
 

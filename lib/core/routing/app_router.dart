@@ -128,6 +128,7 @@ class AppRouter {
                   user2Id: 0,
                   createdAt: DateTime.now(),
                   updatedAt: DateTime.now(),
+                  unreadCount: 0,
                   messages: [],
                 ),
           ),
