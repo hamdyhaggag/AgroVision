@@ -732,7 +732,6 @@ Widget _buildFeatureChips() {
   );
 }
 
-// chat_list_screen.dart
 Widget _buildChatList(BuildContext context) {
   final currentUserId = context.read<AuthCubit>().currentUser?.id ?? 0;
 
@@ -745,28 +744,31 @@ Widget _buildChatList(BuildContext context) {
         return Center(child: Text(state.errorMessage));
       }
       if (state is FarmerChatLoaded) {
-        return ListView.builder(
-          itemCount: state.conversations.length,
-          itemBuilder: (context, index) {
-            final conversation = state.conversations[index];
-            final otherUserId = conversation.user1Id == currentUserId
-                ? conversation.user2Id
-                : conversation.user1Id;
+        return RefreshIndicator(
+          onRefresh: () => context.read<FarmerChatCubit>().loadConversations(),
+          child: ListView.builder(
+            itemCount: state.conversations.length,
+            itemBuilder: (context, index) {
+              final conversation = state.conversations[index];
+              final otherUserId = conversation.user1Id == currentUserId
+                  ? conversation.user2Id
+                  : conversation.user1Id;
 
-            return ListTile(
-              leading: const CircleAvatar(
-                backgroundImage: AssetImage('assets/images/user.png'),
-              ),
-              title: Text('User $otherUserId'),
-              subtitle: Text(
-                conversation.messages.isNotEmpty
-                    ? conversation.messages.last.message
-                    : 'No messages yet',
-              ),
-              onTap: () =>
-                  _navigateToChat(context, conversation, currentUserId),
-            );
-          },
+              return ListTile(
+                leading: const CircleAvatar(
+                  backgroundImage: AssetImage('assets/images/user.png'),
+                ),
+                title: Text('User $otherUserId'),
+                subtitle: Text(
+                  conversation.messages.isNotEmpty
+                      ? conversation.messages.last.message
+                      : 'No messages yet',
+                ),
+                onTap: () =>
+                    _navigateToChat(context, conversation, currentUserId),
+              );
+            },
+          ),
         );
       }
       return const SizedBox.shrink();
