@@ -8,57 +8,42 @@ import '../logic/farmer_chat_cubit.dart';
 import '../logic/farmer_chat_state.dart';
 import '../models/farmer_chat_model.dart';
 
-class FarmerChatScreen extends StatelessWidget {
+class FarmerChatScreen extends StatefulWidget {
   final Conversation conversation;
+
   const FarmerChatScreen({
     super.key,
     required this.conversation,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final currentUserId = context.read<AuthCubit>().currentUser?.id ?? 0;
-    if (currentUserId == 0) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Chat')),
-        body: const Center(child: Text('User not logged in')),
-      );
-    }
-    return BlocProvider(
-      create: (context) => FarmerChatCubit(
-        context.read<FarmerChatApiService>(),
-      )..loadConversations(),
-      child: Scaffold(
-        appBar: _buildAppBar(context),
-        body: Column(
-          children: [
-            Expanded(
-              child: BlocBuilder<FarmerChatCubit, FarmerChatState>(
-                builder: (context, state) {
-                  if (state is FarmerChatLoaded) {
-                    final currentConv = state.conversations.firstWhere(
-                      (c) => c.id == conversation.id,
-                      orElse: () => conversation,
-                    );
-                    return _buildMessagesList(
-                        currentConv.messages, currentUserId);
-                  } else if (state is FarmerChatLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is FarmerChatError) {
-                    return Center(child: Text(state.errorMessage));
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ),
-            _buildMessageInput(context),
-          ],
-        ),
-      ),
-    );
+  _FarmerChatScreenState createState() => _FarmerChatScreenState();
+}
+
+class _FarmerChatScreenState extends State<FarmerChatScreen> {
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _textController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<FarmerChatCubit>().loadConversations();
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _textController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    }
+  }
+
+  PreferredSizeWidget _buildAppBar() {
     return AppBar(
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
@@ -70,7 +55,7 @@ class FarmerChatScreen extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Theme.of(context).primaryColor.withOpacity(0.2),
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
                 width: 2,
               ),
             ),
@@ -85,7 +70,7 @@ class FarmerChatScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Chat with ${conversation.otherUserId}',
+                'Chat with ${widget.conversation.otherUserId}',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -93,14 +78,14 @@ class FarmerChatScreen extends StatelessWidget {
                       .textTheme
                       .bodyLarge
                       ?.color
-                      ?.withOpacity(0.9),
+                      ?.withValues(alpha: 0.9),
                 ),
               ),
               Text(
                 'Online',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.green.withOpacity(0.8),
+                  color: Colors.green.withValues(alpha: 0.8),
                 ),
               ),
             ],
@@ -117,66 +102,32 @@ class FarmerChatScreen extends StatelessWidget {
   }
 
   Widget _buildMessagesList(List<Message> messages, int currentUserId) {
-    return messages.isEmpty
-        ? const Center(child: Text('No messages yet'))
-        : ListView.builder(
-            reverse: true,
-            padding: const EdgeInsets.all(16),
-            itemCount: messages.length,
-            itemBuilder: (context, index) {
-              final message = messages[index];
-              final isSentByMe = message.senderId == currentUserId;
-              return ListTile(
-                title: Text(message.message),
-                subtitle: Text(isSentByMe ? 'You' : 'Other'),
-              );
-            },
-          );
-  }
+    messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            'Start chatting with ${conversation.otherUserId}',
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Send your first message to begin',
-            style: TextStyle(color: Colors.grey[500]),
-          ),
-        ],
-      ),
+    if (messages.isEmpty) {
+      return const Center(child: Text('No messages yet'));
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.all(16),
+      itemCount: messages.length,
+      itemBuilder: (context, index) {
+        final message = messages[index];
+        final isSentByMe = message.senderId == currentUserId;
+        return ChatBubble(
+          message: message,
+          onLongPress: () {},
+          isLoading: false,
+          isSentByMe: isSentByMe,
+        );
+      },
     );
   }
 
-  Widget _buildLoadingIndicator() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(strokeWidth: 2),
-          const SizedBox(height: 16),
-          Text(
-            'Loading messages...',
-            style: TextStyle(color: Colors.grey[600]),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMessageInput(BuildContext context) {
-    final textController = TextEditingController();
+  Widget _buildMessageInput(int conversationId) {
     return Container(
       margin: const EdgeInsets.all(16).copyWith(top: 8),
       decoration: BoxDecoration(
@@ -184,14 +135,14 @@ class FarmerChatScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             spreadRadius: 2,
           ),
         ],
       ),
       child: TextField(
-        controller: textController,
+        controller: _textController,
         decoration: InputDecoration(
           hintText: 'Type your message...',
           border: InputBorder.none,
@@ -204,10 +155,10 @@ class FarmerChatScreen extends StatelessWidget {
                 Icon(Icons.send_rounded, color: Theme.of(context).primaryColor),
             onPressed: () {
               context.read<FarmerChatCubit>().sendMessage(
-                    conversationId: conversation.id,
-                    message: textController.text,
+                    conversationId: conversationId,
+                    message: _textController.text,
                   );
-              textController.clear();
+              _textController.clear();
             },
           ),
         ),
@@ -216,158 +167,214 @@ class FarmerChatScreen extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentUserId = context.read<AuthCubit>().currentUser?.id ?? 0;
+
+    if (currentUserId == 0) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Chat')),
+        body: const Center(child: Text('User not logged in')),
+      );
+    }
+
+    return BlocProvider(
+      create: (context) => FarmerChatCubit(
+        context.read<FarmerChatApiService>(),
+      )..loadConversations(),
+      child: Scaffold(
+        appBar: _buildAppBar(),
+        body: Column(
+          children: [
+            Expanded(
+              child: BlocBuilder<FarmerChatCubit, FarmerChatState>(
+                builder: (context, state) {
+                  if (state is FarmerChatLoaded) {
+                    final currentConv = state.conversations.firstWhere(
+                      (c) => c.id == widget.conversation.id,
+                      orElse: () => widget.conversation,
+                    );
+                    return _buildMessagesList(
+                        currentConv.messages, currentUserId);
+                  } else if (state is FarmerChatLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is FarmerChatError) {
+                    return Center(child: Text(state.errorMessage));
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+            _buildMessageInput(widget.conversation.id),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class ChatBubble extends StatelessWidget {
+class ChatBubble extends StatefulWidget {
   final Message message;
   final VoidCallback onLongPress;
   final bool isLoading;
   final bool isSentByMe;
 
   const ChatBubble({
-    super.key,
+    Key? key,
     required this.message,
     required this.onLongPress,
     this.isLoading = false,
     required this.isSentByMe,
-  });
+  }) : super(key: key);
+
+  @override
+  _ChatBubbleState createState() => _ChatBubbleState();
+}
+
+class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
+  late AnimationController _controller;
+  final List<Animation<double>> _dotAnimations = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isLoading) _initializeAnimations();
+  }
+
+  void _initializeAnimations() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+
+    for (var i = 0; i < 3; i++) {
+      _dotAnimations.add(
+        Tween<double>(begin: 1.0, end: 1.4).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: Interval(0.2 * i, 0.2 * i + 0.4, curve: Curves.easeInOut),
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatBubble oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isLoading != oldWidget.isLoading) {
+      if (widget.isLoading) {
+        _initializeAnimations();
+      } else {
+        _controller.dispose();
+        _dotAnimations.clear();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.isLoading) _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _buildTypingIndicator() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (index) {
+        return AnimatedBuilder(
+          animation: _dotAnimations[index],
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _dotAnimations[index].value,
+              child: child,
+            );
+          },
+          child: Container(
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: widget.isSentByMe ? Colors.white70 : Colors.grey[600],
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      }),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-      child: Row(
-        mainAxisAlignment:
-            isSentByMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (!isSentByMe)
-            CircleAvatar(
-              backgroundColor: Colors.grey[200],
-              radius: 14,
-              child: Icon(Icons.person, size: 16, color: Colors.grey[600]),
-            ),
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                margin: EdgeInsets.only(
-                  left: isSentByMe ? 40 : 8,
-                  right: isSentByMe ? 8 : 40,
+    return GestureDetector(
+      onLongPress: widget.onLongPress,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        child: Row(
+          mainAxisAlignment: widget.isSentByMe
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
+          children: [
+            if (!widget.isSentByMe)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: CircleAvatar(
+                  backgroundColor: Colors.grey[200],
+                  radius: 14,
+                  child: Icon(Icons.person, size: 16, color: Colors.grey[600]),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: isSentByMe
-                      ? Theme.of(context).primaryColor.withOpacity(0.9)
-                      : Colors.grey[100],
-                  borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(20),
-                    topRight: const Radius.circular(20),
-                    bottomLeft: Radius.circular(isSentByMe ? 20 : 4),
-                    bottomRight: Radius.circular(isSentByMe ? 4 : 20),
+              ),
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8,
+              ),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: widget.isSentByMe
+                    ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                    : Colors.grey[200],
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.message.message,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'SYNE',
+                      color: Colors.black87,
+                    ),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      message.message,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: isSentByMe ? Colors.white : Colors.grey[800],
-                        height: 1.3,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          DateFormat('HH:mm').format(message.createdAt),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          DateFormat('HH:mm').format(widget.message.createdAt),
                           style: TextStyle(
                             fontSize: 10,
-                            color:
-                                isSentByMe ? Colors.white70 : Colors.grey[500],
+                            color: Colors.grey[600],
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        if (isLoading)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 4),
-                            child: SizedBox(
-                              width: 12,
-                              height: 12,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color:
-                                    isSentByMe ? Colors.white70 : Colors.grey,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                left: isSentByMe ? null : 0,
-                right: isSentByMe ? 0 : null,
-                child: CustomPaint(
-                  size: const Size(10, 10),
-                  painter: BubbleTailPainter(
-                    color: isSentByMe
-                        ? Theme.of(context).primaryColor.withValues(alpha: 0.9)
-                        : Colors.grey[100]!,
-                    isSentByMe: isSentByMe,
+                      ),
+                      if (widget.isLoading)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4),
+                          child: _buildTypingIndicator(),
+                        ),
+                    ],
                   ),
-                ),
+                ],
               ),
-            ],
-          )
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
-}
-
-class BubbleTailPainter extends CustomPainter {
-  final Color color;
-  final bool isSentByMe;
-
-  BubbleTailPainter({required this.color, required this.isSentByMe});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    final path = Path();
-
-    if (isSentByMe) {
-      // Tail on the right
-      path.moveTo(0, 0);
-      path.lineTo(size.width, 0);
-      path.lineTo(size.width, size.height);
-      path.close();
-    } else {
-      // Tail on the left
-      path.moveTo(0, 0);
-      path.lineTo(size.width, 0);
-      path.lineTo(0, size.height);
-      path.close();
-    }
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
