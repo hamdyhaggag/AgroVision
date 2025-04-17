@@ -66,7 +66,7 @@ class _FarmerChatScreenState extends State<FarmerChatScreen> {
             child: CircleAvatar(
               radius: 20,
               backgroundColor: Colors.grey[200],
-              child: const Icon(Icons.person, color: Colors.grey),
+              child: Icon(Icons.person, color: Colors.grey[600]),
             ),
           ),
           const SizedBox(width: 12),
@@ -355,8 +355,8 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                 padding: const EdgeInsets.only(right: 8),
                 child: CircleAvatar(
                   backgroundColor: Colors.grey[200],
-                  radius: 14,
-                  child: Icon(Icons.person, size: 16, color: Colors.grey[600]),
+                  radius: 22,
+                  child: Icon(Icons.person, size: 24, color: Colors.grey[600]),
                 ),
               ),
             Flexible(

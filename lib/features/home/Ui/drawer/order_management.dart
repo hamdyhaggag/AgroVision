@@ -366,7 +366,6 @@ class _OrderCard extends StatelessWidget {
               Text('\$${order.amount.toStringAsFixed(2)}',
                   style: const TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w700,
                       fontFamily: 'Poppins',
                       color: Colors.black87)),
               const Spacer(),
@@ -425,14 +424,14 @@ class _InfoRow extends StatelessWidget {
       const SizedBox(width: 8),
       Text(label,
           style: TextStyle(
-              fontSize: 13,
+              fontSize: 14,
+              fontFamily: 'SYNE',
               color: Colors.grey[600],
               fontWeight: FontWeight.w500)),
       const SizedBox(width: 4),
       Text(value,
           style: const TextStyle(
             fontSize: 14,
-            fontWeight: FontWeight.w600,
             color: Colors.black87,
             fontFamily: 'Poppins',
           )),

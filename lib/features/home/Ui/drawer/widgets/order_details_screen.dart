@@ -72,8 +72,7 @@ class OrderDetailScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Text('#INV-${order.id.toString().padLeft(6, '0')}',
                         style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
                           color: colors.primary,
                           letterSpacing: -0.5,
                           fontFamily: 'Poppins',
@@ -111,11 +110,11 @@ class OrderDetailScreen extends StatelessWidget {
       case 'completed':
         return Colors.green;
       case 'ordered':
-        return Colors.amber[600]!;
+        return Colors.amber[700]!;
       case 'cancelled':
         return Colors.red;
       default:
-        return AppColors.primaryColor;
+        return Colors.grey;
     }
   }
 
@@ -157,6 +156,7 @@ class OrderDetailScreen extends StatelessWidget {
             child: Text(text,
                 style: TextStyle(
                   color: color,
+                  fontSize: 14,
                   fontFamily: 'Poppins',
                 ))),
       ]),
@@ -204,8 +204,7 @@ class OrderDetailScreen extends StatelessWidget {
       const Spacer(),
       Text(value,
           style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontSize: 14,
             fontFamily: 'Poppins',
             color: isTotal ? AppColors.primaryColor : Colors.black87,
           )),
