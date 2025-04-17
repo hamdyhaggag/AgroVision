@@ -45,7 +45,6 @@ class ConversationListItem extends StatelessWidget {
         MaterialPageRoute(
           builder: (context) => FarmerChatScreen(
             conversation: conversation,
-            currentUserId: currentUserId,
           ),
         ),
       ),

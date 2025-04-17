@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:json_annotation/json_annotation.dart';
 
 part 'farmer_chat_model.g.dart';
@@ -36,6 +34,24 @@ class Conversation {
   factory Conversation.fromJson(Map<String, dynamic> json) =>
       _$ConversationFromJson(json);
   Map<String, dynamic> toJson() => _$ConversationToJson(this);
+
+  Conversation copyWith({
+    int? id,
+    int? user1Id,
+    int? user2Id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    List<Message>? messages,
+  }) {
+    return Conversation(
+      id: id ?? this.id,
+      user1Id: user1Id ?? this.user1Id,
+      user2Id: user2Id ?? this.user2Id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      messages: messages ?? this.messages,
+    );
+  }
 }
 
 @JsonSerializable()
@@ -69,4 +85,25 @@ class Message {
   factory Message.fromJson(Map<String, dynamic> json) =>
       _$MessageFromJson(json);
   Map<String, dynamic> toJson() => _$MessageToJson(this);
+  Message copyWith({
+    int? id,
+    int? conversationId,
+    int? senderId,
+    int? receiverId,
+    String? message,
+    int? isRead,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Message(
+      id: id ?? this.id,
+      conversationId: conversationId ?? this.conversationId,
+      senderId: senderId ?? this.senderId,
+      receiverId: receiverId ?? this.receiverId,
+      message: message ?? this.message,
+      isRead: isRead ?? this.isRead,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }
