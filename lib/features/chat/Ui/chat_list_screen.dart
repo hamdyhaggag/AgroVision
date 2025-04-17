@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../models/chat_session.dart';
@@ -81,6 +82,9 @@ class _ChatListScreenState extends State<ChatListScreen>
                   _buildChatList(context),
                   BlocBuilder<ChatCubit, ChatState>(
                     builder: (context, state) {
+                      if (state is ChatLoading) {
+                        return _buildSessionShimmer();
+                      }
                       return state.sessions.isEmpty
                           ? _buildChatbotWelcome(context)
                           : _buildSessionList(context, state.sessions);
@@ -170,7 +174,7 @@ class _ChatListScreenState extends State<ChatListScreen>
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -182,8 +186,8 @@ class _ChatListScreenState extends State<ChatListScreen>
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () => _navigateToChatDetail(context, session),
-                  hoverColor: AppColors.primaryColor.withOpacity(0.05),
-                  highlightColor: AppColors.primaryColor.withOpacity(0.1),
+                  hoverColor: AppColors.primaryColor.withValues(alpha: 0.05),
+                  highlightColor: AppColors.primaryColor.withValues(alpha: 0.1),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -289,7 +293,7 @@ class _ChatListScreenState extends State<ChatListScreen>
   Widget _buildSessionActions(BuildContext context, ChatSession session) {
     return IconButton(
       icon: Icon(Icons.more_vert,
-          color: AppColors.textSecondary.withOpacity(0.8)),
+          color: AppColors.textSecondary.withValues(alpha: 0.8)),
       splashRadius: 20,
       onPressed: () => _showSessionOptions(context, session),
     );
@@ -303,7 +307,7 @@ class _ChatListScreenState extends State<ChatListScreen>
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: AppColors.primaryColor.withOpacity(0.1),
+            color: AppColors.primaryColor.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.forum_outlined,
@@ -527,6 +531,60 @@ class _ChatListScreenState extends State<ChatListScreen>
       Navigator.pop(context);
     }
   }
+}
+
+Widget _buildSessionShimmer() {
+  return Shimmer.fromColors(
+    baseColor: Colors.grey[300]!,
+    highlightColor: Colors.grey[100]!,
+    child: ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      itemCount: 5,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 120,
+                        height: 20,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: 200,
+                        height: 16,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
 }
 
 Widget _buildChatbotWelcome(BuildContext context) {
@@ -798,7 +856,7 @@ Widget _buildChatList(BuildContext context) {
   return BlocBuilder<FarmerChatCubit, FarmerChatState>(
     builder: (context, state) {
       if (state is FarmerChatLoading) {
-        return const Center(child: CircularProgressIndicator());
+        return _buildShimmerLoader();
       }
       if (state is FarmerChatError) {
         return Center(child: Text(state.errorMessage));
@@ -948,6 +1006,62 @@ Widget _buildChatList(BuildContext context) {
       }
       return const SizedBox.shrink();
     },
+  );
+}
+
+Widget _buildShimmerLoader() {
+  return Shimmer.fromColors(
+    baseColor: Colors.grey[300]!,
+    highlightColor: Colors.grey[100]!,
+    child: ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 6, // Number of shimmer items
+      itemBuilder: (context, index) {
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            leading: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 16,
+                  color: Colors.white,
+                  margin: const EdgeInsets.only(bottom: 8),
+                ),
+                Container(
+                  width: 100,
+                  height: 14,
+                  color: Colors.white,
+                ),
+              ],
+            ),
+            subtitle: Container(
+              width: double.infinity,
+              height: 14,
+              color: Colors.white,
+              margin: const EdgeInsets.only(top: 8),
+            ),
+          ),
+        );
+      },
+    ),
   );
 }
 
