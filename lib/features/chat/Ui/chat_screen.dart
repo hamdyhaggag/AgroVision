@@ -335,58 +335,61 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                   child: Icon(Icons.person, size: 16, color: Colors.grey[600]),
                 ),
               ),
-            Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.8,
-                ),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: widget.isSentByMe
-                      ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-                      : Colors.grey[200],
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Directionality(
-                      textDirection: ui.TextDirection.rtl,
-                      child: Text(
-                        widget.message.message,
-                        style: TextStyle(
-                          fontSize:
-                              isArabic(widget.message.message) ? 15.0 : 16.0,
-                          fontFamily:
-                              isArabic(widget.message.message) ? 'DIN' : 'SYNE',
-                          color: Colors.black87,
+            Flexible(
+              child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.8,
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: widget.isSentByMe
+                        ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                        : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Directionality(
+                        textDirection: ui.TextDirection.rtl,
+                        child: Text(
+                          widget.message.message,
+                          style: TextStyle(
+                            fontSize:
+                                isArabic(widget.message.message) ? 15.0 : 16.0,
+                            fontFamily: isArabic(widget.message.message)
+                                ? 'DIN'
+                                : 'SYNE',
+                            color: Colors.black87,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            DateFormat('HH:mm')
-                                .format(widget.message.createdAt),
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[600],
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              DateFormat('HH:mm')
+                                  .format(widget.message.createdAt),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[600],
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        if (widget.isLoading)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 4),
-                            child: _buildTypingIndicator(),
-                          ),
-                      ],
-                    ),
-                  ],
-                )),
+                          if (widget.isLoading)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 4),
+                              child: _buildTypingIndicator(),
+                            ),
+                        ],
+                      ),
+                    ],
+                  )),
+            ),
           ],
         ),
       ),
