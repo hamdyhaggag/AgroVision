@@ -1,7 +1,11 @@
+import 'dart:ui' as ui;
+
+import 'package:agro_vision/core/themes/text_styles.dart';
 import 'package:agro_vision/features/chat/services/farmer_chat_api_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../authentication/Logic/auth cubit/auth_cubit.dart';
 import '../logic/farmer_chat_cubit.dart';
@@ -144,6 +148,7 @@ class _FarmerChatScreenState extends State<FarmerChatScreen> {
       child: TextField(
         controller: _textController,
         decoration: InputDecoration(
+          hintStyle: TextStyles.size16GaryRegular,
           hintText: 'Type your message...',
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
@@ -154,11 +159,16 @@ class _FarmerChatScreenState extends State<FarmerChatScreen> {
             icon:
                 Icon(Icons.send_rounded, color: Theme.of(context).primaryColor),
             onPressed: () {
-              context.read<FarmerChatCubit>().sendMessage(
-                    conversationId: conversationId,
-                    message: _textController.text,
-                  );
-              _textController.clear();
+              final currentUserId =
+                  context.read<AuthCubit>().currentUser?.id ?? 0;
+              if (currentUserId != 0) {
+                context.read<FarmerChatCubit>().sendMessage(
+                      conversationId: conversationId,
+                      message: _textController.text,
+                      senderId: currentUserId,
+                    );
+                _textController.clear();
+              }
             },
           ),
         ),
@@ -326,55 +336,65 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                 ),
               ),
             Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.8,
-              ),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: widget.isSentByMe
-                    ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-                    : Colors.grey[200],
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.message.message,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'SYNE',
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          DateFormat('HH:mm').format(widget.message.createdAt),
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey[600],
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.8,
+                ),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: widget.isSentByMe
+                      ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                      : Colors.grey[200],
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Directionality(
+                      textDirection: ui.TextDirection.rtl,
+                      child: Text(
+                        widget.message.message,
+                        style: TextStyle(
+                          fontSize:
+                              isArabic(widget.message.message) ? 15.0 : 16.0,
+                          fontFamily:
+                              isArabic(widget.message.message) ? 'DIN' : 'SYNE',
+                          color: Colors.black87,
                         ),
                       ),
-                      if (widget.isLoading)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 4),
-                          child: _buildTypingIndicator(),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            DateFormat('HH:mm')
+                                .format(widget.message.createdAt),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey[600],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+                        if (widget.isLoading)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: _buildTypingIndicator(),
+                          ),
+                      ],
+                    ),
+                  ],
+                )),
           ],
         ),
       ),
     );
+  }
+
+  bool isArabic(String text) {
+    final arabicRegex = RegExp(r'[\u0600-\u06FF]');
+    return arabicRegex.hasMatch(text);
   }
 }

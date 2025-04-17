@@ -8,8 +8,9 @@ class FarmerChatLoading extends FarmerChatState {}
 
 class FarmerChatLoaded extends FarmerChatState {
   final List<Conversation> conversations;
+  final bool isOptimistic;
 
-  FarmerChatLoaded(this.conversations);
+  FarmerChatLoaded(this.conversations, {this.isOptimistic = false});
 }
 
 class FarmerChatError extends FarmerChatState {

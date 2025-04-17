@@ -26,6 +26,12 @@ class TextStyles {
     color: AppColors.blackColor,
     fontWeight: FontWeights.regular,
   );
+  static final TextStyle size16GaryRegular = TextStyle(
+    fontSize: 16.sp,
+    fontFamily: 'SYNE',
+    color: AppColors.greyColor,
+    fontWeight: FontWeights.regular,
+  );
   static TextStyle heading1 = TextStyle(
       fontSize: 24.sp, fontFamily: 'SYNE', fontWeight: FontWeight.bold);
   static TextStyle heading2 = TextStyle(

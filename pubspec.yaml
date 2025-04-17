@@ -95,7 +95,6 @@ flutter:
       fonts:
         - asset: assets/fonts/DINNextLTArabic-Medium.ttf
         - asset: assets/fonts/DINNextLTArabic-Regular.ttf
-        - asset: assets/fonts/Poppins-Bold.ttf
 
 
     - family: Syne
@@ -106,3 +105,8 @@ flutter:
       fonts:
         - asset: assets/fonts/PTSans-Bold.ttf
         - asset: assets/fonts/PTSans-Regular.ttf
+
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Bold.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf

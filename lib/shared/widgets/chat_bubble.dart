@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -111,11 +112,15 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                     _buildTypingIndicator(),
                   if (widget.message.text.isNotEmpty) ...[
                     const SizedBox(height: 8),
-                    Text(
-                      widget.message.text,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontFamily: 'SYNE',
+                    Directionality(
+                      textDirection: ui.TextDirection.rtl,
+                      child: Text(
+                        widget.message.text,
+                        style: TextStyle(
+                          fontSize: isArabic(widget.message.text) ? 15.0 : 16.0,
+                          fontFamily:
+                              isArabic(widget.message.text) ? 'DIN' : 'SYNE',
+                        ),
                       ),
                     ),
                   ],
@@ -219,6 +224,11 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
 
   Widget _buildVoiceMessage(String filePath) {
     return VoiceMessageBubble(filePath: filePath);
+  }
+
+  bool isArabic(String text) {
+    final arabicRegex = RegExp(r'[\u0600-\u06FF]');
+    return arabicRegex.hasMatch(text);
   }
 }
 
