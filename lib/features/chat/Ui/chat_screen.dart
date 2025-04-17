@@ -180,46 +180,65 @@ class _FarmerChatScreenState extends State<FarmerChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUserId = context.read<AuthCubit>().currentUser?.id ?? 0;
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, authState) {
+        if (authState is UserUpdatedState) {
+          final currentUserId = context.read<AuthCubit>().currentUser?.id ?? 0;
+          if (currentUserId == 0) {
+            return _buildLoginPrompt();
+          }
 
-    if (currentUserId == 0) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Chat')),
-        body: const Center(child: Text('User not logged in')),
-      );
-    }
+          return BlocProvider(
+            create: (context) => FarmerChatCubit(
+              context.read<FarmerChatApiService>(),
+            )..loadConversations(),
+            child: _buildChatInterface(currentUserId),
+          );
+        }
 
-    return BlocProvider(
-      create: (context) => FarmerChatCubit(
-        context.read<FarmerChatApiService>(),
-      )..loadConversations(),
-      child: Scaffold(
-        appBar: _buildAppBar(),
-        body: Column(
-          children: [
-            Expanded(
-              child: BlocBuilder<FarmerChatCubit, FarmerChatState>(
-                builder: (context, state) {
-                  if (state is FarmerChatLoaded) {
-                    final currentConv = state.conversations.firstWhere(
-                      (c) => c.id == widget.conversation.id,
-                      orElse: () => widget.conversation,
-                    );
-                    return _buildMessagesList(
-                        currentConv.messages, currentUserId);
-                  } else if (state is FarmerChatLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is FarmerChatError) {
-                    return Center(child: Text(state.errorMessage));
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
+        if (authState is UserClearedState) {
+          return _buildLoginPrompt();
+        }
+
+        return const Center(child: CircularProgressIndicator());
+      },
+    );
+  }
+
+  Widget _buildChatInterface(int currentUserId) {
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: Column(
+        children: [
+          Expanded(
+            child: BlocBuilder<FarmerChatCubit, FarmerChatState>(
+              builder: (context, state) {
+                if (state is FarmerChatLoaded) {
+                  final currentConv = state.conversations.firstWhere(
+                    (c) => c.id == widget.conversation.id,
+                    orElse: () => widget.conversation,
+                  );
+                  return _buildMessagesList(
+                      currentConv.messages, currentUserId);
+                } else if (state is FarmerChatLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is FarmerChatError) {
+                  return Center(child: Text(state.errorMessage));
+                }
+                return const SizedBox.shrink();
+              },
             ),
-            _buildMessageInput(widget.conversation.id),
-          ],
-        ),
+          ),
+          _buildMessageInput(widget.conversation.id),
+        ],
       ),
+    );
+  }
+
+  Widget _buildLoginPrompt() {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Chat')),
+      body: const Center(child: Text('Please login to continue')),
     );
   }
 }
@@ -231,12 +250,12 @@ class ChatBubble extends StatefulWidget {
   final bool isSentByMe;
 
   const ChatBubble({
-    Key? key,
+    super.key,
     required this.message,
     required this.onLongPress,
     this.isLoading = false,
     required this.isSentByMe,
-  }) : super(key: key);
+  });
 
   @override
   _ChatBubbleState createState() => _ChatBubbleState();
@@ -315,6 +334,11 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
     );
   }
 
+  bool isArabic(String text) {
+    final arabicRegex = RegExp(r'[\u0600-\u06FF]');
+    return arabicRegex.hasMatch(text);
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -337,67 +361,62 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
               ),
             Flexible(
               child: Container(
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.8,
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: widget.isSentByMe
-                        ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-                        : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Directionality(
-                        textDirection: ui.TextDirection.rtl,
-                        child: Text(
-                          widget.message.message,
-                          style: TextStyle(
-                            fontSize:
-                                isArabic(widget.message.message) ? 15.0 : 16.0,
-                            fontFamily: isArabic(widget.message.message)
-                                ? 'DIN'
-                                : 'SYNE',
-                            color: Colors.black87,
-                          ),
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.8,
+                ),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: widget.isSentByMe
+                      ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                      : Colors.grey[200],
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Directionality(
+                      textDirection: ui.TextDirection.rtl,
+                      child: Text(
+                        widget.message.message,
+                        style: TextStyle(
+                          fontSize:
+                              isArabic(widget.message.message) ? 15.0 : 16.0,
+                          fontFamily:
+                              isArabic(widget.message.message) ? 'DIN' : 'SYNE',
+                          color: Colors.black87,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              DateFormat('HH:mm')
-                                  .format(widget.message.createdAt),
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey[600],
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            DateFormat('HH:mm')
+                                .format(widget.message.createdAt),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey[600],
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          if (widget.isLoading)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 4),
-                              child: _buildTypingIndicator(),
-                            ),
-                        ],
-                      ),
-                    ],
-                  )),
+                        ),
+                        if (widget.isLoading)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: _buildTypingIndicator(),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  bool isArabic(String text) {
-    final arabicRegex = RegExp(r'[\u0600-\u06FF]');
-    return arabicRegex.hasMatch(text);
   }
 }
