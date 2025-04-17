@@ -57,7 +57,7 @@ class LogoutScreen extends StatelessWidget {
                       CustomBottom(
                         text: 'Yes, Log Out',
                         onPressed: () {
-                          context.read<LoginCubit>().logout();
+                          context.read<LoginCubit>().logout(context);
 
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(

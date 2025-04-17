@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/helpers/cache_helper.dart';
 import '../../Data/model/login_request_body.dart';
@@ -10,55 +9,61 @@ import 'login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {
   final LoginRepo _loginRepo;
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   LoginCubit(this._loginRepo) : super(const LoginState.initial());
 
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  final formKey = GlobalKey<FormState>();
-
-  void emitLoginStates(
-      LoginRequestBody loginRequestBody, BuildContext context) async {
+  Future<void> emitLoginStates(
+      LoginRequestBody body, BuildContext context) async {
     emit(const LoginState.loading());
-    final response = await _loginRepo.login(loginRequestBody);
-    response.when(success: (loginResponse) async {
-      final user = User(
-        id: loginResponse.id,
-        name: loginResponse.name,
-        email: loginResponse.email,
-      );
+    final response = await _loginRepo.login(body);
 
-      context.read<AuthCubit>().setUser(user);
-      await CacheHelper.saveData(key: 'token', value: loginResponse.token);
-      await CacheHelper.saveData(key: 'userId', value: loginResponse.id);
-      await CacheHelper.ensureInitialized();
-      CacheHelper.saveData(key: 'isLoggedIn', value: true);
-
-      if (kDebugMode) {
-        print('🔵 RAW NAME: ${loginResponse.name}');
-      }
-
-      await CacheHelper.saveData(
-        key: 'userName',
-        value: loginResponse.name,
-      );
-
-      final savedName = CacheHelper.getString(key: 'userName');
-      if (kDebugMode) {
-        print('🆗 IMMEDIATE CHECK: $savedName');
-      }
-
-      emit(LoginState.success(loginResponse));
-    }, failure: (error) {
-      emit(LoginState.error(error: error.apiErrorModel.message ?? ''));
-    });
+    response.when(
+      success: (data) async {
+        await _persistUserData(data);
+        _updateAuthState(context, data);
+        emit(LoginState.success(data));
+      },
+      failure: (error) => emit(LoginState.error(
+          error: error.apiErrorModel.message ?? 'Login failed')),
+    );
   }
 
-  void logout() async {
-    await CacheHelper.ensureInitialized();
-    await CacheHelper.removeData(key: 'userName');
-    if (kDebugMode) {
-      print('🚪 LOGGED OUT - Cleared userName');
-    }
+  Future<void> _persistUserData(dynamic responseData) async {
+    await Future.wait([
+      CacheHelper.saveData(key: 'userId', value: responseData.id),
+      CacheHelper.saveData(key: 'userName', value: responseData.name),
+      CacheHelper.saveData(key: 'email', value: responseData.email),
+      CacheHelper.saveData(key: 'token', value: responseData.token),
+      CacheHelper.saveData(key: 'isLoggedIn', value: true),
+    ]);
+  }
+
+  void _updateAuthState(BuildContext context, dynamic responseData) {
+    context.read<AuthCubit>().setUser(User(
+          id: responseData.id,
+          name: responseData.name,
+          email: responseData.email,
+        ));
+  }
+
+  Future<void> logout(BuildContext context) async {
+    await Future.wait([
+      CacheHelper.removeData(key: 'userId'),
+      CacheHelper.removeData(key: 'userName'),
+      CacheHelper.removeData(key: 'email'),
+      CacheHelper.removeData(key: 'token'),
+      CacheHelper.saveData(key: 'isLoggedIn', value: false),
+    ]);
+
+    context.read<AuthCubit>().clearUser();
+    _clearControllers();
+  }
+
+  void _clearControllers() {
+    emailController.clear();
+    passwordController.clear();
   }
 }
