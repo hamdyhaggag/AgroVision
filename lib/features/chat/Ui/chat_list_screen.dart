@@ -111,164 +111,168 @@ class _ChatListScreenState extends State<ChatListScreen>
   }
 
   Widget _buildSessionList(BuildContext context, List<ChatSession> sessions) {
-    return ListView.separated(
-      addAutomaticKeepAlives: true,
-      cacheExtent: 1000,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      physics: const BouncingScrollPhysics(),
-      itemCount: sessions.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final session = sessions[index];
-        final lastMessage = session.messages.isNotEmpty
-            ? session.messages.last.text
-            : 'Start the conversation';
-        final hasUnread = session.unreadCount > 0;
+    return RefreshIndicator(
+        onRefresh: () => context.read<ChatCubit>().loadSessions(),
+        child: ListView.separated(
+          addAutomaticKeepAlives: true,
+          cacheExtent: 1000,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          physics: const BouncingScrollPhysics(),
+          itemCount: sessions.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
+          itemBuilder: (context, index) {
+            final session = sessions[index];
+            final lastMessage = session.messages.isNotEmpty
+                ? session.messages.last.text
+                : 'Start the conversation';
+            final hasUnread = session.unreadCount > 0;
 
-        return Dismissible(
-          key: Key(session.id),
-          background: Container(
-            color: AppColors.errorColor,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.only(left: 20),
-            child: const Icon(Icons.delete, color: Colors.white),
-          ),
-          secondaryBackground: Container(
-            color: AppColors.primaryColor,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20),
-            child: const Icon(Icons.edit, color: Colors.white),
-          ),
-          confirmDismiss: (direction) async {
-            if (direction == DismissDirection.startToEnd) {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Delete Session'),
-                  content:
-                      const Text('Are you sure you want to delete this chat?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
+            return Dismissible(
+              key: Key(session.id),
+              background: Container(
+                color: AppColors.errorColor,
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.only(left: 20),
+                child: const Icon(Icons.delete, color: Colors.white),
+              ),
+              secondaryBackground: Container(
+                color: AppColors.primaryColor,
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 20),
+                child: const Icon(Icons.edit, color: Colors.white),
+              ),
+              confirmDismiss: (direction) async {
+                if (direction == DismissDirection.startToEnd) {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Delete Session'),
+                      content: const Text(
+                          'Are you sure you want to delete this chat?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Delete',
+                              style: TextStyle(color: AppColors.errorColor)),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Delete',
-                          style: TextStyle(color: AppColors.errorColor)),
-                    ),
-                  ],
-                ),
-              );
-              return confirm ?? false;
-            } else if (direction == DismissDirection.endToStart) {
-              _showRenameDialog(context, session);
-              return false;
-            }
-            return false;
-          },
-          onDismissed: (direction) {
-            if (direction == DismissDirection.startToEnd) {
-              context.read<ChatCubit>().deleteSession(session.id);
-            }
-          },
-          child: Material(
-            borderRadius: BorderRadius.circular(16),
-            color: AppColors.surfaceColor,
-            elevation: 1,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () {
-                context.read<ChatCubit>().setCurrentSession(session.id);
-                Navigator.pushNamed(context, '/chatBotDetail');
+                  );
+                  return confirm ?? false;
+                } else if (direction == DismissDirection.endToStart) {
+                  _showRenameDialog(context, session);
+                  return false;
+                }
+                return false;
               },
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: hasUnread
-                      ? const Border(
-                          left: BorderSide(
-                              color: AppColors.primaryColor, width: 4))
-                      : null,
-                ),
-                child: Row(
-                  children: [
-                    _buildLeadingAvatar(context, index, hasUnread),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+              onDismissed: (direction) {
+                if (direction == DismissDirection.startToEnd) {
+                  context.read<ChatCubit>().deleteSession(session.id);
+                }
+              },
+              child: Material(
+                borderRadius: BorderRadius.circular(16),
+                color: AppColors.surfaceColor,
+                elevation: 1,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    context.read<ChatCubit>().setCurrentSession(session.id);
+                    Navigator.pushNamed(context, '/chatBotDetail');
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: hasUnread
+                          ? const Border(
+                              left: BorderSide(
+                                  color: AppColors.primaryColor, width: 4))
+                          : null,
+                    ),
+                    child: Row(
+                      children: [
+                        _buildLeadingAvatar(context, index, hasUnread),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: Text(
-                                  session.title ?? 'New Chat',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    color: AppColors.textPrimary,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      session.title ?? 'New Chat',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                                  Text(
+                                    DateFormat(
+                                            'HH:mm', context.locale.toString())
+                                        .format(session.createdAt),
+                                    style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
                               ),
+                              const SizedBox(height: 4),
                               Text(
-                                DateFormat('HH:mm', context.locale.toString())
-                                    .format(session.createdAt),
+                                lastMessage,
                                 style: const TextStyle(
                                   color: AppColors.textSecondary,
-                                  fontSize: 12,
+                                  fontSize: 14,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            lastMessage,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 14,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (hasUnread)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryColor,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  '${session.unreadCount} new',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w500,
+                              if (hasUnread)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryColor,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      '${session.unreadCount} new',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                        ],
-                      ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.more_vert,
+                              color: AppColors.textSecondary),
+                          onPressed: () =>
+                              _showSessionOptions(context, session),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.more_vert,
-                          color: AppColors.textSecondary),
-                      onPressed: () => _showSessionOptions(context, session),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        );
-      },
-    );
+            );
+          },
+        ));
   }
 
   Widget _buildLeadingAvatar(BuildContext context, int index, bool hasUnread) {

@@ -19,6 +19,8 @@ class ChatCubit extends Cubit<ChatState> {
     _loadCachedSessions();
   }
 
+  Future<void> loadSessions() => _loadCachedSessions();
+
   Future<void> _loadCachedSessions() async {
     final cachedSessions = await CacheHelper.getSessions();
     if (cachedSessions.isNotEmpty) {
