@@ -768,8 +768,7 @@ Widget _buildChatList(BuildContext context) {
                       ? conversation.messages.last.message
                       : 'No messages yet',
                 ),
-                onTap: () =>
-                    _navigateToChat(context, conversation, currentUserId),
+                onTap: () => _navigateToChat(context, conversation),
               );
             },
           ),
@@ -780,14 +779,12 @@ Widget _buildChatList(BuildContext context) {
   );
 }
 
-void _navigateToChat(
-    BuildContext context, Conversation conversation, int currentUserId) {
+void _navigateToChat(BuildContext context, Conversation conversation) {
   Navigator.pushNamed(
     context,
     AppRoutes.farmerChatScreen,
     arguments: {
       'conversation': conversation,
-      'currentUserId': currentUserId,
     },
   );
 }

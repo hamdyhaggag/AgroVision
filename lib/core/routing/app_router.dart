@@ -110,11 +110,9 @@ class AppRouter {
             : <String, dynamic>{};
 
         Conversation? conversation;
-        int currentUserId = 0;
 
         try {
           conversation = args['conversation'] as Conversation;
-          currentUserId = args['currentUserId'] as int? ?? 0;
         } catch (e) {
           if (kDebugMode) {
             print('Error parsing chat arguments: $e');
@@ -132,10 +130,8 @@ class AppRouter {
                   updatedAt: DateTime.now(),
                   messages: [],
                 ),
-            currentUserId: currentUserId,
           ),
         );
-
       case '/orderAnalytics':
         return MaterialPageRoute(
           builder: (_) => const OrderAnalytics(),
