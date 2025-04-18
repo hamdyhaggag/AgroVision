@@ -3,16 +3,29 @@ import 'package:json_annotation/json_annotation.dart';
 part 'farmer_chat_model.g.dart';
 
 @JsonSerializable()
+class ConversationsResponse {
+  final List<Conversation> conversations;
+
+  ConversationsResponse({required this.conversations});
+
+  factory ConversationsResponse.fromJson(Map<String, dynamic> json) =>
+      _$ConversationsResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$ConversationsResponseToJson(this);
+}
+
+@JsonSerializable()
 class Conversation {
   final int id;
   @JsonKey(name: 'user1_id')
   final int user1Id;
+  @JsonKey(name: 'user1_name')
+  final String user1Name;
   @JsonKey(name: 'user2_id')
   final int user2Id;
+  @JsonKey(name: 'user2_name')
+  final String user2Name;
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
-  @JsonKey(name: 'updated_at')
-  final DateTime updatedAt;
   @JsonKey(name: 'unread_count', defaultValue: 0)
   final int unreadCount;
   final List<Message> messages;
@@ -20,9 +33,10 @@ class Conversation {
   Conversation({
     required this.id,
     required this.user1Id,
+    required this.user1Name,
     required this.user2Id,
+    required this.user2Name,
     required this.createdAt,
-    required this.updatedAt,
     required this.unreadCount,
     this.messages = const [],
   });
@@ -41,18 +55,20 @@ class Conversation {
   Conversation copyWith({
     int? id,
     int? user1Id,
+    String? user1Name,
     int? user2Id,
+    String? user2Name,
     DateTime? createdAt,
-    DateTime? updatedAt,
     int? unreadCount,
     List<Message>? messages,
   }) {
     return Conversation(
       id: id ?? this.id,
       user1Id: user1Id ?? this.user1Id,
+      user1Name: user1Name ?? this.user1Name,
       user2Id: user2Id ?? this.user2Id,
+      user2Name: user2Name ?? this.user2Name,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
       unreadCount: unreadCount ?? this.unreadCount,
       messages: messages ?? this.messages,
     );
@@ -87,7 +103,6 @@ class Message {
     required this.updatedAt,
   });
 
-  // Add timestamp getter for UI compatibility
   DateTime get timestamp => createdAt;
 
   factory Message.fromJson(Map<String, dynamic> json) =>

@@ -24,33 +24,32 @@ class _FarmerChatApiService implements FarmerChatApiService {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<HttpResponse<List<Conversation>>> getConversations() async {
+  Future<HttpResponse<ConversationsResponse>> getConversations() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<HttpResponse<List<Conversation>>>(Options(
+    final _options =
+        _setStreamType<HttpResponse<ConversationsResponse>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
-        .compose(
-          _dio.options,
-          '/api/conversations',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<Conversation> _value;
+            .compose(
+              _dio.options,
+              '/api/conversations',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ConversationsResponse _value;
     try {
-      _value = _result.data!
-          .map((dynamic i) => Conversation.fromJson(i as Map<String, dynamic>))
-          .toList();
+      _value = ConversationsResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;

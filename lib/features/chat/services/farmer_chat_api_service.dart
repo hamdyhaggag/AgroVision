@@ -10,7 +10,7 @@ abstract class FarmerChatApiService {
       _FarmerChatApiService;
 
   @GET('/api/conversations')
-  Future<HttpResponse<List<Conversation>>> getConversations();
+  Future<HttpResponse<ConversationsResponse>> getConversations();
 
   @POST('/api/conversations')
   Future<HttpResponse<Conversation>> createConversation(

@@ -28,7 +28,7 @@ class ConversationListItem extends StatelessWidget {
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(DateFormat('HH:mm').format(conversation.updatedAt)),
+          Text(DateFormat('HH:mm').format(conversation.createdAt)),
           if (_unreadCount > 0)
             CircleAvatar(
               radius: 10,

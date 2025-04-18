@@ -125,9 +125,10 @@ class AppRouter {
                 Conversation(
                   id: -1,
                   user1Id: 0,
+                  user1Name: 'Unknown User',
                   user2Id: 0,
+                  user2Name: 'Unknown User',
                   createdAt: DateTime.now(),
-                  updatedAt: DateTime.now(),
                   unreadCount: 0,
                   messages: [],
                 ),
