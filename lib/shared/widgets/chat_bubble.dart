@@ -5,6 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../models/chat_message.dart';
 import 'package:audio_waveforms/audio_waveforms.dart';
 
@@ -119,13 +120,21 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                           textDirection: isArabicText
                               ? ui.TextDirection.rtl
                               : ui.TextDirection.ltr,
-                          child: Text(
-                            widget.message.text,
-                            textAlign:
-                                isArabicText ? TextAlign.right : TextAlign.left,
-                            style: TextStyle(
-                              fontSize: isArabicText ? 15.0 : 16.0,
-                              fontFamily: isArabicText ? 'DIN' : 'SYNE',
+                          child: MarkdownBody(
+                            data: widget.message.text,
+                            styleSheet: MarkdownStyleSheet(
+                              h2: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              p: const TextStyle(
+                                fontSize: 15,
+                              ),
+                              listBullet: TextStyle(
+                                fontSize: 15,
+                                fontFamily: isArabicText ? 'DIN' : 'SYNE',
+                              ),
+                              listIndent: 24.0,
                             ),
                           ),
                         );
