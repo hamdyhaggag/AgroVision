@@ -26,12 +26,18 @@ class FarmerChatScreen extends StatefulWidget {
 
 class _FarmerChatScreenState extends State<FarmerChatScreen>
     with TickerProviderStateMixin {
+  late bool _isInputArabic = false;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
   late AnimationController _typingController;
   late List<Animation<double>> _dotAnimations;
   late final StreamSubscription<FarmerChatState> _sub;
   int _lastMessageCount = 0;
+
+  bool isArabic(String text) {
+    final arabicRegex = RegExp(r'[\u0600-\u06FF]');
+    return arabicRegex.hasMatch(text);
+  }
 
   @override
   void initState() {
@@ -60,6 +66,15 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
         }
       }
     });
+    _textController.addListener(_checkInputLanguage);
+  }
+
+  void _checkInputLanguage() {
+    final currentText = _textController.text;
+    final isArabicText = isArabic(currentText);
+    if (isArabicText != _isInputArabic) {
+      setState(() => _isInputArabic = isArabicText);
+    }
   }
 
   @override
@@ -68,6 +83,7 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
     _typingController.dispose();
     _scrollController.dispose();
     _textController.dispose();
+    _textController.removeListener(_checkInputLanguage);
     super.dispose();
   }
 
@@ -211,8 +227,14 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
       ),
       child: TextField(
         controller: _textController,
+        textDirection:
+            _isInputArabic ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+        style: TextStyle(
+          fontFamily: _isInputArabic ? 'DIN' : 'SYNE',
+          fontSize: _isInputArabic ? 15.0 : 16.0,
+        ),
         decoration: InputDecoration(
-          hintStyle: TextStyles.size16GaryRegular,
+          hintStyle: TextStyles.size16GaryRegular.copyWith(fontFamily: 'SYNE'),
           hintText: 'Type your message...',
           border: InputBorder.none,
           contentPadding:
@@ -340,6 +362,7 @@ class _ChatBubbleState extends State<ChatBubble> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabicText = isArabic(widget.message.message);
     return GestureDetector(
       onLongPress: widget.onLongPress,
       child: Container(
@@ -373,14 +396,14 @@ class _ChatBubbleState extends State<ChatBubble> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Directionality(
-                      textDirection: ui.TextDirection.rtl,
+                      textDirection: isArabicText
+                          ? ui.TextDirection.rtl
+                          : ui.TextDirection.ltr,
                       child: Text(
                         widget.message.message,
                         style: TextStyle(
-                          fontSize:
-                              isArabic(widget.message.message) ? 15.0 : 16.0,
-                          fontFamily:
-                              isArabic(widget.message.message) ? 'DIN' : 'SYNE',
+                          fontSize: isArabicText ? 15.0 : 16.0,
+                          fontFamily: isArabicText ? 'DIN' : 'SYNE',
                           color: Colors.black87,
                         ),
                       ),
