@@ -938,7 +938,9 @@ Widget _buildChatList(BuildContext context) {
                           children: [
                             Expanded(
                               child: Text(
-                                'User $otherUserId',
+                                conversation.user1Id == currentUserId
+                                    ? conversation.user2Name
+                                    : conversation.user1Name,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,

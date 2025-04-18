@@ -74,7 +74,7 @@ class _FarmerChatScreenState extends State<FarmerChatScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Chat with ${widget.conversation.otherUserId}',
+                widget.conversation.user1Name,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
