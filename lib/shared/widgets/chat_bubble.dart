@@ -112,16 +112,24 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                     _buildTypingIndicator(),
                   if (widget.message.text.isNotEmpty) ...[
                     const SizedBox(height: 8),
-                    Directionality(
-                      textDirection: ui.TextDirection.rtl,
-                      child: Text(
-                        widget.message.text,
-                        style: TextStyle(
-                          fontSize: isArabic(widget.message.text) ? 15.0 : 16.0,
-                          fontFamily:
-                              isArabic(widget.message.text) ? 'DIN' : 'SYNE',
-                        ),
-                      ),
+                    Builder(
+                      builder: (context) {
+                        final isArabicText = isArabic(widget.message.text);
+                        return Directionality(
+                          textDirection: isArabicText
+                              ? ui.TextDirection.rtl
+                              : ui.TextDirection.ltr,
+                          child: Text(
+                            widget.message.text,
+                            textAlign:
+                                isArabicText ? TextAlign.right : TextAlign.left,
+                            style: TextStyle(
+                              fontSize: isArabicText ? 15.0 : 16.0,
+                              fontFamily: isArabicText ? 'DIN' : 'SYNE',
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                   const SizedBox(height: 4),

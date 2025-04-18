@@ -161,22 +161,23 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          leading: BlocSelector<ChatCubit, ChatState, bool>(
-            selector: (state) => state is ChatNetworkError,
-            builder: (context, isOffline) {
-              return Icon(
-                isOffline ? Icons.cloud_off : Icons.cloud,
-                color: isOffline ? Colors.red : Colors.green,
-              );
+          // Add your prefix icon here
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            onPressed: () {
+              if (Navigator.canPop(context)) {
+                Navigator.of(context).pop();
+              }
             },
           ),
+
           title: Row(
             children: [
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.primaryColor.withValues(alpha: 0.2),
+                    color: AppColors.primaryColor.withOpacity(0.2),
                     width: 2,
                   ),
                 ),
@@ -196,7 +197,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                       fontSize: 16,
                       fontFamily: 'SYNE',
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary.withValues(alpha: 0.9),
+                      color: AppColors.textPrimary.withOpacity(0.9),
                     ),
                   ),
                   Text(
@@ -204,17 +205,20 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       fontFamily: 'SYNE',
-                      color: AppColors.textSecondary.withValues(alpha: 0.8),
+                      color: AppColors.textSecondary.withOpacity(0.8),
                     ),
                   ),
                 ],
               ),
             ],
           ),
+
           actions: [
             IconButton(
-              icon: Icon(Icons.help_outline,
-                  color: AppColors.primaryColor.withValues(alpha: 0.8)),
+              icon: Icon(
+                Icons.help_outline,
+                color: AppColors.primaryColor.withOpacity(0.8),
+              ),
               onPressed: _showCapabilitiesDialog,
             ),
           ],
