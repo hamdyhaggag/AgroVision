@@ -22,11 +22,13 @@ class FarmerChatCubit extends Cubit<FarmerChatState> {
   Future<void> loadConversations() async {
     try {
       final response = await _service.getConversations();
+      final conversations = response.data.conversations;
+
       if (state is FarmerChatLoaded) {
         final currentState = state as FarmerChatLoaded;
-        emit(FarmerChatLoaded(response.data, isOptimistic: false));
+        emit(FarmerChatLoaded(conversations, isOptimistic: false));
       } else {
-        emit(FarmerChatLoaded(response.data));
+        emit(FarmerChatLoaded(conversations));
       }
     } on DioException catch (e) {
       emit(FarmerChatError(e.message ?? 'Failed to load conversations'));
@@ -48,10 +50,10 @@ class FarmerChatCubit extends Cubit<FarmerChatState> {
     final conversation = currentState.conversations[convIndex];
     final newMessage = Message(
       id: -1,
-      message: message,
+      conversationId: conversationId,
       senderId: senderId,
       receiverId: conversation.otherUserId,
-      conversationId: conversationId,
+      message: message,
       isRead: 0,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),

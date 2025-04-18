@@ -1031,7 +1031,7 @@ Widget _buildShimmerLoader() {
             leading: Container(
               width: 56,
               height: 56,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
