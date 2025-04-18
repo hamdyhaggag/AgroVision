@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:agro_vision/core/themes/text_styles.dart';
 import 'package:agro_vision/features/chat/services/farmer_chat_api_service.dart';
@@ -29,28 +30,44 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
   final TextEditingController _textController = TextEditingController();
   late AnimationController _typingController;
   late List<Animation<double>> _dotAnimations;
+  late final StreamSubscription<FarmerChatState> _sub;
+  int _lastMessageCount = 0;
 
   @override
   void initState() {
     super.initState();
-    context.read<FarmerChatCubit>().loadConversations();
     _typingController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1200))
-      ..repeat();
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
     _dotAnimations = List.generate(3, (i) {
       return Tween<double>(begin: 1.0, end: 1.4).animate(
         CurvedAnimation(
-            parent: _typingController,
-            curve: Interval(0.2 * i, 0.2 * i + 0.4, curve: Curves.easeInOut)),
+          parent: _typingController,
+          curve: Interval(0.2 * i, 0.2 * i + 0.4, curve: Curves.easeInOut),
+        ),
       );
+    });
+    final cubit = context.read<FarmerChatCubit>();
+    cubit.loadConversations();
+    _sub = cubit.stream.listen((state) {
+      if (state is FarmerChatLoaded) {
+        final conv = state.conversations
+            .firstWhere((c) => c.id == widget.conversation.id);
+        if (conv.messages.length > _lastMessageCount) {
+          _lastMessageCount = conv.messages.length;
+          _scrollToBottom();
+        }
+      }
     });
   }
 
   @override
   void dispose() {
+    _sub.cancel();
+    _typingController.dispose();
     _scrollController.dispose();
     _textController.dispose();
-    _typingController.dispose();
     super.dispose();
   }
 
@@ -63,8 +80,9 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          onPressed: () => Navigator.pop(context)),
+        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+        onPressed: () => Navigator.pop(context),
+      ),
       title: Row(
         children: [
           Container(
@@ -85,25 +103,34 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(widget.conversation.user1Name,
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: Theme.of(context)
-                          .textTheme
-                          .bodyLarge
-                          ?.color
-                          ?.withValues(alpha: 0.9))),
-              Text('Online',
-                  style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.green.withValues(alpha: 0.8))),
+              Text(
+                widget.conversation.user1Name,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: Theme.of(context)
+                      .textTheme
+                      .bodyLarge
+                      ?.color
+                      ?.withValues(alpha: 0.9),
+                ),
+              ),
+              Text(
+                'Online',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.green.withValues(alpha: 0.8),
+                ),
+              ),
             ],
           ),
         ],
       ),
       actions: [
-        IconButton(icon: const Icon(Icons.more_vert_rounded), onPressed: () {})
+        IconButton(
+          icon: const Icon(Icons.more_vert_rounded),
+          onPressed: () {},
+        ),
       ],
     );
   }
@@ -111,7 +138,6 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
   Widget _buildMessagesList(List<Message> messages, int currentUserId) {
     messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     if (messages.isEmpty) return const Center(child: Text('No messages yet'));
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(16),
@@ -120,10 +146,11 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
         final m = messages[i];
         final sentByMe = m.senderId == currentUserId;
         return ChatBubble(
-            message: m,
-            onLongPress: () {},
-            isLoading: false,
-            isSentByMe: sentByMe);
+          message: m,
+          onLongPress: () {},
+          isLoading: false,
+          isSentByMe: sentByMe,
+        );
       },
     );
   }
@@ -146,15 +173,20 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
               children: [
                 if (!sentByMe)
                   const Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: CircleAvatar(
-                          radius: 22, backgroundColor: Colors.white)),
+                    padding: EdgeInsets.only(right: 8),
+                    child: CircleAvatar(
+                      radius: 22,
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
                 Container(
-                    width: MediaQuery.of(context).size.width * 0.6,
-                    height: 80,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15))),
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
               ],
             ),
           );
@@ -167,14 +199,16 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
     return Container(
       margin: const EdgeInsets.all(16).copyWith(top: 8),
       decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 10,
-                spreadRadius: 2)
-          ]),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
       child: TextField(
         controller: _textController,
         decoration: InputDecoration(
@@ -190,9 +224,10 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
               final uid = context.read<AuthCubit>().currentUser?.id ?? 0;
               if (uid != 0) {
                 context.read<FarmerChatCubit>().sendMessage(
-                    conversationId: conversationId,
-                    message: _textController.text,
-                    senderId: uid);
+                      conversationId: conversationId,
+                      message: _textController.text,
+                      senderId: uid,
+                    );
                 _textController.clear();
               }
             },
@@ -219,18 +254,20 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
               children: [
                 Expanded(
                   child: BlocBuilder<FarmerChatCubit, FarmerChatState>(
-                      builder: (ctx, state) {
-                    if (state is FarmerChatLoaded) {
-                      final conv = state.conversations.firstWhere(
+                    builder: (ctx, state) {
+                      if (state is FarmerChatLoaded) {
+                        final conv = state.conversations.firstWhere(
                           (c) => c.id == widget.conversation.id,
-                          orElse: () => widget.conversation);
-                      return _buildMessagesList(conv.messages, uid);
-                    } else if (state is FarmerChatError) {
-                      return Center(child: Text(state.errorMessage));
-                    } else {
-                      return _buildChatShimmerLoader();
-                    }
-                  }),
+                          orElse: () => widget.conversation,
+                        );
+                        return _buildMessagesList(conv.messages, uid);
+                      } else if (state is FarmerChatError) {
+                        return Center(child: Text(state.errorMessage));
+                      } else {
+                        return _buildChatShimmerLoader();
+                      }
+                    },
+                  ),
                 ),
                 _buildMessageInput(widget.conversation.id),
               ],
@@ -246,8 +283,9 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
 
   Widget _buildLoginPrompt() {
     return Scaffold(
-        appBar: AppBar(title: const Text('Chat')),
-        body: const Center(child: Text('Please login to continue')));
+      appBar: AppBar(title: const Text('Chat')),
+      body: const Center(child: Text('Please login to continue')),
+    );
   }
 }
 
@@ -257,12 +295,13 @@ class ChatBubble extends StatefulWidget {
   final bool isLoading;
   final bool isSentByMe;
 
-  const ChatBubble(
-      {super.key,
-      required this.message,
-      required this.onLongPress,
-      this.isLoading = false,
-      required this.isSentByMe});
+  const ChatBubble({
+    super.key,
+    required this.message,
+    required this.onLongPress,
+    this.isLoading = false,
+    required this.isSentByMe,
+  });
 
   @override
   _ChatBubbleState createState() => _ChatBubbleState();
@@ -286,12 +325,14 @@ class _ChatBubbleState extends State<ChatBubble> {
             return Transform.scale(scale: anim.value, child: child);
           },
           child: Container(
-              width: 8,
-              height: 8,
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              decoration: BoxDecoration(
-                  color: widget.isSentByMe ? Colors.white70 : Colors.grey[600],
-                  shape: BoxShape.circle)),
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: widget.isSentByMe ? Colors.white70 : Colors.grey[600],
+              shape: BoxShape.circle,
+            ),
+          ),
         );
       }),
     );
@@ -323,41 +364,50 @@ class _ChatBubbleState extends State<ChatBubble> {
                     maxWidth: MediaQuery.of(context).size.width * 0.8),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                    color: widget.isSentByMe
-                        ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-                        : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(15)),
+                  color: widget.isSentByMe
+                      ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                      : Colors.grey[200],
+                  borderRadius: BorderRadius.circular(15),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Directionality(
-                        textDirection: ui.TextDirection.rtl,
-                        child: Text(widget.message.message,
-                            style: TextStyle(
-                                fontSize: isArabic(widget.message.message)
-                                    ? 15.0
-                                    : 16.0,
-                                fontFamily: isArabic(widget.message.message)
-                                    ? 'DIN'
-                                    : 'SYNE',
-                                color: Colors.black87))),
+                      textDirection: ui.TextDirection.rtl,
+                      child: Text(
+                        widget.message.message,
+                        style: TextStyle(
+                          fontSize:
+                              isArabic(widget.message.message) ? 15.0 : 16.0,
+                          fontFamily:
+                              isArabic(widget.message.message) ? 'DIN' : 'SYNE',
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                              child: Text(
-                                  DateFormat('HH:mm')
-                                      .format(widget.message.createdAt),
-                                  style: TextStyle(
-                                      fontSize: 10, color: Colors.grey[600]),
-                                  overflow: TextOverflow.ellipsis)),
-                          if (widget.isLoading)
-                            Padding(
-                                padding: const EdgeInsets.only(left: 4),
-                                child: _buildTypingIndicator()),
-                        ]),
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            DateFormat('HH:mm')
+                                .format(widget.message.createdAt),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey[600],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (widget.isLoading)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: _buildTypingIndicator(),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
               ),
