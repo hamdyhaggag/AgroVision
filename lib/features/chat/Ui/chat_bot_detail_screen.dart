@@ -18,29 +18,20 @@ class ChatBotDetailScreen extends StatefulWidget {
 }
 
 class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
-  int _getPendingMessagesCount(String sessionId) {
-    final chatCubit = context.read<ChatCubit>();
-    return chatCubit.pendingMessages
-        .where((m) => m.sessionId == sessionId)
-        .length;
-  }
-
+  late bool _isInputArabic = false;
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
+  bool isArabic(String text) {
+    final arabicRegex = RegExp(r'[\u0600-\u06FF]');
+    return arabicRegex.hasMatch(text);
+  }
 
   @override
   void initState() {
     super.initState();
     _handleSessionAndPrefill();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final routeArgs = ModalRoute.of(context)?.settings.arguments;
-      if (routeArgs is Map<String, dynamic>) {
-        final prefillMessage = routeArgs['prefillMessage'] as String?;
-        if (prefillMessage != null && prefillMessage.isNotEmpty) {
-          _controller.text = prefillMessage;
-        }
-      }
-    });
+    _controller.addListener(_checkInputLanguage);
   }
 
   void _handleSessionAndPrefill() {
@@ -65,74 +56,20 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
     }
   }
 
+  void _checkInputLanguage() {
+    final currentText = _controller.text;
+    final isArabicText = isArabic(currentText);
+    if (isArabicText != _isInputArabic) {
+      setState(() => _isInputArabic = isArabicText);
+    }
+  }
+
   @override
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
+    _controller.removeListener(_checkInputLanguage);
     super.dispose();
-  }
-
-  void _showCapabilitiesDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Assistant Capabilities',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'SYNE',
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              ..._buildCapabilityItems(),
-              const SizedBox(height: 8),
-              const Text('More features coming soon!',
-                  style: TextStyle(
-                    fontFamily: 'SYNE',
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                  )),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/khedr.jpg',
-            width: 80,
-            height: 80,
-          ),
-          const SizedBox(height: 16),
-          const Text('How can I help you today?',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 16,
-                fontFamily: 'SYNE',
-              )),
-          const SizedBox(height: 8),
-          Text('Ask about crops, weather, or soil analysis',
-              style: TextStyle(
-                color: AppColors.textSecondary.withValues(alpha: 0.7),
-                fontSize: 14,
-                fontFamily: 'SYNE',
-              )),
-        ],
-      ),
-    );
   }
 
   @override
@@ -161,23 +98,17 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          // Add your prefix icon here
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded),
-            onPressed: () {
-              if (Navigator.canPop(context)) {
-                Navigator.of(context).pop();
-              }
-            },
+            onPressed: () => Navigator.maybePop(context),
           ),
-
           title: Row(
             children: [
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.primaryColor.withOpacity(0.2),
+                    color: AppColors.primaryColor.withValues(alpha: 0.2),
                     width: 2,
                   ),
                 ),
@@ -197,7 +128,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                       fontSize: 16,
                       fontFamily: 'SYNE',
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary.withOpacity(0.9),
+                      color: AppColors.textPrimary.withValues(alpha: 0.9),
                     ),
                   ),
                   Text(
@@ -205,19 +136,18 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       fontFamily: 'SYNE',
-                      color: AppColors.textSecondary.withOpacity(0.8),
+                      color: AppColors.textSecondary.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
               ),
             ],
           ),
-
           actions: [
             IconButton(
               icon: Icon(
                 Icons.help_outline,
-                color: AppColors.primaryColor.withOpacity(0.8),
+                color: AppColors.primaryColor.withValues(alpha: 0.8),
               ),
               onPressed: _showCapabilitiesDialog,
             ),
@@ -238,65 +168,64 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
               children: [
                 Expanded(
                   child: BlocListener<ChatCubit, ChatState>(
-                      listener: (context, state) {
-                        if (currentSession.messages.isNotEmpty) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            _scrollController.animateTo(
-                              _scrollController.position.maxScrollExtent,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOut,
-                            );
-                          });
-                        }
-                      },
-                      child: currentSession.messages.isEmpty
-                          ? _buildEmptyState()
-                          : ListView.separated(
-                              controller: _scrollController,
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16, horizontal: 8),
-                              itemCount: currentSession.messages.length +
-                                  (state is ChatLoading ? 1 : 0) +
-                                  _getPendingMessagesCount(currentSession.id),
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(height: 12),
-                              itemBuilder: (context, index) {
-                                final chatCubit = context.read<ChatCubit>();
-                                final pendingMessages = chatCubit
-                                    .pendingMessages
-                                    .where(
-                                        (m) => m.sessionId == currentSession.id)
-                                    .toList();
-                                final allMessages = [
-                                  ...currentSession.messages,
-                                  ...pendingMessages,
-                                ];
-                                if (index < allMessages.length) {
-                                  final message = allMessages[index];
-                                  return ChatBubble(
-                                    message: message,
-                                    isLoading:
-                                        message.status == MessageStatus.pending,
-                                    onLongPress: () =>
-                                        _showMessageOptions(message),
-                                  );
-                                }
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: ChatBubble(
-                                    message: Message(
+                    listener: (context, state) {
+                      if (currentSession.messages.isNotEmpty) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _scrollController.animateTo(
+                            _scrollController.position.maxScrollExtent,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        });
+                      }
+                    },
+                    child: currentSession.messages.isEmpty
+                        ? _buildEmptyState()
+                        : ListView.separated(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16, horizontal: 8),
+                            itemCount: currentSession.messages.length +
+                                (state is ChatLoading ? 1 : 0) +
+                                _pendingMessagesCount(currentSession.id),
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final chatCubit = context.read<ChatCubit>();
+                              final pendingMessages = chatCubit.pendingMessages
+                                  .where(
+                                      (m) => m.sessionId == currentSession.id)
+                                  .toList();
+                              final allMessages = [
+                                ...currentSession.messages,
+                                ...pendingMessages
+                              ];
+                              if (index < allMessages.length) {
+                                final message = allMessages[index];
+                                return ChatBubble(
+                                  message: message,
+                                  isLoading:
+                                      message.status == MessageStatus.pending,
+                                  onLongPress: () =>
+                                      _showMessageOptions(message),
+                                );
+                              }
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                child: ChatBubble(
+                                  message: Message(
                                       text: '',
                                       isSentByMe: false,
-                                      timestamp: DateTime.now(),
-                                    ),
-                                    isLoading: true,
-                                    loadingColor: AppColors.primaryColor,
-                                    onLongPress: () {},
-                                  ),
-                                );
-                              },
-                            )),
+                                      timestamp: DateTime.now()),
+                                  isLoading: true,
+                                  loadingColor: AppColors.primaryColor,
+                                  onLongPress: () {},
+                                ),
+                              );
+                            },
+                          ),
+                  ),
                 ),
                 _buildInputSection(context),
               ],
@@ -305,6 +234,14 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
         ),
       ),
     );
+  }
+
+  int _pendingMessagesCount(String sessionId) {
+    return context
+        .read<ChatCubit>()
+        .pendingMessages
+        .where((m) => m.sessionId == sessionId)
+        .length;
   }
 
   Widget _buildInputSection(BuildContext context) {
@@ -334,6 +271,12 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
               child: TextField(
                 controller: _controller,
                 textCapitalization: TextCapitalization.sentences,
+                textDirection:
+                    _isInputArabic ? TextDirection.rtl : TextDirection.ltr,
+                style: TextStyle(
+                  fontFamily: _isInputArabic ? 'DIN' : 'SYNE',
+                  fontSize: _isInputArabic ? 15.0 : 16.0,
+                ),
                 minLines: 1,
                 maxLines: 4,
                 decoration: InputDecoration(
@@ -363,6 +306,31 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
     );
   }
 
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset('assets/images/khedr.jpg', width: 80, height: 80),
+          const SizedBox(height: 16),
+          const Text('How can I help you today?',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 16,
+                fontFamily: 'SYNE',
+              )),
+          const SizedBox(height: 8),
+          Text('Ask about crops, weather, or soil analysis',
+              style: TextStyle(
+                color: AppColors.textSecondary.withValues(alpha: 0.7),
+                fontSize: 14,
+                fontFamily: 'SYNE',
+              )),
+        ],
+      ),
+    );
+  }
+
   void _handleSend(String text, BuildContext context) {
     if (text.trim().isEmpty) return;
     final chatCubit = context.read<ChatCubit>();
@@ -375,25 +343,56 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
       ),
     );
     if (currentSession.messages.isEmpty) {
-      chatCubit.createNewSession().then((_) {
-        chatCubit.sendTextMessage(text);
-      });
+      chatCubit.createNewSession().then((_) => chatCubit.sendTextMessage(text));
     } else {
       chatCubit.sendTextMessage(text);
     }
     _controller.clear();
   }
 
+  void _showCapabilitiesDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Assistant Capabilities',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'SYNE',
+                    fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ..._buildCapabilityItems(),
+              const SizedBox(height: 8),
+              const Text('More features coming soon!',
+                  style: TextStyle(
+                      fontFamily: 'SYNE',
+                      color: AppColors.textSecondary,
+                      fontSize: 12)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   List<Widget> _buildCapabilityItems() {
     return [
       _buildCapabilityItem(Icons.analytics, 'Crop Analysis',
-          'Get detailed insights about crop health and growth'),
+          'Get detailed insights about crop health'),
       _buildCapabilityItem(Icons.photo_camera, 'Image Recognition',
           'Identify plant diseases from photos'),
       _buildCapabilityItem(Icons.thermostat, 'Weather Prediction',
           'Get localized weather forecasts'),
-      _buildCapabilityItem(Icons.science, 'Soil Analysis',
-          'Understand soil composition and recommendations'),
+      _buildCapabilityItem(
+          Icons.science, 'Soil Analysis', 'Understand soil composition'),
     ];
   }
 
@@ -448,13 +447,11 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
             ListTile(
               leading:
                   const Icon(Icons.delete_outline, color: Colors.redAccent),
-              title: const Text(
-                'Delete',
-                style: TextStyle(
-                  color: Colors.redAccent,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              title: const Text('Delete',
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                  )),
               onTap: () {
                 context.read<ChatCubit>().deleteMessage(message);
                 Navigator.pop(context);
@@ -486,14 +483,12 @@ class _AttachmentButton extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  "Record Voice Message",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'SYNE',
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text("Record Voice Message",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'SYNE',
+                      fontWeight: FontWeight.bold,
+                    )),
                 SizedBox(height: 16),
                 VoiceRecordingWidget(),
               ],
@@ -517,9 +512,8 @@ class _AttachmentButton extends StatelessWidget {
           final textController = TextEditingController();
           return AlertDialog(
             title: const Center(
-              child:
-                  Text('Image Question', style: TextStyle(fontFamily: 'SYNE')),
-            ),
+                child: Text('Image Question',
+                    style: TextStyle(fontFamily: 'SYNE'))),
             content: TextField(
               controller: textController,
               decoration: const InputDecoration(
@@ -529,13 +523,14 @@ class _AttachmentButton extends StatelessWidget {
             ),
             actions: [
               TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel',
-                      style: TextStyle(fontFamily: 'SYNE'))),
+                onPressed: () => Navigator.pop(context),
+                child:
+                    const Text('Cancel', style: TextStyle(fontFamily: 'SYNE')),
+              ),
               TextButton(
-                  onPressed: () => Navigator.pop(context, textController.text),
-                  child:
-                      const Text('Send', style: TextStyle(fontFamily: 'SYNE'))),
+                onPressed: () => Navigator.pop(context, textController.text),
+                child: const Text('Send', style: TextStyle(fontFamily: 'SYNE')),
+              ),
             ],
           );
         },
