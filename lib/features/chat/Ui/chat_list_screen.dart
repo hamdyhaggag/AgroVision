@@ -364,6 +364,7 @@ class _ChatListScreenState extends State<ChatListScreen>
             color: AppColors.textSecondary,
             fontSize: 14,
             height: 1.3,
+            fontFamily: isArabic(message) ? 'DIN' : 'SYNE',
           ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
@@ -530,6 +531,10 @@ class _ChatListScreenState extends State<ChatListScreen>
       context.read<ChatCubit>().renameSession(session.id, trimmed);
       Navigator.pop(context);
     }
+  }
+
+  bool isArabic(String text) {
+    return RegExp(r'[\u0600-\u06FF]').hasMatch(text);
   }
 }
 
