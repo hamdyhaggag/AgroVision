@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import '../../../models/disease_model.dart';
-import '../../../shared/widgets/custom_appbar.dart';
 
 class DetectionRecords extends StatefulWidget {
   const DetectionRecords({super.key});
@@ -96,9 +95,25 @@ class _DetectionRecordsState extends State<DetectionRecords> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
         title: isSelectionMode
             ? Text('${selectedReports.length} Selected')
-            : const Text('Detection Records'),
+            : const Text(
+                'Detection Records',
+                style: TextStyle(
+                  fontFamily: 'SYNE',
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
         actions: [
           if (isSelectionMode)
             IconButton(
