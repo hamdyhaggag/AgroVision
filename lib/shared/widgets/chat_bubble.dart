@@ -123,12 +123,14 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                           child: MarkdownBody(
                             data: widget.message.text,
                             styleSheet: MarkdownStyleSheet(
-                              h2: const TextStyle(
+                              h2: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
+                                fontFamily: isArabicText ? 'DIN' : 'SYNE',
                               ),
-                              p: const TextStyle(
+                              p: TextStyle(
                                 fontSize: 15,
+                                fontFamily: isArabicText ? 'DIN' : 'SYNE',
                               ),
                               listBullet: TextStyle(
                                 fontSize: 15,
