@@ -50,17 +50,15 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
                 size: 18.sp,
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) {
+                final trimmedValue = value?.trim() ?? '';
+
+                if (trimmedValue.isEmpty) {
                   return 'Please enter an email address';
                 }
-                if (!value.contains('@')) {
+                if (!trimmedValue.contains('@')) {
                   return 'Email must contain "@"';
                 }
-                if (!value.contains('.') ||
-                    value.indexOf('.') < value.indexOf('@')) {
-                  return 'Email must have a valid domain (e.g., ".com")';
-                }
-                if (!AppRegex.isEmailValid(value)) {
+                if (!AppRegex.isEmailValid(trimmedValue)) {
                   return 'Please enter a valid email address';
                 }
                 return null;
