@@ -232,24 +232,21 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
             ],
           ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: FutureBuilder<Map<String, dynamic>>(
-                future: plantDetailsFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                        child: CircularProgressIndicator(
-                            color: AppColors.primaryColor));
-                  } else if (snapshot.hasError) {
-                    return _buildErrorUI(snapshot.error.toString());
-                  } else if (snapshot.hasData) {
-                    return _buildResultUI(snapshot.data!);
-                  } else {
-                    return const Center(child: Text('No data available'));
-                  }
-                },
-              ),
+            child: FutureBuilder<Map<String, dynamic>>(
+              future: plantDetailsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                      child: CircularProgressIndicator(
+                          color: AppColors.primaryColor));
+                } else if (snapshot.hasError) {
+                  return _buildErrorUI(snapshot.error.toString());
+                } else if (snapshot.hasData) {
+                  return _buildResultUI(snapshot.data!);
+                } else {
+                  return const Center(child: Text('No data available'));
+                }
+              },
             ),
           ),
         ],
@@ -264,71 +261,44 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.info_outline_rounded,
-                    size: 34,
-                    color: Colors.red.shade700,
-                  ),
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade700,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: Colors.red.shade700,
+              ),
             ),
             const SizedBox(height: 24),
             Text(
-              'Something Went Wrong',
+              'Oops! Something Went Wrong',
               style: TextStyles.heading2.copyWith(
                 fontSize: 20,
                 color: AppColors.errorColor,
-                fontWeight: FontWeight.w600,
               ),
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               _parseErrorMessage(error),
-              style: TextStyles.bodyText.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
-                fontSize: 15,
-                height: 1.4,
-              ),
               textAlign: TextAlign.center,
+              style: TextStyles.bodyText.copyWith(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.8),
+              ),
             ),
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: CustomBottom(
-                text: 'Try Again',
-                onPressed: () => setState(() {
-                  plantDetailsFuture =
-                      fetchPlantDetails(File(widget.imagePath!));
-                }),
-                icon: Icons.refresh_rounded,
-                iconColor: Colors.white,
-              ),
+            CustomBottom(
+              text: 'Try Again',
+              onPressed: () => setState(() {
+                plantDetailsFuture = fetchPlantDetails(File(widget.imagePath!));
+              }),
+              icon: Icons.refresh_rounded,
             ),
           ],
         ),
@@ -345,136 +315,236 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
     final isInvalidInput = plantClass == 'Invalid Input';
     final isIdentified = !isInvalidInput && plantClass != 'Unknown Class';
 
-    return SingleChildScrollView(
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        key: ValueKey(isInvalidInput),
         children: [
-          Row(
-            children: [
-              Icon(
-                isInvalidInput
-                    ? Icons.error_outline
-                    : isIdentified
-                        ? Icons.check_circle
-                        : Icons.warning_rounded,
-                color: isInvalidInput
-                    ? Colors.red
-                    : isIdentified
-                        ? Colors.green
-                        : Colors.orange,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                isInvalidInput
-                    ? 'Invalid Image Uploaded!'
-                    : isIdentified
-                        ? 'We identified the plant!'
-                        : 'We can\'t identify the plant!',
-                style: TextStyles.bodyText.copyWith(
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            decoration: BoxDecoration(
+              color: isInvalidInput
+                  ? Colors.red.withValues(alpha: 0.1)
+                  : isIdentified
+                      ? Colors.green.withValues(alpha: 0.1)
+                      : Colors.orange.withValues(alpha: 0.1),
+              borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(20)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  isInvalidInput
+                      ? Icons.error_outline_rounded
+                      : isIdentified
+                          ? Icons.verified_rounded
+                          : Icons.help_outline_rounded,
                   color: isInvalidInput
-                      ? Colors.red
+                      ? AppColors.errorColor
                       : isIdentified
                           ? Colors.green
                           : Colors.orange,
+                  size: 32,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            plantClass,
-            style: isInvalidInput
-                ? TextStyles.heading1.copyWith(color: Colors.red)
-                : isIdentified
-                    ? TextStyles.heading1
-                    : TextStyles.heading1.copyWith(color: Colors.orange),
-          ),
-          if (isIdentified) ...[
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Text('Confidence Score', style: TextStyles.bodyText),
-                const Spacer(),
-                Text('${confidence.toStringAsFixed(2)}%',
-                    style: TextStyles.bodyText
-                        .copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isInvalidInput
+                            ? 'Invalid Input Detected'
+                            : isIdentified
+                                ? 'Plant Identified'
+                                : 'Unclear Detection',
+                        style: TextStyles.heading2.copyWith(
+                          fontSize: 18,
+                          color: isInvalidInput
+                              ? AppColors.errorColor
+                              : isIdentified
+                                  ? Colors.green
+                                  : Colors.orange,
+                        ),
+                      ),
+                      Text(
+                        plantClass,
+                        style: TextStyles.bodyText.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: confidence / 100,
-              backgroundColor: AppColors.greyLight,
-              color: AppColors.primaryColor,
-            ),
-          ],
-          const SizedBox(height: 16),
-          Text('Reason', style: TextStyles.heading2),
-          const SizedBox(height: 8),
-          Text(reason,
-              style: TextStyles.bodyText,
-              maxLines: 5,
-              overflow: TextOverflow.ellipsis),
-          const SizedBox(height: 16),
-          Text('Control', style: TextStyles.heading2),
-          const SizedBox(height: 8),
-          RichText(
-            text: TextSpan(
-              style: TextStyles.bodyText,
-              children: [TextSpan(text: control)],
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (isInvalidInput) _buildInvalidInputVisual(),
+                  if (isIdentified) ...[
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Text('Confidence Score', style: TextStyles.bodyText),
+                        const Spacer(),
+                        Text('${confidence.toStringAsFixed(2)}%',
+                            style: TextStyles.bodyText
+                                .copyWith(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: confidence / 100,
+                      backgroundColor: AppColors.greyLight,
+                      color: AppColors.primaryColor,
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Analysis', style: TextStyles.heading2),
+                        const SizedBox(height: 12),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
+                              color: isInvalidInput
+                                  ? AppColors.errorColor
+                                  : AppColors.primaryColor,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                reason,
+                                style: TextStyles.bodyText,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (control.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.tips_and_updates_rounded,
+                                color: isInvalidInput
+                                    ? AppColors.errorColor
+                                    : AppColors.primaryColor,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  control,
+                                  style: TextStyles.bodyText,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  if (isInvalidInput) ...[
+                    CustomBottom(
+                      text: 'Retry with New Image',
+                      onPressed: _handleImageRetry,
+                      icon: Icons.camera_alt_rounded,
+                      color: Colors.red,
+                    ),
+                  ],
+                  if (!isInvalidInput)
+                    CustomBottom(
+                      text: 'Talk to the Bot',
+                      isLoading: _isStartingChat,
+                      onPressed: () async {
+                        if (_isStartingChat) return;
+                        setState(() => _isStartingChat = true);
+                        try {
+                          final chatCubit = context.read<ChatCubit>();
+                          final newSession = await chatCubit.createNewSession();
+                          chatCubit.addBotMessage(
+                            'Diagnosis Result:\n• Disease: ${data['class']}\n• Reason: ${data['reason']}\n• Control: ${data['control']}\n\nHow can I help?',
+                            newSession.id,
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ChatBotDetailScreen(),
+                            ),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Chat error: ${e.toString()}')),
+                          );
+                        } finally {
+                          if (mounted) setState(() => _isStartingChat = false);
+                        }
+                      },
+                    ),
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 16),
-          if (isInvalidInput) ...[
-            CustomBottom(
-              text: 'Try New Image',
-              onPressed: _handleImageRetry,
-              icon: Icons.camera_alt,
-              iconColor: Colors.white,
-            ),
-            const SizedBox(height: 8),
-          ],
-          if (!isInvalidInput)
-            CustomBottom(
-              text: 'Talk to the Bot',
-              isLoading: _isStartingChat,
-              onPressed: () async {
-                if (_isStartingChat) return;
-
-                setState(() => _isStartingChat = true);
-
-                try {
-                  final chatCubit = context.read<ChatCubit>();
-                  final newSession = await chatCubit.createNewSession();
-                  if (newSession == null) return;
-
-                  chatCubit.addBotMessage(
-                    'Diagnosis Result:\n'
-                    '• Disease: ${data['class']}\n'
-                    '• Reason: ${data['reason']}\n'
-                    '• Control Measures: ${data['control']}\n\n'
-                    'How can I assist you further?',
-                    newSession.id,
-                  );
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ChatBotDetailScreen(),
-                    ),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('Failed to start chat: ${e.toString()}'),
-                  ));
-                } finally {
-                  if (mounted) {
-                    setState(() => _isStartingChat = false);
-                  }
-                }
-              },
-            ),
         ],
       ),
+    );
+  }
+
+  Widget _buildInvalidInputVisual() {
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border:
+                Border.all(color: Colors.red.withValues(alpha: 0.3), width: 2),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.file(
+                  File(widget.imagePath!),
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+                Container(
+                  color: Colors.red.withValues(alpha: 0.2),
+                  child: Center(
+                    child: Icon(
+                      Icons.warning_amber_rounded,
+                      size: 48,
+                      color: Colors.red.shade700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -483,17 +553,14 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
       'connection timed out': 'Network connection timed out',
       'no internet connection': 'Internet connection required',
       'server error': 'Problem with our servers',
-      'timed out': 'Network connection timed out',
-      'failed host lookup': 'Internet connection required',
-      '500': 'Problem with our servers',
       'invalid input': 'Invalid image uploaded',
+      '500': 'Internal server error',
     };
-
     final errorLower = error.toLowerCase();
     return errorMap.entries
         .firstWhere(
           (entry) => errorLower.contains(entry.key.toLowerCase()),
-          orElse: () => const MapEntry('', 'Something unexpected occurred'),
+          orElse: () => const MapEntry('', 'An unexpected error occurred'),
         )
         .value;
   }
