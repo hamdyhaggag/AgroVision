@@ -4,6 +4,7 @@ import 'package:agro_vision/features/chat/Ui/chat_bot_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
@@ -50,8 +51,10 @@ class PlantDetailsScreen extends StatefulWidget {
 
 class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
   final Dio _dio = Dio()..interceptors.add(PrettyDioLogger());
+  final ImagePicker _picker = ImagePicker();
   Future<Map<String, dynamic>>? plantDetailsFuture;
   bool _isStartingChat = false;
+
   @override
   void initState() {
     super.initState();
@@ -85,8 +88,9 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        await saveReport(data);
-        return data;
+        final processedData = processResponse(data);
+        await saveReport(processedData);
+        return processedData;
       } else {
         throw 'Server returned unexpected status: ${response.statusCode}';
       }
@@ -107,6 +111,31 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
     }
   }
 
+  Map<String, dynamic> processResponse(Map<String, dynamic> data) {
+    if (data.containsKey('prediction')) {
+      final prediction = data['prediction'] as Map<String, dynamic>;
+      return {
+        'class': prediction['class'] ?? 'Unknown Class',
+        'confidence': _parseConfidence(prediction['confidence']),
+        'reason': prediction['reason'] ?? 'Reason not provided.',
+        'control': prediction['control'] ?? 'Control methods not provided.',
+      };
+    }
+    return {
+      'class': data['class'] ?? 'Unknown Class',
+      'confidence': _parseConfidence(data['confidence']),
+      'reason': data['reason'] ?? 'Reason not provided.',
+      'control': data['control'] ?? 'Control methods not provided.',
+    };
+  }
+
+  double _parseConfidence(dynamic confidence) {
+    if (confidence is String) {
+      return double.tryParse(confidence.replaceAll('%', '')) ?? 0.0;
+    }
+    return (confidence as num?)?.toDouble() ?? 0.0;
+  }
+
   Future<void> saveReport(Map<String, dynamic> report) async {
     final prefs = await SharedPreferences.getInstance();
     final existingReports = prefs.getStringList('diseaseReports') ?? [];
@@ -123,6 +152,44 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
 
     existingReports.add(jsonEncode(newReport.toJson()));
     await prefs.setStringList('diseaseReports', existingReports);
+  }
+
+  Future<void> _handleImageRetry() async {
+    final result = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from Gallery'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take a Photo'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      final XFile? image = await _picker.pickImage(source: result);
+      if (image != null && mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PlantDetailsScreen(
+              imagePath: image.path,
+              plantType: widget.plantType,
+            ),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -175,194 +242,9 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                         child: CircularProgressIndicator(
                             color: AppColors.primaryColor));
                   } else if (snapshot.hasError) {
-                    return Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.shade50,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.info_outline_rounded,
-                                    size: 34,
-                                    color: Colors.red.shade700,
-                                  ),
-                                ),
-                                Positioned(
-                                  right: 0,
-                                  top: 0,
-                                  child: Container(
-                                    width: 16,
-                                    height: 16,
-                                    decoration: BoxDecoration(
-                                      color: Colors.red.shade700,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: 2,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            Text(
-                              'Something Went Wrong',
-                              style: TextStyles.heading2.copyWith(
-                                fontSize: 20,
-                                color: AppColors.errorColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              _parseErrorMessage(snapshot.error.toString()),
-                              style: TextStyles.bodyText.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withValues(alpha: 0.8),
-                                fontSize: 15,
-                                height: 1.4,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 24),
-                            SizedBox(
-                              width: double.infinity,
-                              child: CustomBottom(
-                                text: 'Try Again',
-                                onPressed: () => setState(() {
-                                  plantDetailsFuture = fetchPlantDetails(
-                                      File(widget.imagePath!));
-                                }),
-                                icon: Icons.refresh_rounded,
-                                iconColor: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
+                    return _buildErrorUI(snapshot.error.toString());
                   } else if (snapshot.hasData) {
-                    final data = snapshot.data!;
-                    final plantClass =
-                        data['class'] as String? ?? 'Unknown Class';
-                    final confidence = data['confidence'] as double? ?? 0.0;
-                    final reason =
-                        data['reason'] as String? ?? 'Reason not provided.';
-                    final control = data['control'] as String? ??
-                        'Control methods not provided.';
-
-                    return SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.check_circle,
-                                  color: Colors.green),
-                              const SizedBox(width: 8),
-                              Text('We identified the plant!',
-                                  style: TextStyles.bodyText
-                                      .copyWith(color: Colors.green)),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(plantClass, style: TextStyles.heading1),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Text('Confidence Score',
-                                  style: TextStyles.bodyText),
-                              const Spacer(),
-                              Text('${confidence.toStringAsFixed(2)}%',
-                                  style: TextStyles.bodyText
-                                      .copyWith(fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          LinearProgressIndicator(
-                            value: confidence / 100,
-                            backgroundColor: AppColors.greyLight,
-                            color: AppColors.primaryColor,
-                          ),
-                          const SizedBox(height: 16),
-                          Text('Reason', style: TextStyles.heading2),
-                          const SizedBox(height: 8),
-                          Text(reason,
-                              style: TextStyles.bodyText,
-                              maxLines: 5,
-                              overflow: TextOverflow.ellipsis),
-                          const SizedBox(height: 16),
-                          Text('Control', style: TextStyles.heading2),
-                          const SizedBox(height: 8),
-                          RichText(
-                            text: TextSpan(
-                              style: TextStyles.bodyText,
-                              children: [
-                                TextSpan(text: control),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          CustomBottom(
-                            text: 'Talk to the Bot',
-                            isLoading: _isStartingChat,
-                            onPressed: () async {
-                              if (!snapshot.hasData || _isStartingChat) return;
-
-                              setState(() => _isStartingChat = true);
-
-                              try {
-                                final data = snapshot.data!;
-                                final chatCubit = context.read<ChatCubit>();
-
-                                final newSession =
-                                    await chatCubit.createNewSession();
-                                if (newSession == null) return;
-
-                                chatCubit.addBotMessage(
-                                  'Diagnosis Result:\n'
-                                  '• Disease: ${data['class']}\n'
-                                  '• Reason: ${data['reason']}\n'
-                                  '• Control Measures: ${data['control']}\n\n'
-                                  'How can I assist you further?',
-                                  newSession.id,
-                                );
-
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const ChatBotDetailScreen(),
-                                  ),
-                                );
-                              } catch (e) {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                  content: Text(
-                                      'Failed to start chat: ${e.toString()}'),
-                                ));
-                              } finally {
-                                if (mounted) {
-                                  setState(() => _isStartingChat = false);
-                                }
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    );
+                    return _buildResultUI(snapshot.data!);
                   } else {
                     return const Center(child: Text('No data available'));
                   }
@@ -375,9 +257,228 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
     );
   }
 
-  String _parseErrorMessage(String error) {
-    debugPrint('Error received: $error');
+  Widget _buildErrorUI(String error) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.info_outline_rounded,
+                    size: 34,
+                    color: Colors.red.shade700,
+                  ),
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade700,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Something Went Wrong',
+              style: TextStyles.heading2.copyWith(
+                fontSize: 20,
+                color: AppColors.errorColor,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _parseErrorMessage(error),
+              style: TextStyles.bodyText.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                fontSize: 15,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: CustomBottom(
+                text: 'Try Again',
+                onPressed: () => setState(() {
+                  plantDetailsFuture =
+                      fetchPlantDetails(File(widget.imagePath!));
+                }),
+                icon: Icons.refresh_rounded,
+                iconColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
+  Widget _buildResultUI(Map<String, dynamic> data) {
+    final plantClass = data['class'] as String? ?? 'Unknown Class';
+    final confidence = data['confidence'] as double? ?? 0.0;
+    final reason = data['reason'] as String? ?? 'Reason not provided.';
+    final control =
+        data['control'] as String? ?? 'Control methods not provided.';
+    final isInvalidInput = plantClass == 'Invalid Input';
+    final isIdentified = !isInvalidInput && plantClass != 'Unknown Class';
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isInvalidInput
+                    ? Icons.error_outline
+                    : isIdentified
+                        ? Icons.check_circle
+                        : Icons.warning_rounded,
+                color: isInvalidInput
+                    ? Colors.red
+                    : isIdentified
+                        ? Colors.green
+                        : Colors.orange,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                isInvalidInput
+                    ? 'Invalid Image Uploaded!'
+                    : isIdentified
+                        ? 'We identified the plant!'
+                        : 'We can\'t identify the plant!',
+                style: TextStyles.bodyText.copyWith(
+                  color: isInvalidInput
+                      ? Colors.red
+                      : isIdentified
+                          ? Colors.green
+                          : Colors.orange,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            plantClass,
+            style: isInvalidInput
+                ? TextStyles.heading1.copyWith(color: Colors.red)
+                : isIdentified
+                    ? TextStyles.heading1
+                    : TextStyles.heading1.copyWith(color: Colors.orange),
+          ),
+          if (isIdentified) ...[
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Text('Confidence Score', style: TextStyles.bodyText),
+                const Spacer(),
+                Text('${confidence.toStringAsFixed(2)}%',
+                    style: TextStyles.bodyText
+                        .copyWith(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            LinearProgressIndicator(
+              value: confidence / 100,
+              backgroundColor: AppColors.greyLight,
+              color: AppColors.primaryColor,
+            ),
+          ],
+          const SizedBox(height: 16),
+          Text('Reason', style: TextStyles.heading2),
+          const SizedBox(height: 8),
+          Text(reason,
+              style: TextStyles.bodyText,
+              maxLines: 5,
+              overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 16),
+          Text('Control', style: TextStyles.heading2),
+          const SizedBox(height: 8),
+          RichText(
+            text: TextSpan(
+              style: TextStyles.bodyText,
+              children: [TextSpan(text: control)],
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (isInvalidInput) ...[
+            CustomBottom(
+              text: 'Try New Image',
+              onPressed: _handleImageRetry,
+              icon: Icons.camera_alt,
+              iconColor: Colors.white,
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (!isInvalidInput)
+            CustomBottom(
+              text: 'Talk to the Bot',
+              isLoading: _isStartingChat,
+              onPressed: () async {
+                if (_isStartingChat) return;
+
+                setState(() => _isStartingChat = true);
+
+                try {
+                  final chatCubit = context.read<ChatCubit>();
+                  final newSession = await chatCubit.createNewSession();
+                  if (newSession == null) return;
+
+                  chatCubit.addBotMessage(
+                    'Diagnosis Result:\n'
+                    '• Disease: ${data['class']}\n'
+                    '• Reason: ${data['reason']}\n'
+                    '• Control Measures: ${data['control']}\n\n'
+                    'How can I assist you further?',
+                    newSession.id,
+                  );
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ChatBotDetailScreen(),
+                    ),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Failed to start chat: ${e.toString()}'),
+                  ));
+                } finally {
+                  if (mounted) {
+                    setState(() => _isStartingChat = false);
+                  }
+                }
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  String _parseErrorMessage(String error) {
     const errorMap = {
       'connection timed out': 'Network connection timed out',
       'no internet connection': 'Internet connection required',
@@ -385,10 +486,10 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
       'timed out': 'Network connection timed out',
       'failed host lookup': 'Internet connection required',
       '500': 'Problem with our servers',
+      'invalid input': 'Invalid image uploaded',
     };
 
     final errorLower = error.toLowerCase();
-
     return errorMap.entries
         .firstWhere(
           (entry) => errorLower.contains(entry.key.toLowerCase()),
