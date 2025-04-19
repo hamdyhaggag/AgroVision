@@ -87,7 +87,11 @@ class _ChatListScreenState extends State<ChatListScreen>
                       }
                       return state.sessions.isEmpty
                           ? _buildChatbotWelcome(context)
-                          : _buildSessionList(context, state.sessions);
+                          : _buildSessionList(
+                              context,
+                              state.sessions,
+                              state is ChatSuccess && state.isCreatingSession,
+                            );
                     },
                   ),
                 ],
@@ -135,7 +139,8 @@ class _ChatListScreenState extends State<ChatListScreen>
     );
   }
 
-  Widget _buildSessionList(BuildContext context, List<ChatSession> sessions) {
+  Widget _buildSessionList(BuildContext context, List<ChatSession> sessions,
+      bool isCreatingSession) {
     return RefreshIndicator(
       onRefresh: () => context.read<ChatCubit>().loadSessions(),
       color: Theme.of(context).primaryColor,
@@ -145,9 +150,59 @@ class _ChatListScreenState extends State<ChatListScreen>
         cacheExtent: 1000,
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         physics: const BouncingScrollPhysics(),
-        itemCount: sessions.length,
+        itemCount: sessions.length + (isCreatingSession ? 1 : 0),
         separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
+          if (isCreatingSession && index == sessions.length) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 120,
+                                height: 20,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                width: 200,
+                                height: 16,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+
           final session = sessions[index];
           final lastMessage = session.messages.isNotEmpty
               ? session.messages.last.text
@@ -887,9 +942,6 @@ Widget _buildChatList(BuildContext context) {
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final conversation = state.conversations[index];
-                    final otherUserId = conversation.user1Id == currentUserId
-                        ? conversation.user2Id
-                        : conversation.user1Id;
                     final lastMessage = conversation.messages.isNotEmpty
                         ? conversation.messages.last
                         : null;
@@ -1022,7 +1074,7 @@ Widget _buildShimmerLoader() {
     highlightColor: Colors.grey[100]!,
     child: ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: 6, // Number of shimmer items
+      itemCount: 6,
       itemBuilder: (context, index) {
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 8),

@@ -1,112 +1,44 @@
 part of 'chat_cubit.dart';
 
-@immutable
-sealed class ChatState {
+abstract class ChatState {
   final List<ChatSession> sessions;
   final String? currentSessionId;
-  final String? error;
 
   const ChatState({
-    required this.sessions,
+    this.sessions = const [],
     this.currentSessionId,
-    this.error,
   });
-
-  ChatState copyWith({
-    List<ChatSession>? sessions,
-    String? currentSessionId,
-    String? error,
-  });
-
-  List<Message> get messages {
-    final session = sessions.firstWhere(
-      (s) => s.id == currentSessionId,
-      orElse: () => ChatSession(
-        id: 'default',
-        messages: [],
-        createdAt: DateTime.now(),
-      ),
-    );
-    return session.messages;
-  }
 }
 
-final class ChatInitial extends ChatState {
-  const ChatInitial() : super(sessions: const []);
-
-  @override
-  ChatState copyWith({
-    List<ChatSession>? sessions,
-    String? currentSessionId,
-    String? error,
-  }) {
-    return ChatInitial();
-  }
+class ChatInitial extends ChatState {
+  const ChatInitial() : super();
 }
 
-final class ChatLoading extends ChatState {
-  const ChatLoading({
-    required super.sessions,
-    required super.currentSessionId,
-  }) : super(error: null);
+class ChatSuccess extends ChatState {
+  final bool isCreatingSession;
 
-  @override
-  ChatLoading copyWith({
-    List<ChatSession>? sessions,
-    String? currentSessionId,
-    String? error,
-  }) {
-    return ChatLoading(
-      sessions: sessions ?? this.sessions,
-      currentSessionId: currentSessionId ?? this.currentSessionId,
-    );
-  }
-}
-
-final class ChatSuccess extends ChatState {
   const ChatSuccess({
     required super.sessions,
     required super.currentSessionId,
-  }) : super(error: null);
-
-  @override
-  ChatSuccess copyWith({
-    List<ChatSession>? sessions,
-    String? currentSessionId,
-    String? error,
-  }) {
-    return ChatSuccess(
-      sessions: sessions ?? this.sessions,
-      currentSessionId: currentSessionId ?? this.currentSessionId,
-    );
-  }
-
-  @override
-  List<Object?> get props => [sessions, currentSessionId];
+    required this.isCreatingSession,
+  });
 }
 
-final class ChatError extends ChatState {
+class ChatLoading extends ChatState {
+  const ChatLoading({
+    required super.sessions,
+    required super.currentSessionId,
+  });
+}
+
+class ChatError extends ChatState {
+  final String error;
+
   const ChatError({
     required super.sessions,
     required super.currentSessionId,
-    required super.error,
+    required this.error,
   });
-
-  @override
-  ChatError copyWith({
-    List<ChatSession>? sessions,
-    String? currentSessionId,
-    String? error,
-  }) {
-    return ChatError(
-      sessions: sessions ?? this.sessions,
-      currentSessionId: currentSessionId ?? this.currentSessionId,
-      error: error ?? this.error,
-    );
-  }
-
-  @override
-  List<Object?> get props => [sessions, currentSessionId, error];
 }
 
 class ChatNetworkError extends ChatState {
@@ -120,31 +52,5 @@ class ChatNetworkError extends ChatState {
     required this.error,
     required this.lastMessage,
     required this.pendingMessages,
-  }) : super(error: error);
-
-  @override
-  ChatNetworkError copyWith({
-    List<ChatSession>? sessions,
-    String? currentSessionId,
-    String? error,
-    String? lastMessage,
-    List<Message>? pendingMessages,
-  }) {
-    return ChatNetworkError(
-      sessions: sessions ?? this.sessions,
-      currentSessionId: currentSessionId ?? this.currentSessionId,
-      error: error ?? this.error,
-      lastMessage: lastMessage ?? this.lastMessage,
-      pendingMessages: pendingMessages ?? this.pendingMessages,
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-        sessions,
-        currentSessionId,
-        error,
-        lastMessage,
-        pendingMessages,
-      ];
+  });
 }

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/helpers/cache_helper.dart';
@@ -27,6 +26,7 @@ class ChatCubit extends Cubit<ChatState> {
       emit(ChatSuccess(
         sessions: cachedSessions,
         currentSessionId: cachedSessions.last.id,
+        isCreatingSession: false,
       ));
     }
   }
@@ -45,7 +45,9 @@ class ChatCubit extends Cubit<ChatState> {
     final newCurrentSessionId =
         updatedSessions.isNotEmpty ? updatedSessions.last.id : null;
     emit(ChatSuccess(
-        sessions: updatedSessions, currentSessionId: newCurrentSessionId));
+        sessions: updatedSessions,
+        currentSessionId: newCurrentSessionId,
+        isCreatingSession: false));
   }
 
   void renameSession(String sessionId, String newTitle) {
@@ -55,11 +57,16 @@ class ChatCubit extends Cubit<ChatState> {
           : session;
     }).toList();
     emit(ChatSuccess(
-        sessions: updatedSessions, currentSessionId: state.currentSessionId));
+        sessions: updatedSessions,
+        currentSessionId: state.currentSessionId,
+        isCreatingSession: false));
   }
 
   void setCurrentSession(String sessionId) {
-    emit(ChatSuccess(sessions: state.sessions, currentSessionId: sessionId));
+    emit(ChatSuccess(
+        sessions: state.sessions,
+        currentSessionId: sessionId,
+        isCreatingSession: false));
   }
 
   void deleteMessage(Message message) {
@@ -70,7 +77,9 @@ class ChatCubit extends Cubit<ChatState> {
           : session;
     }).toList();
     emit(ChatSuccess(
-        sessions: updatedSessions, currentSessionId: state.currentSessionId));
+        sessions: updatedSessions,
+        currentSessionId: state.currentSessionId,
+        isCreatingSession: false));
   }
 
   void addPendingMessage(String text) {
@@ -87,7 +96,8 @@ class ChatCubit extends Cubit<ChatState> {
         .copyWith(messages: [...currentSession.messages, newMessage]);
     emit(ChatSuccess(
         sessions: _updateSessions(updatedSession),
-        currentSessionId: currentSession.id));
+        currentSessionId: currentSession.id,
+        isCreatingSession: false));
   }
 
   Future<void> sendTextMessage(String text) async {
@@ -113,7 +123,9 @@ class ChatCubit extends Cubit<ChatState> {
       _handleSuccessResponse(updatedSession, response.answer);
     } catch (e) {
       emit(ChatSuccess(
-          sessions: updatedSessions, currentSessionId: currentSession.id));
+          sessions: updatedSessions,
+          currentSessionId: currentSession.id,
+          isCreatingSession: false));
       if (e is NetworkUnavailableException) {
         _pendingMessages.add(Message(
           text: text,
@@ -126,6 +138,10 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<ChatSession> createNewSession() async {
+    emit(ChatSuccess(
+        sessions: state.sessions,
+        currentSessionId: state.currentSessionId,
+        isCreatingSession: true));
     try {
       final response = await repository.createNewSession("55");
       final newSession = ChatSession(
@@ -149,7 +165,10 @@ class ChatCubit extends Cubit<ChatState> {
 
   void _addNewSession(ChatSession newSession) {
     final newSessions = [...state.sessions, newSession];
-    emit(ChatSuccess(sessions: newSessions, currentSessionId: newSession.id));
+    emit(ChatSuccess(
+        sessions: newSessions,
+        currentSessionId: newSession.id,
+        isCreatingSession: false));
   }
 
   Future<void> sendImageMessage(
@@ -214,8 +233,10 @@ class ChatCubit extends Cubit<ChatState> {
         messages: [],
         createdAt: DateTime.now(),
       );
-      emit(
-          ChatSuccess(sessions: [newSession], currentSessionId: newSession.id));
+      emit(ChatSuccess(
+          sessions: [newSession],
+          currentSessionId: newSession.id,
+          isCreatingSession: false));
       return newSession;
     }
     return state.sessions.firstWhere(
@@ -230,7 +251,9 @@ class ChatCubit extends Cubit<ChatState> {
       Message(text: answer, isSentByMe: false, status: MessageStatus.delivered)
     ]);
     emit(ChatSuccess(
-        sessions: _updateSessions(finalSession), currentSessionId: session.id));
+        sessions: _updateSessions(finalSession),
+        currentSessionId: session.id,
+        isCreatingSession: false));
   }
 
   void _handleError(dynamic error, List<ChatSession> sessions,
@@ -279,6 +302,7 @@ class ChatCubit extends Cubit<ChatState> {
     emit(ChatSuccess(
       sessions: updatedSessions,
       currentSessionId: sessionId,
+      isCreatingSession: false,
     ));
   }
 
