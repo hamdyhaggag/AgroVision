@@ -334,19 +334,9 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
   void _handleSend(String text, BuildContext context) {
     if (text.trim().isEmpty) return;
     final chatCubit = context.read<ChatCubit>();
-    final currentSession = chatCubit.state.sessions.firstWhere(
-      (s) => s.id == chatCubit.state.currentSessionId,
-      orElse: () => ChatSession(
-        id: 'default',
-        messages: [],
-        createdAt: DateTime.now(),
-      ),
-    );
-    if (currentSession.messages.isEmpty) {
-      chatCubit.createNewSession().then((_) => chatCubit.sendTextMessage(text));
-    } else {
-      chatCubit.sendTextMessage(text);
-    }
+
+    chatCubit.sendTextMessage(text);
+
     _controller.clear();
   }
 
