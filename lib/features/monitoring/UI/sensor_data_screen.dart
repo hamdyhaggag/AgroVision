@@ -501,7 +501,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                   _buildControlButton(
                     label: 'Auto',
                     active: autoActive,
-                    activeColor: AppColors.successColor,
+                    activeColor: AppColors.primaryColor,
                     icon: Icons.auto_awesome_mosaic_rounded,
                     onTap: () => onAutoChanged(!autoActive),
                   ),
@@ -524,7 +524,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
 
   Widget _buildStatusIndicator(bool autoActive, bool manualActive) {
     Color indicatorColor = Colors.grey;
-    if (autoActive) indicatorColor = AppColors.successColor;
+    if (autoActive) indicatorColor = AppColors.primaryColor;
     if (manualActive) indicatorColor = AppColors.primaryColor;
 
     return AnimatedContainer(
