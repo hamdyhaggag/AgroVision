@@ -17,6 +17,34 @@ class SensorDataScreen extends StatefulWidget {
 
 class SensorDataScreenState extends State<SensorDataScreen> {
   String _selectedSensor = 'EC';
+  Map<String, Map<String, bool>> pumpControls = {
+    'EC': {'auto': false, 'manual': false},
+    'Fertility': {'auto': false, 'manual': false},
+    'Humidity': {'auto': false, 'manual': false},
+    'PH': {'auto': false, 'manual': false},
+    'Temp': {'auto': false, 'manual': false},
+    'K': {'auto': false, 'manual': false},
+    'N': {'auto': false, 'manual': false},
+    'P': {'auto': false, 'manual': false},
+  };
+  final List<Map<String, String>> sensors = [
+    {'label': 'EC', 'svgPath': 'assets/images/sensor_icon/Ec.svg'},
+    {
+      'label': 'Fertility',
+      'svgPath': 'assets/images/sensor_icon/Fertility.svg'
+    },
+    {'label': 'Humidity', 'svgPath': 'assets/images/sensor_icon/Humidity.svg'},
+    {'label': 'PH', 'svgPath': 'assets/images/sensor_icon/Ph.svg'},
+    {'label': 'Temp', 'svgPath': 'assets/images/sensor_icon/Temp.svg'},
+    {'label': 'K', 'svgPath': 'assets/images/sensor_icon/K.svg'},
+    {'label': 'N', 'svgPath': 'assets/images/sensor_icon/N.svg'},
+    {'label': 'P', 'svgPath': 'assets/images/sensor_icon/P.svg'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +135,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
             const SizedBox(height: 24),
             _buildSensorGrid(),
             const SizedBox(height: 24),
-            _buildChartSection(_selectedSensor),
+            _buildPumpControlsSection(),
             const SizedBox(height: 32),
           ],
         ),
@@ -245,23 +273,6 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   }
 
   Widget _buildSensorGrid() {
-    const sensors = [
-      {'label': 'EC', 'svgPath': 'assets/images/sensor_icon/Ec.svg'},
-      {
-        'label': 'Fertility',
-        'svgPath': 'assets/images/sensor_icon/Fertility.svg'
-      },
-      {
-        'label': 'Humidity',
-        'svgPath': 'assets/images/sensor_icon/Humidity.svg'
-      },
-      {'label': 'PH', 'svgPath': 'assets/images/sensor_icon/Ph.svg'},
-      {'label': 'Temp', 'svgPath': 'assets/images/sensor_icon/Temp.svg'},
-      {'label': 'K', 'svgPath': 'assets/images/sensor_icon/K.svg'},
-      {'label': 'N', 'svgPath': 'assets/images/sensor_icon/N.svg'},
-      {'label': 'P', 'svgPath': 'assets/images/sensor_icon/P.svg'},
-    ];
-
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -339,7 +350,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
     );
   }
 
-  Widget _buildChartSection(String selectedSensor) {
+  Widget _buildPumpControlsSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Container(
@@ -352,120 +363,229 @@ class SensorDataScreenState extends State<SensorDataScreen> {
               spreadRadius: 2,
               blurRadius: 20,
               offset: const Offset(0, 8),
-            )
+            ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Growth Rate Analysis',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                          letterSpacing: 0.8,
-                        ),
+                  SvgPicture.asset(
+                    'assets/icon/control.svg',
+                    colorFilter: const ColorFilter.mode(
+                        AppColors.primaryColor, BlendMode.srcIn),
+                    width: 24,
+                    height: 24,
                   ),
-                  IconButton(
-                    icon: Icon(Icons.fullscreen,
-                        size: 24,
-                        color: AppColors.textSecondary.withValues(alpha: 0.7)),
-                    onPressed: () => _showFullScreenChart(context),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Smart Pump Control',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                          fontFamily: 'SYNE',
+                        ),
                   ),
                 ],
               ),
             ),
             const Divider(height: 1, color: Colors.black12),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: GrowthRateChart(
-                    selectedSensor: selectedSensor,
-                    chartStyle: const ChartStyle(
-                      backgroundColor: Colors.transparent,
-                      textColor: AppColors.textPrimary,
-                      lineColor: AppColors.primaryColor,
-                      axisLineColor: Colors.black12,
-                      gridColor: Colors.black12,
-                      borderColor: Colors.transparent,
-                    ),
-                  ),
-                ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: _buildControlItem(
+                label: _selectedSensor,
+                svgPath: sensors.firstWhere(
+                    (sensor) => sensor['label'] == _selectedSensor)['svgPath']!,
+                autoActive: pumpControls[_selectedSensor]!['auto']!,
+                manualActive: pumpControls[_selectedSensor]!['manual']!,
+                onAutoChanged: (value) {
+                  setState(() {
+                    pumpControls[_selectedSensor]!['auto'] = value;
+                    if (value) pumpControls[_selectedSensor]!['manual'] = false;
+                  });
+                },
+                onManualChanged: (value) {
+                  setState(() {
+                    pumpControls[_selectedSensor]!['manual'] = value;
+                    if (value) pumpControls[_selectedSensor]!['auto'] = false;
+                  });
+                },
               ),
             ),
-            _buildChartLegend(),
-            const SizedBox(height: 12),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildChartLegend() {
+  Widget _buildControlItem({
+    required String label,
+    required String svgPath,
+    required bool autoActive,
+    required bool manualActive,
+    required ValueChanged<bool> onAutoChanged,
+    required ValueChanged<bool> onManualChanged,
+  }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Wrap(
-        spacing: 16,
-        runSpacing: 8,
-        children: [
-          _buildLegendItem('Optimal Range', AppColors.successColor),
-          _buildLegendItem('Current Value', AppColors.primaryColor),
-          _buildLegendItem('Historical Avg', AppColors.textSecondary),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primaryColor.withValues(alpha: 0.03),
+              AppColors.primaryColor.withValues(alpha: 0.08),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.black12, width: 1),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: SvgPicture.asset(
+                  svgPath,
+                  width: 28,
+                  height: 28,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.primaryColor,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                        fontFamily: 'SYNE',
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      autoActive
+                          ? 'Auto Mode'
+                          : manualActive
+                              ? 'Manual '
+                              : 'Inactive',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary.withValues(alpha: 0.8),
+                        fontFamily: 'SYNE',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _buildStatusIndicator(autoActive, manualActive),
+              const SizedBox(width: 24),
+              Column(
+                children: [
+                  _buildControlButton(
+                    label: 'Auto',
+                    active: autoActive,
+                    activeColor: AppColors.successColor,
+                    icon: Icons.auto_awesome_mosaic_rounded,
+                    onTap: () => onAutoChanged(!autoActive),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildControlButton(
+                    label: 'Manual',
+                    active: manualActive,
+                    activeColor: AppColors.primaryColor,
+                    icon: Icons.touch_app_rounded,
+                    onTap: () => onManualChanged(!manualActive),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusIndicator(bool autoActive, bool manualActive) {
+    Color indicatorColor = Colors.grey;
+    if (autoActive) indicatorColor = AppColors.successColor;
+    if (manualActive) indicatorColor = AppColors.primaryColor;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        color: indicatorColor,
+        shape: BoxShape.circle,
+        boxShadow: [
+          if (autoActive || manualActive)
+            BoxShadow(
+              color: indicatorColor.withValues(alpha: 0.4),
+              spreadRadius: 2,
+              blurRadius: 8,
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildLegendItem(String text, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
+  Widget _buildControlButton({
+    required String label,
+    required bool active,
+    required Color activeColor,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color:
+              active ? activeColor.withValues(alpha: 0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: active ? activeColor : Colors.grey.withValues(alpha: 0.3),
+            width: 1.5,
           ),
         ),
-        const SizedBox(width: 6),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showFullScreenChart(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(24),
-        child: InteractiveViewer(
-          panEnabled: true,
-          scaleEnabled: true,
-          child: GrowthRateChart(
-            selectedSensor: _selectedSensor,
-            chartStyle: const ChartStyle(
-              backgroundColor: Colors.white,
-              textColor: AppColors.textPrimary,
-              lineColor: AppColors.primaryColor,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon,
+                size: 18,
+                color:
+                    active ? activeColor : Colors.grey.withValues(alpha: 0.6)),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: active ? activeColor : Colors.grey,
+                fontFamily: 'SYNE',
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
