@@ -25,19 +25,19 @@ class Crop {
 
   factory Crop.fromJson(Map<String, dynamic> json) {
     return Crop(
-      id: json['id'] as int,
-      userId: json['user_id'] as int,
-      productName: json['productName'] as String,
-      productCategory: json['productCategory'] as String,
-      pricePerKilo: json['pricePerKilo'] as String,
-      quantity: json['quantity'] as int,
-      status: json['status'] as String,
+      id: json['id'] as int? ?? 0, // Handle null
+      userId: json['user_id'] as int? ?? 0,
+      productName: json['productName'] as String? ?? '',
+      productCategory: json['productCategory'] as String? ?? '',
+      pricePerKilo: json['pricePerKilo'] as String? ?? '0.00',
+      quantity: json['quantity'] as int? ?? 0,
+      status: json['status'] as String? ?? 'Unknown',
       photo: json['photo'] as String?,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? DateTime.tryParse(json['created_at'] as String)
           : null,
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+          ? DateTime.tryParse(json['updated_at'] as String)
           : null,
     );
   }

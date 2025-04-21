@@ -6,6 +6,7 @@ import '../../../../core/helpers/cache_helper.dart';
 import '../../../../core/network/api_service.dart';
 import '../../../../core/network/dio_factory.dart';
 import '../../../../core/themes/app_colors.dart';
+import '../../../../models/category_model.dart';
 
 class InventoryCardShimmer extends StatelessWidget {
   const InventoryCardShimmer({super.key});
@@ -86,6 +87,7 @@ class FarmInventoryScreen extends StatefulWidget {
 
 class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
   List<InventoryItem> inventoryItems = [];
+  List<Category> categories = [];
   bool isLoading = true;
   String? errorMessage;
   late final ApiService _apiService;
@@ -95,47 +97,134 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
     super.initState();
     final dio = DioFactory.getAgrovisionDio();
     _apiService = ApiService(dio);
-    _fetchCrops();
+    _loadData();
   }
 
-  Future<void> _fetchCrops() async {
+  Future<void> _loadData() async {
     try {
+      final categoriesResponse = await _apiService.getCategories();
       final userId = CacheHelper.getInt('userId');
-      final response = await _apiService.getUserCrops(userId);
-      final crops = response.data.crops;
+      final cropsResponse = await _apiService.getUserCrops(userId);
+
       setState(() {
-        inventoryItems = crops
-            .map((crop) => InventoryItem(
-                  id: crop.id,
-                  imageUrl: crop.photo != null
-                      ? 'https://final.agrovision.ltd/storage/app/public/photos/${crop.photo}'
-                      : 'https://example.com/placeholder.png',
-                  productName: crop.productName,
-                  category: crop.productCategory,
-                  price: '${crop.pricePerKilo} EGP',
-                  quantity: '${crop.quantity} Kg',
-                  status: crop.status.isNotEmpty ? crop.status : 'Unknown',
-                ))
-            .toList();
+        categories = categoriesResponse.data.categories;
+        inventoryItems = cropsResponse.data.crops.map((crop) {
+          final cleanCropCategory = crop.productCategory.trim().toLowerCase();
+          final matchedCategory = categories.firstWhere(
+            (c) {
+              final apiCategory = c.name.trim().toLowerCase();
+              return cleanCropCategory == apiCategory ||
+                  (apiCategory.endsWith('s') &&
+                      cleanCropCategory ==
+                          apiCategory.substring(0, apiCategory.length - 1)) ||
+                  (cleanCropCategory.endsWith('s') &&
+                      apiCategory ==
+                          cleanCropCategory.substring(
+                              0, cleanCropCategory.length - 1));
+            },
+            orElse: () => Category(id: -1, name: crop.productCategory),
+          );
+
+          if (matchedCategory.id == -1) {
+            debugPrint('Category not found: ${crop.productCategory}');
+          }
+
+          return InventoryItem(
+            id: crop.id,
+            imageUrl: crop.photo != null
+                ? 'https://final.agrovision.ltd/storage/app/public/photos/${crop.photo}'
+                : 'https://example.com/placeholder.png',
+            productName: crop.productName,
+            category: matchedCategory.name,
+            categoryId: matchedCategory.id,
+            price: '${crop.pricePerKilo} EGP',
+            quantity: '${crop.quantity} Kg',
+            status: crop.status.isNotEmpty ? crop.status : 'Unknown',
+          );
+        }).toList();
         isLoading = false;
-        errorMessage = null;
-      });
-    } on DioException catch (e) {
-      setState(() {
-        isLoading = false;
-        if (e.response?.statusCode == 404 &&
-            e.response?.data['message'] == 'No Crop found for this user.') {
-          inventoryItems = [];
-          errorMessage = 'You haven’t added any products yet.';
-        } else {
-          errorMessage = 'Unable to load inventory. Please try again.';
-        }
       });
     } catch (e) {
       setState(() {
         isLoading = false;
-        errorMessage = 'An unexpected error occurred.';
+        errorMessage = 'Failed to load data: ${e.toString()}';
       });
+    }
+  }
+
+  void _postItem(InventoryItem item) async {
+    try {
+      if (item.categoryId == -1) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Invalid Category'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('"${item.category}" is not a valid category.'),
+                const SizedBox(height: 16),
+                const Text('Valid categories:'),
+                ...categories.map((c) => Text('- ${c.name.trim()}')).toList(),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+
+      final response = await _apiService.addProductFromCrop({
+        'crop_id': item.id,
+        'product_name': item.productName,
+        'price': double.parse(item.price.replaceAll(' EGP', '')),
+        'quantity': int.parse(item.quantity.replaceAll(' Kg', '')),
+        'category_id': item.categoryId,
+        'description': '',
+      });
+
+      if (response.response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Product listed successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } on DioException catch (e) {
+      String message = 'Posting failed';
+      Color color = Colors.red;
+
+      if (e.response?.statusCode == 400) {
+        final error = e.response?.data['error']?.toString() ?? '';
+        message = error.contains('المنتج موجود بالفعل')
+            ? 'Product already exists in marketplace'
+            : 'Invalid request: ${error.isNotEmpty ? error : "Unknown error"}';
+      } else if (e.response?.statusCode == 302) {
+        message = 'Server configuration error - Contact support';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: color,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unexpected error occurred'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
   }
 
@@ -173,6 +262,7 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
         item: inventoryItems[index],
         onEdit: () => _editItem(context, inventoryItems[index]),
         onDelete: () => _deleteItem(inventoryItems[index].id),
+        onPost: () => _postItem(inventoryItems[index]),
       ),
     );
   }
@@ -222,8 +312,9 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
     } on DioException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(
-                'Delete failed: ${e.response?.data['message'] ?? 'Unknown error'}')),
+          content:
+              Text('Delete failed: ${e.response?.data['message'] ?? 'Error'}'),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -237,12 +328,14 @@ class InventoryCard extends StatelessWidget {
   final InventoryItem item;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onPost;
 
   const InventoryCard({
     super.key,
     required this.item,
     required this.onEdit,
     required this.onDelete,
+    required this.onPost,
   });
 
   @override
@@ -324,14 +417,21 @@ class InventoryCard extends StatelessWidget {
                       PopupMenuButton(
                         itemBuilder: (context) => [
                           PopupMenuItem(
-                              onTap: onEdit,
-                              child: const Text('Edit',
-                                  style: TextStyle(fontFamily: 'SYNE'))),
+                            onTap: onEdit,
+                            child: const Text('Edit',
+                                style: TextStyle(fontFamily: 'SYNE')),
+                          ),
                           PopupMenuItem(
-                              onTap: onDelete,
-                              child: const Text('Delete',
-                                  style: TextStyle(
-                                      color: Colors.red, fontFamily: 'SYNE'))),
+                            onTap: onPost,
+                            child: const Text('Post on Market',
+                                style: TextStyle(fontFamily: 'SYNE')),
+                          ),
+                          PopupMenuItem(
+                            onTap: onDelete,
+                            child: const Text('Delete',
+                                style: TextStyle(
+                                    color: Colors.red, fontFamily: 'SYNE')),
+                          ),
                         ],
                         icon:
                             Icon(Icons.more_vert, color: Colors.grey.shade600),
@@ -412,6 +512,7 @@ class InventoryItem {
   final String imageUrl;
   final String productName;
   final String category;
+  final int categoryId;
   final String price;
   final String quantity;
   final String status;
@@ -421,6 +522,7 @@ class InventoryItem {
     required this.imageUrl,
     required this.productName,
     required this.category,
+    required this.categoryId,
     required this.price,
     required this.quantity,
     required this.status,
