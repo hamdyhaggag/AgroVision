@@ -1,11 +1,12 @@
 import 'dart:math';
-import 'package:agro_vision/shared/widgets/custom_appbar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../../shared/widgets/custom_appbar.dart';
 import '../../../shared/widgets/custom_botton.dart';
-import '../../../shared/widgets/growth_rate_chart.dart';
+import '../Api/pump_control_service.dart';
 import '../Logic/sensor_data_cubit.dart';
 
 class SensorDataScreen extends StatefulWidget {
@@ -16,6 +17,8 @@ class SensorDataScreen extends StatefulWidget {
 }
 
 class SensorDataScreenState extends State<SensorDataScreen> {
+  late final PumpControlService _pumpControlService;
+
   String _selectedSensor = 'EC';
   Map<String, Map<String, bool>> pumpControls = {
     'EC': {'auto': false, 'manual': false},
@@ -44,6 +47,17 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   @override
   void initState() {
     super.initState();
+    _pumpControlService = PumpControlService();
+  }
+
+  void _showErrorSnackBar(BuildContext context, String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      duration: const Duration(seconds: 2),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -287,8 +301,8 @@ class SensorDataScreenState extends State<SensorDataScreen> {
       itemBuilder: (context, index) {
         final sensor = sensors[index];
         return _buildSensorItem(
-          label: sensor['label'] as String,
-          svgPath: sensor['svgPath'] as String,
+          label: sensor['label']!,
+          svgPath: sensor['svgPath']!,
         );
       },
     );
@@ -483,7 +497,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                       autoActive
                           ? 'Auto Mode'
                           : manualActive
-                              ? 'Manual '
+                              ? 'Manual'
                               : 'Inactive',
                       style: TextStyle(
                         fontSize: 14,
@@ -503,7 +517,34 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                     active: autoActive,
                     activeColor: AppColors.primaryColor,
                     icon: Icons.auto_awesome_mosaic_rounded,
-                    onTap: () => onAutoChanged(!autoActive),
+                    onTap: () async {
+                      final newValue = !autoActive;
+                      setState(() {
+                        pumpControls[_selectedSensor]!['auto'] = newValue;
+                        if (newValue)
+                          pumpControls[_selectedSensor]!['manual'] = false;
+                      });
+                      try {
+                        if (newValue) {
+                          await _pumpControlService.autoOn();
+                        } else {
+                          await _pumpControlService.autoOff();
+                        }
+                      } catch (e) {
+                        if (kDebugMode) {
+                          print('PumpControlService.auto toggle error: $e');
+                        }
+                        _showErrorSnackBar(
+                          context,
+                          newValue
+                              ? 'Couldn’t enable Auto mode.'
+                              : 'Couldn’t disable Auto mode.',
+                        );
+                        setState(() {
+                          pumpControls[_selectedSensor]!['auto'] = !newValue;
+                        });
+                      }
+                    },
                   ),
                   const SizedBox(height: 8),
                   _buildControlButton(
@@ -511,7 +552,34 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                     active: manualActive,
                     activeColor: AppColors.primaryColor,
                     icon: Icons.touch_app_rounded,
-                    onTap: () => onManualChanged(!manualActive),
+                    onTap: () async {
+                      final newValue = !manualActive;
+                      setState(() {
+                        pumpControls[_selectedSensor]!['manual'] = newValue;
+                        if (newValue)
+                          pumpControls[_selectedSensor]!['auto'] = false;
+                      });
+                      try {
+                        if (newValue) {
+                          await _pumpControlService.manualOn();
+                        } else {
+                          await _pumpControlService.manualOff();
+                        }
+                      } catch (e) {
+                        if (kDebugMode) {
+                          print('PumpControlService.manual toggle error: $e');
+                        }
+                        _showErrorSnackBar(
+                          context,
+                          newValue
+                              ? 'Couldn’t enable Manual mode.'
+                              : 'Couldn’t disable Manual mode.',
+                        );
+                        setState(() {
+                          pumpControls[_selectedSensor]!['manual'] = !newValue;
+                        });
+                      }
+                    },
                   ),
                 ],
               ),
@@ -524,9 +592,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
 
   Widget _buildStatusIndicator(bool autoActive, bool manualActive) {
     Color indicatorColor = Colors.grey;
-    if (autoActive) indicatorColor = AppColors.primaryColor;
-    if (manualActive) indicatorColor = AppColors.primaryColor;
-
+    if (autoActive || manualActive) indicatorColor = AppColors.primaryColor;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       width: 12,
@@ -688,7 +754,6 @@ class _ShimmerLoaderState extends State<ShimmerLoader>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
-
     _opacityAnimation =
         Tween<double>(begin: 0.5, end: 1.0).animate(_controller);
   }
