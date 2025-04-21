@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../../core/helpers/cache_helper.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../shared/widgets/custom_appbar.dart';
 import '../../../shared/widgets/custom_botton.dart';
@@ -48,6 +49,24 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   void initState() {
     super.initState();
     _pumpControlService = PumpControlService();
+    _loadPumpControls();
+  }
+
+  Future<void> _loadPumpControls() async {
+    await CacheHelper.ensureInitialized();
+    for (var sensor in sensors) {
+      final label = sensor['label']!;
+      final autoKey = '${label}_auto';
+      final manualKey = '${label}_manual';
+      pumpControls[label]!['auto'] = CacheHelper.getBoolean(key: autoKey);
+      pumpControls[label]!['manual'] = CacheHelper.getBoolean(key: manualKey);
+    }
+    setState(() {});
+  }
+
+  Future<void> _savePumpControl(String sensor, String mode, bool value) async {
+    final key = '${sensor}_$mode';
+    await CacheHelper.saveData(key: key, value: value);
   }
 
   void _showErrorSnackBar(BuildContext context, String message) {
@@ -415,17 +434,21 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                     (sensor) => sensor['label'] == _selectedSensor)['svgPath']!,
                 autoActive: pumpControls[_selectedSensor]!['auto']!,
                 manualActive: pumpControls[_selectedSensor]!['manual']!,
-                onAutoChanged: (value) {
+                onAutoChanged: (value) async {
                   setState(() {
                     pumpControls[_selectedSensor]!['auto'] = value;
                     if (value) pumpControls[_selectedSensor]!['manual'] = false;
                   });
+                  await _savePumpControl(_selectedSensor, 'auto', value);
+                  await _savePumpControl(_selectedSensor, 'manual', false);
                 },
-                onManualChanged: (value) {
+                onManualChanged: (value) async {
                   setState(() {
                     pumpControls[_selectedSensor]!['manual'] = value;
                     if (value) pumpControls[_selectedSensor]!['auto'] = false;
                   });
+                  await _savePumpControl(_selectedSensor, 'manual', value);
+                  await _savePumpControl(_selectedSensor, 'auto', false);
                 },
               ),
             ),
@@ -521,9 +544,12 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                       final newValue = !autoActive;
                       setState(() {
                         pumpControls[_selectedSensor]!['auto'] = newValue;
-                        if (newValue)
+                        if (newValue) {
                           pumpControls[_selectedSensor]!['manual'] = false;
+                        }
                       });
+                      await _savePumpControl(_selectedSensor, 'auto', newValue);
+                      await _savePumpControl(_selectedSensor, 'manual', false);
                       try {
                         if (newValue) {
                           await _pumpControlService.autoOn();
@@ -559,6 +585,9 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                         if (newValue)
                           pumpControls[_selectedSensor]!['auto'] = false;
                       });
+                      await _savePumpControl(
+                          _selectedSensor, 'manual', newValue);
+                      await _savePumpControl(_selectedSensor, 'auto', false);
                       try {
                         if (newValue) {
                           await _pumpControlService.manualOn();
