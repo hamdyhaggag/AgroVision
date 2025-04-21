@@ -1,11 +1,81 @@
 import 'package:agro_vision/shared/widgets/custom_appbar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/helpers/cache_helper.dart';
 import '../../../../core/network/api_service.dart';
 import '../../../../core/network/dio_factory.dart';
 import '../../../../core/themes/app_colors.dart';
-import 'add_new_product.dart';
+
+class InventoryCardShimmer extends StatelessWidget {
+  const InventoryCardShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.08),
+              spreadRadius: 2,
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                      width: double.infinity,
+                      height: 16,
+                      color: Colors.grey.shade300),
+                  const SizedBox(height: 8),
+                  Container(width: 80, height: 12, color: Colors.grey.shade300),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Container(
+                          width: 60, height: 14, color: Colors.grey.shade300),
+                      const SizedBox(width: 24),
+                      Container(
+                          width: 60, height: 14, color: Colors.grey.shade300),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                        width: 60, height: 20, color: Colors.grey.shade300),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class FarmInventoryScreen extends StatefulWidget {
   const FarmInventoryScreen({super.key});
@@ -33,13 +103,12 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
       final userId = CacheHelper.getInt('userId');
       final response = await _apiService.getUserCrops(userId);
       final crops = response.data.crops;
-
       setState(() {
         inventoryItems = crops
             .map((crop) => InventoryItem(
                   imageUrl: crop.photo != null
                       ? 'https://final.agrovision.ltd/storage/app/public/photos/${crop.photo}'
-                      : 'https://example.com/placeholder.png', // Fallback URL
+                      : 'https://example.com/placeholder.png',
                   productName: crop.productName,
                   category: crop.productCategory,
                   price: '${crop.pricePerKilo} EGP',
@@ -48,7 +117,7 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
                 ))
             .toList();
         isLoading = false;
-        errorMessage = null; // clear any previous error
+        errorMessage = null;
       });
     } on DioException catch (e) {
       setState(() {
@@ -75,9 +144,7 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
       appBar: const CustomAppBar(title: 'Farm Inventory'),
       body: Column(
         children: [
-          Expanded(
-            child: _buildBody(),
-          ),
+          Expanded(child: _buildBody()),
         ],
       ),
     );
@@ -85,7 +152,11 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
 
   Widget _buildBody() {
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        itemCount: 5,
+        itemBuilder: (context, index) => const InventoryCardShimmer(),
+      );
     }
     if (errorMessage != null) {
       return Center(child: Text(errorMessage!));
@@ -109,21 +180,13 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text(
-          'Edit Item',
-          style: TextStyle(fontFamily: 'SYNE'),
-        ),
-        content: const Text(
-          'Edit functionality implementation',
-          style: TextStyle(fontFamily: 'SYNE'),
-        ),
+        title: const Text('Edit Item', style: TextStyle(fontFamily: 'SYNE')),
+        content: const Text('Edit functionality implementation',
+            style: TextStyle(fontFamily: 'SYNE')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Close',
-              style: TextStyle(fontFamily: 'SYNE'),
-            ),
+            child: const Text('Close', style: TextStyle(fontFamily: 'SYNE')),
           ),
         ],
       ),
@@ -152,7 +215,6 @@ class InventoryCard extends StatelessWidget {
     final statusColor = item.status == 'In Stock'
         ? AppColors.successColor
         : AppColors.errorColor;
-
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -227,20 +289,14 @@ class InventoryCard extends StatelessWidget {
                       PopupMenuButton(
                         itemBuilder: (context) => [
                           PopupMenuItem(
-                            child: const Text(
-                              'Edit',
-                              style: TextStyle(fontFamily: 'SYNE'),
-                            ),
-                            onTap: onEdit,
-                          ),
+                              onTap: onEdit,
+                              child: const Text('Edit',
+                                  style: TextStyle(fontFamily: 'SYNE'))),
                           PopupMenuItem(
-                            child: const Text(
-                              'Delete',
-                              style: TextStyle(
-                                  color: Colors.red, fontFamily: 'SYNE'),
-                            ),
-                            onTap: onDelete,
-                          ),
+                              onTap: onDelete,
+                              child: const Text('Delete',
+                                  style: TextStyle(
+                                      color: Colors.red, fontFamily: 'SYNE'))),
                         ],
                         icon:
                             Icon(Icons.more_vert, color: Colors.grey.shade600),
@@ -251,14 +307,10 @@ class InventoryCard extends StatelessWidget {
                   Row(
                     children: [
                       _buildDetailItem(
-                        icon: Icons.price_change_outlined,
-                        value: item.price,
-                      ),
+                          icon: Icons.price_change_outlined, value: item.price),
                       const SizedBox(width: 24),
                       _buildDetailItem(
-                        icon: Icons.scale_outlined,
-                        value: item.quantity,
-                      ),
+                          icon: Icons.scale_outlined, value: item.quantity),
                     ],
                   ),
                   const SizedBox(height: 12),
