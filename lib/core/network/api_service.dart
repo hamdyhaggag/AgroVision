@@ -4,6 +4,7 @@ import '../../features/authentication/Data/model/login_request_body.dart';
 import '../../features/authentication/Data/model/login_response.dart';
 import '../../features/authentication/Data/model/message_read_response.dart';
 import '../../features/chat/models/farmer_chat_model.dart';
+import '../../features/home/Ui/drawer/widgets/crops_response.dart';
 import '../../models/orders_response.dart';
 import 'api_constants.dart';
 
@@ -27,6 +28,8 @@ abstract class ApiService {
   @POST(ApiConstants.logout)
   Future<void> logout();
 
+  @GET('users/{userId}/crops')
+  Future<HttpResponse<CropsResponse>> getUserCrops(@Path('userId') int userId);
 //
 // @POST(ApiConstants.send)
 // Future<ForgotResponseBody> forgot(

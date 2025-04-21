@@ -1,5 +1,9 @@
 import 'package:agro_vision/shared/widgets/custom_appbar.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/helpers/cache_helper.dart';
+import '../../../../core/network/api_service.dart';
+import '../../../../core/network/dio_factory.dart';
 import '../../../../core/themes/app_colors.dart';
 import 'add_new_product.dart';
 
@@ -11,24 +15,59 @@ class FarmInventoryScreen extends StatefulWidget {
 }
 
 class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
-  final List<InventoryItem> inventoryItems = [
-    InventoryItem(
-      imageUrl: 'https://images.unsplash.com/photo-1580939798894-28b2df78fdc6',
-      productName: 'Potato | EG',
-      category: 'Vegetable',
-      price: '8 EGP',
-      quantity: '45 Kg',
-      status: 'In Stock',
-    ),
-    InventoryItem(
-      imageUrl: 'https://images.unsplash.com/photo-1588252181028-fcb92a68ac66',
-      productName: 'Tomato | EG',
-      category: 'Vegetable',
-      price: '12 EGP',
-      quantity: '7 Kg',
-      status: 'Out of Stock',
-    ),
-  ];
+  List<InventoryItem> inventoryItems = [];
+  bool isLoading = true;
+  String? errorMessage;
+  late final ApiService _apiService;
+
+  @override
+  void initState() {
+    super.initState();
+    final dio = DioFactory.getAgrovisionDio();
+    _apiService = ApiService(dio);
+    _fetchCrops();
+  }
+
+  Future<void> _fetchCrops() async {
+    try {
+      final userId = CacheHelper.getInt('userId');
+      final response = await _apiService.getUserCrops(userId);
+      final crops = response.data.crops;
+
+      setState(() {
+        inventoryItems = crops
+            .map((crop) => InventoryItem(
+                  imageUrl: crop.photo != null
+                      ? 'https://final.agrovision.ltd/storage/app/public/photos/${crop.photo}'
+                      : 'https://example.com/placeholder.png', // Fallback URL
+                  productName: crop.productName,
+                  category: crop.productCategory,
+                  price: '${crop.pricePerKilo} EGP',
+                  quantity: '${crop.quantity} Kg',
+                  status: crop.status.isNotEmpty ? crop.status : 'Unknown',
+                ))
+            .toList();
+        isLoading = false;
+        errorMessage = null; // clear any previous error
+      });
+    } on DioException catch (e) {
+      setState(() {
+        isLoading = false;
+        if (e.response?.statusCode == 404 &&
+            e.response?.data['message'] == 'No Crop found for this user.') {
+          inventoryItems = [];
+          errorMessage = 'You haven’t added any products yet.';
+        } else {
+          errorMessage = 'Unable to load inventory. Please try again.';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = 'An unexpected error occurred.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,64 +75,32 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
       appBar: const CustomAppBar(title: 'Farm Inventory'),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search inventory...',
-                hintStyle:
-                    TextStyle(color: Colors.grey.shade500, fontFamily: 'SYNE'),
-                prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                      color: AppColors.primaryColor, width: 1.5),
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          ),
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-              itemCount: inventoryItems.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) => InventoryCard(
-                item: inventoryItems[index],
-                onEdit: () => _editItem(context, inventoryItems[index]),
-                onDelete: () => _deleteItem(index),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AddNewProduct(),
-                ),
-              ),
-              child: const Text(
-                'Add New Order',
-                style: TextStyle(fontFamily: 'SYNE'),
-              ),
-            ),
+            child: _buildBody(),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (errorMessage != null) {
+      return Center(child: Text(errorMessage!));
+    }
+    if (inventoryItems.isEmpty) {
+      return const Center(child: Text('No crops available.'));
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      itemCount: inventoryItems.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) => InventoryCard(
+        item: inventoryItems[index],
+        onEdit: () => _editItem(context, inventoryItems[index]),
+        onDelete: () => _deleteItem(index),
       ),
     );
   }
