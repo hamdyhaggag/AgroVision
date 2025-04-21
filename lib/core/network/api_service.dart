@@ -30,6 +30,9 @@ abstract class ApiService {
 
   @GET('users/{userId}/crops')
   Future<HttpResponse<CropsResponse>> getUserCrops(@Path('userId') int userId);
+
+  @DELETE('crops/{id}')
+  Future<HttpResponse<void>> deleteCrop(@Path('id') int id);
 //
 // @POST(ApiConstants.send)
 // Future<ForgotResponseBody> forgot(

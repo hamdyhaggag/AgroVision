@@ -106,6 +106,7 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
       setState(() {
         inventoryItems = crops
             .map((crop) => InventoryItem(
+                  id: crop.id,
                   imageUrl: crop.photo != null
                       ? 'https://final.agrovision.ltd/storage/app/public/photos/${crop.photo}'
                       : 'https://example.com/placeholder.png',
@@ -171,7 +172,7 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
       itemBuilder: (context, index) => InventoryCard(
         item: inventoryItems[index],
         onEdit: () => _editItem(context, inventoryItems[index]),
-        onDelete: () => _deleteItem(index),
+        onDelete: () => _deleteItem(inventoryItems[index].id),
       ),
     );
   }
@@ -193,8 +194,42 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
     );
   }
 
-  void _deleteItem(int index) {
-    setState(() => inventoryItems.removeAt(index));
+  void _deleteItem(int cropId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Delete'),
+        content: const Text('Are you sure you want to delete this item?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+    try {
+      await _apiService.deleteCrop(cropId);
+      setState(() {
+        inventoryItems.removeWhere((item) => item.id == cropId);
+      });
+    } on DioException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                'Delete failed: ${e.response?.data['message'] ?? 'Unknown error'}')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to delete item')),
+      );
+    }
   }
 }
 
@@ -373,6 +408,7 @@ class InventoryCard extends StatelessWidget {
 }
 
 class InventoryItem {
+  final int id;
   final String imageUrl;
   final String productName;
   final String category;
@@ -381,6 +417,7 @@ class InventoryItem {
   final String status;
 
   InventoryItem({
+    required this.id,
     required this.imageUrl,
     required this.productName,
     required this.category,
