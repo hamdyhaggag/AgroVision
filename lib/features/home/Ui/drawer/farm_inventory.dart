@@ -1,3 +1,4 @@
+import 'package:agro_vision/features/home/Ui/drawer/widgets/edit_crop_dialog.dart';
 import 'package:agro_vision/shared/widgets/custom_appbar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -131,6 +132,7 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
 
           return InventoryItem(
             id: crop.id,
+            userId: crop.userId,
             imageUrl: crop.photo != null
                 ? 'https://final.agrovision.ltd/storage/app/public/photos/${crop.photo}'
                 : 'https://example.com/placeholder.png',
@@ -270,18 +272,55 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
   void _editItem(BuildContext context, InventoryItem item) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Edit Item', style: TextStyle(fontFamily: 'SYNE')),
-        content: const Text('Edit functionality implementation',
-            style: TextStyle(fontFamily: 'SYNE')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close', style: TextStyle(fontFamily: 'SYNE')),
-          ),
-        ],
+      builder: (context) => EditCropDialog(
+        item: item,
+        categories: categories,
+        onSave: (formData) => _handleUpdateCrop(item, formData),
       ),
     );
+  }
+
+  Future<void> _handleUpdateCrop(
+      InventoryItem item, Map<String, dynamic> formData) async {
+    try {
+      final response = await _apiService.updateCrop(item.id, formData);
+      final updatedCrop = response.data.crop;
+
+      final category = categories.firstWhere(
+        (c) => c.name == updatedCrop.productCategory,
+        orElse: () => Category(id: -1, name: updatedCrop.productCategory),
+      );
+
+      setState(() {
+        final index = inventoryItems.indexWhere((i) => i.id == item.id);
+        if (index != -1) {
+          inventoryItems[index] = InventoryItem(
+            userId: item.userId,
+            id: updatedCrop.id,
+            imageUrl: updatedCrop.photo != null
+                ? 'https://final.agrovision.ltd/storage/app/public/photos/${updatedCrop.photo}'
+                : 'https://example.com/placeholder.png',
+            productName: updatedCrop.productName,
+            category: category.name,
+            categoryId: category.id,
+            price: '${updatedCrop.pricePerKilo} EGP',
+            quantity: '${updatedCrop.quantity} Kg',
+            status: updatedCrop.status,
+          );
+        }
+      });
+    } on DioException catch (e) {
+      String message = 'Update failed';
+      if (e.response?.statusCode == 302) {
+        message = 'Session expired. Please log in again.';
+      } else {
+        message = e.response?.data['message'] ?? message;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+      rethrow;
+    }
   }
 
   void _deleteItem(int cropId) async {
@@ -341,8 +380,10 @@ class InventoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusColor = item.status == 'In Stock'
-        ? AppColors.successColor
-        : AppColors.errorColor;
+        ? AppColors.primaryColor
+        : item.status == 'Out of Stock'
+            ? AppColors.errorColor
+            : AppColors.successColor;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -516,9 +557,11 @@ class InventoryItem {
   final String price;
   final String quantity;
   final String status;
+  final int userId;
 
   InventoryItem({
     required this.id,
+    required this.userId,
     required this.imageUrl,
     required this.productName,
     required this.category,

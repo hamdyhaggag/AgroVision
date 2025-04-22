@@ -5,6 +5,7 @@ import '../../features/authentication/Data/model/login_response.dart';
 import '../../features/authentication/Data/model/message_read_response.dart';
 import '../../features/chat/models/farmer_chat_model.dart';
 import '../../features/home/Ui/drawer/widgets/crops_response.dart';
+import '../../features/home/Ui/drawer/widgets/update_crop_response.dart';
 import '../../models/category_model.dart';
 import '../../models/orders_response.dart';
 import 'api_constants.dart';
@@ -41,6 +42,13 @@ abstract class ApiService {
   @POST('products/add-from-crop')
   Future<HttpResponse<dynamic>> addProductFromCrop(
       @Body() Map<String, dynamic> body);
+
+  @PUT('crops/{id}')
+  Future<HttpResponse<UpdateCropResponse>> updateCrop(
+    @Path('id') int id,
+    @Body() Map<String, dynamic> body,
+  );
+
 //
 // @POST(ApiConstants.send)
 // Future<ForgotResponseBody> forgot(

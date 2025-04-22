@@ -7,6 +7,7 @@ class Crop {
   final int quantity;
   final String status;
   final String? photo;
+  final DateTime? deletedAt;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -19,13 +20,14 @@ class Crop {
     required this.quantity,
     required this.status,
     this.photo,
+    this.deletedAt,
     this.createdAt,
     this.updatedAt,
   });
 
   factory Crop.fromJson(Map<String, dynamic> json) {
     return Crop(
-      id: json['id'] as int? ?? 0, // Handle null
+      id: json['id'] as int? ?? 0,
       userId: json['user_id'] as int? ?? 0,
       productName: json['productName'] as String? ?? '',
       productCategory: json['productCategory'] as String? ?? '',
@@ -33,6 +35,9 @@ class Crop {
       quantity: json['quantity'] as int? ?? 0,
       status: json['status'] as String? ?? 'Unknown',
       photo: json['photo'] as String?,
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.tryParse(json['deleted_at'] as String)
+          : null,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)
           : null,

@@ -68,6 +68,10 @@ class DioFactory {
   static Dio getAgrovisionDio() {
     final dio = Dio(BaseOptions(
       baseUrl: ApiConstants.baseUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
     ));
