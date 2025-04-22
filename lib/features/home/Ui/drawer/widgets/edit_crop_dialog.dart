@@ -8,11 +8,11 @@ class EditCropDialog extends StatefulWidget {
   final Function(Map<String, dynamic>) onSave;
 
   const EditCropDialog({
-    Key? key,
+    super.key,
     required this.item,
     required this.categories,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   _EditCropDialogState createState() => _EditCropDialogState();
@@ -40,7 +40,7 @@ class _EditCropDialogState extends State<EditCropDialog> {
     _selectedStatus = widget.item.status;
   }
 
-  void _saveForm() async {
+  Future<void> _saveForm() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
 
@@ -53,11 +53,11 @@ class _EditCropDialogState extends State<EditCropDialog> {
         'status': _selectedStatus,
         'user_id': widget.item.userId,
       };
-
-      await widget.onSave(formData);
-      if (mounted) Navigator.pop(context);
+      final success = await widget.onSave(formData);
+      if (success && mounted) {
+        Navigator.of(context).pop(true);
+      }
     } catch (e) {
-      // Handle error
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

@@ -29,20 +29,20 @@ class Crop {
     return Crop(
       id: json['id'] as int? ?? 0,
       userId: json['user_id'] as int? ?? 0,
-      productName: json['productName'] as String? ?? '',
-      productCategory: json['productCategory'] as String? ?? '',
-      pricePerKilo: json['pricePerKilo'] as String? ?? '0.00',
+      productName: json['productName']?.toString() ?? '',
+      productCategory: json['productCategory']?.toString() ?? '',
+      pricePerKilo: json['pricePerKilo']?.toString() ?? '0.00',
       quantity: json['quantity'] as int? ?? 0,
-      status: json['status'] as String? ?? 'Unknown',
-      photo: json['photo'] as String?,
+      status: json['status']?.toString() ?? 'Unknown',
+      photo: json['photo']?.toString(),
       deletedAt: json['deleted_at'] != null
-          ? DateTime.tryParse(json['deleted_at'] as String)
+          ? DateTime.tryParse(json['deleted_at']?.toString() ?? '')
           : null,
       createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'] as String)
+          ? DateTime.tryParse(json['created_at']?.toString() ?? '')
           : null,
       updatedAt: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'] as String)
+          ? DateTime.tryParse(json['updated_at']?.toString() ?? '')
           : null,
     );
   }

@@ -2,6 +2,7 @@ import 'package:agro_vision/features/home/Ui/drawer/widgets/edit_crop_dialog.dar
 import 'package:agro_vision/shared/widgets/custom_appbar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/helpers/cache_helper.dart';
 import '../../../../core/network/api_service.dart';
@@ -269,8 +270,8 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
     );
   }
 
-  void _editItem(BuildContext context, InventoryItem item) {
-    showDialog(
+  void _editItem(BuildContext context, InventoryItem item) async {
+    final didSave = await showDialog<bool>(
       context: context,
       builder: (context) => EditCropDialog(
         item: item,
@@ -278,9 +279,13 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
         onSave: (formData) => _handleUpdateCrop(item, formData),
       ),
     );
+
+    if (didSave == true) {
+      _loadData();
+    }
   }
 
-  Future<void> _handleUpdateCrop(
+  Future<bool> _handleUpdateCrop(
       InventoryItem item, Map<String, dynamic> formData) async {
     try {
       final response = await _apiService.updateCrop(item.id, formData);
@@ -294,11 +299,12 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
       setState(() {
         final index = inventoryItems.indexWhere((i) => i.id == item.id);
         if (index != -1) {
+          final photo = updatedCrop.photo;
           inventoryItems[index] = InventoryItem(
             userId: item.userId,
             id: updatedCrop.id,
-            imageUrl: updatedCrop.photo != null
-                ? 'https://final.agrovision.ltd/storage/app/public/photos/${updatedCrop.photo}'
+            imageUrl: photo != null && photo.isNotEmpty
+                ? 'https://final.agrovision.ltd/storage/app/public/photos/$photo'
                 : 'https://example.com/placeholder.png',
             productName: updatedCrop.productName,
             category: category.name,
@@ -309,17 +315,24 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
           );
         }
       });
+      return true;
     } on DioException catch (e) {
       String message = 'Update failed';
       if (e.response?.statusCode == 302) {
         message = 'Session expired. Please log in again.';
-      } else {
-        message = e.response?.data['message'] ?? message;
+      } else if (e.response?.data != null &&
+          e.response?.data['message'] != null) {
+        message = e.response!.data['message'];
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
-      rethrow;
+      return false;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An unexpected error occurred: $e')),
+      );
+      return false;
     }
   }
 
@@ -483,10 +496,12 @@ class InventoryCard extends StatelessWidget {
                   Row(
                     children: [
                       _buildDetailItem(
-                          icon: Icons.price_change_outlined, value: item.price),
+                          assetName: 'assets/icon/money.svg',
+                          value: item.price),
                       const SizedBox(width: 24),
                       _buildDetailItem(
-                          icon: Icons.scale_outlined, value: item.quantity),
+                          assetName: 'assets/icon/weight.svg',
+                          value: item.quantity),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -529,11 +544,31 @@ class InventoryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailItem({required IconData icon, required String value}) {
+  Widget _buildDetailItem({
+    IconData? icon,
+    String? assetName,
+    required String value,
+  }) {
+    final bool hasIcon = assetName != null || icon != null;
+
     return Row(
       children: [
-        Icon(icon, size: 18, color: AppColors.textSecondary),
-        const SizedBox(width: 6),
+        if (assetName != null) ...[
+          SvgPicture.asset(
+            assetName,
+            width: 18,
+            height: 18,
+            colorFilter: const ColorFilter.mode(
+                AppColors.textSecondary, BlendMode.srcIn),
+          ),
+        ] else if (icon != null) ...[
+          Icon(
+            icon,
+            size: 18,
+            color: AppColors.textSecondary,
+          ),
+        ],
+        if (hasIcon) const SizedBox(width: 6),
         Text(
           value,
           style: const TextStyle(
