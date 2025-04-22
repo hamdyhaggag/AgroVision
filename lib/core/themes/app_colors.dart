@@ -1,33 +1,113 @@
-import 'package:agro_vision/core/helpers/extensions.dart';
 import 'package:flutter/material.dart';
 
 class AppColors {
   AppColors._();
-  static const Color primaryColor = Color(0xff34C759);
-  static const Color selectionColor = Color(0xff99efce);
-  static const Color primaryColorshade = Color(0xffb2e2c3);
-  static const Color navy = Color(0xff51526C);
-  static final Color secondaryColor = HexColor.fromHex('#34C759');
-  static const Color surfaceColor = Color(0xFFF9FAFB);
-  static const Color secondaryText = Color(0xFF64748B);
-  static const Color accentColor = Color(0xff218838);
-  static final Color background = HexColor.fromHex('#1A858D');
-  static final Color error = HexColor.fromHex('#1A858D');
-  static Color whiteColor = const Color(0xffffffff);
-  static Color blackColor = const Color(0xff000000);
-  static Color navBarColor = const Color(0xffE6E6E6);
-  static const Color greyLight = Color(0xffe8e8e8);
-  static const Color greyColor = Color(0xffa1a1a1);
-  static const Color completeColor = Color(0xffC0FCE3);
-  static const Color inCompleteColor = Color(0xfffebbbb);
 
-  /////////////////////
+  // ----------------------
+  // PRIMARY COLORS
+  // ----------------------
+  /// The main brand color.
+  static const Color primaryColor = Color(0xFF34C759);
+
+  /// A lighter tint of [primaryColor].
+  static const Color primaryColorshade = Color(0xFFB2E2C3);
+
+  // ----------------------
+  // SELECTION & ACCENTS
+  // ----------------------
+  /// Highlight or selection background.
+  static const Color selectionColor = Color(0xFF99EFCE);
+
+  /// Secondary accent color (identical to primary).
+  static const Color secondaryColor = Color(0xFF34C759);
+
+  /// Surface elements such as cards or panels.
+  static const Color surfaceColor = Color(0xFFF9FAFB);
+
+  /// Secondary text color for less emphasis.
+  static const Color secondaryText = Color(0xFF64748B);
+
+  /// Accent hue for buttons or links.
+  static const Color accentColor = Color(0xFF218838);
+
+  // ----------------------
+  // BACKGROUND & ERRORS
+  // ----------------------
+  /// App-wide background.
+  static const Color background = Color(0xFF1A858D);
+
+  /// Error background or state (same as [background]).
+  static const Color error = Color(0xFF1A858D);
+
+  // ----------------------
+  // NEUTRALS & NAVIGATION
+  // ----------------------
+  /// Pure white color.
+  static const Color whiteColor = Color(0xFFFFFFFF);
+
+  /// Pure black color.
+  static const Color blackColor = Color(0xFF000000);
+
+  /// Deep neutral for text or icons.
+  static const Color navy = Color(0xFF51526C);
+
+  /// Navigation bar background.
+  static const Color navBarColor = Color(0xFFE6E6E6);
+
+  /// Light grey for dividers and borders.
+  static const Color greyLight = Color(0xFFE8E8E8);
+
+  /// Standard grey for text or icons.
+  static const Color greyColor = Color(0xFFA1A1A1);
+
+  // ----------------------
+  // COMPLETION STATES
+  // ----------------------
+  /// Indicates completed portion.
+  static const Color completeColor = Color(0xFFC0FCE3);
+
+  /// Indicates incomplete or pending portion.
+  static const Color inCompleteColor = Color(0xFFFEBBBB);
+
+  // ----------------------
+  // MATERIAL SURFACE & TEXT
+  // ----------------------
+  /// Scaffold background color.
   static const Color scaffoldBackground = Color(0xFFF4F6F8);
+
+  /// Primary text.
   static const Color textPrimary = Color(0xFF1A1A1A);
+
+  /// Secondary text.
   static const Color textSecondary = Color(0xFF666666);
+
+  /// Tertiary text.
   static const Color textTertiary = Color(0xFF999999);
+
+  /// Background for gauge components.
   static const Color gaugeBackground = Color(0xFFEAECF0);
+
+  // ----------------------
+  // STATUS COLORS
+  // ----------------------
+  /// Warning indicators.
   static const Color warningColor = Color(0xFFFFC107);
+
+  /// Success indicators.
   static const Color successColor = Color(0xFF8BC34A);
+
+  /// Error indicators (e.g., text or icons).
   static const Color errorColor = Color(0xFFEF5350);
+
+  // ----------------------
+  // DIVIDER & SURFACES
+  // ----------------------
+  /// Standard divider lines.
+  static const Color divider = Color(0xFFE0E0E0);
+
+  /// Default surface for components.
+  static const Color surface = Color(0xFFFFFFFF);
+
+  /// Text and icon color on [surface].
+  static const Color onSurface = Color(0xFF2F2F2F);
 }

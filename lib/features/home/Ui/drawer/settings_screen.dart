@@ -18,7 +18,6 @@ class _SettingsScreenState extends State<SettingsScreen>
     with SingleTickerProviderStateMixin {
   File? _profileImage;
   String username = 'User';
-  bool _isDarkMode = false;
   bool _notificationsEnabled = true;
   late AnimationController _controller;
   late Animation<double> _avatarAnimation;
@@ -46,7 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   Future<void> _loadUserData() async {
     await CacheHelper.ensureInitialized();
-    String? fetchedUsername = await CacheHelper.getString(key: 'userName');
+    String? fetchedUsername = CacheHelper.getString(key: 'userName');
     setState(() {
       username = fetchedUsername;
     });
@@ -146,18 +145,28 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  SnackBar _buildCustomSnackBar(String message) {
+  SnackBar _buildCustomSnackBar(String message, {bool isError = false}) {
     return SnackBar(
       content: Row(
         children: [
-          const Icon(Icons.check_circle, color: Colors.white),
-          const SizedBox(width: 10),
-          Text(message, style: const TextStyle(color: Colors.white)),
+          Icon(
+            isError ? Icons.error : Icons.check_circle,
+            color: AppColors.surface,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: AppColors.surface),
+            ),
+          ),
         ],
       ),
-      backgroundColor: AppColors.primaryColor,
+      backgroundColor: isError ? AppColors.error : AppColors.primaryColor,
       behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       duration: const Duration(seconds: 2),
     );
   }
@@ -342,14 +351,14 @@ class _SettingsScreenState extends State<SettingsScreen>
   Widget _buildSectionTitle(String title) {
     return FadeInLeft(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
-            Text(title),
-            const SizedBox(width: 10),
-            Expanded(
+            Text(title, style: const TextStyle(color: AppColors.onSurface)),
+            const SizedBox(width: 8),
+            const Expanded(
               child: Divider(
-                color: Colors.grey.shade200,
+                color: AppColors.divider,
                 thickness: 2,
               ),
             ),
@@ -362,16 +371,15 @@ class _SettingsScreenState extends State<SettingsScreen>
   Widget _buildSettingsCard(List<Widget> children) {
     return FadeInUp(
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.2),
-              spreadRadius: 2,
-              blurRadius: 10,
-              offset: const Offset(0, 5),
+              color: AppColors.onSurface.withValues(alpha: 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -389,13 +397,17 @@ class _SettingsScreenState extends State<SettingsScreen>
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: AppColors.primaryColor,
-        child: Icon(icon, color: AppColors.whiteColor),
+        child: Icon(icon, color: AppColors.surface),
       ),
-      title: Text(title),
+      title: Text(
+        title,
+        style: const TextStyle(color: AppColors.onSurface),
+      ),
       trailing: Switch(
+        activeColor: AppColors.primaryColor,
+        inactiveThumbColor: AppColors.divider,
         value: value,
         onChanged: onChanged,
-        activeColor: AppColors.primaryColor,
       ),
     );
   }
@@ -408,12 +420,18 @@ class _SettingsScreenState extends State<SettingsScreen>
   }) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: color.withValues(alpha: 0.2),
+        backgroundColor: color.withValues(alpha: 0.15),
         child: Icon(icon, color: color),
       ),
-      title: Text(title),
-      trailing:
-          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      title: Text(
+        title,
+        style: const TextStyle(color: AppColors.onSurface),
+      ),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: 16,
+        color: AppColors.divider,
+      ),
       onTap: onTap,
     );
   }
