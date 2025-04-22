@@ -57,7 +57,6 @@ class _EditCropDialogState extends State<EditCropDialog> {
       if (success && mounted) {
         Navigator.of(context).pop(true);
       }
-    } catch (e) {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

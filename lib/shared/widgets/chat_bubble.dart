@@ -253,8 +253,7 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
 
 class VoiceMessageBubble extends StatefulWidget {
   final String filePath;
-  const VoiceMessageBubble({Key? key, required this.filePath})
-      : super(key: key);
+  const VoiceMessageBubble({super.key, required this.filePath});
 
   @override
   State<VoiceMessageBubble> createState() => _VoiceMessageBubbleState();

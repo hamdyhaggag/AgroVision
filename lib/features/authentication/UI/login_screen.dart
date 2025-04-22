@@ -1,9 +1,7 @@
-import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../core/routing/app_routes.dart';
 import '../../../core/utils/utils.dart';
 import '../../../shared/widgets/custom_botton.dart';
 import '../../../shared/widgets/emai_and_password.dart';

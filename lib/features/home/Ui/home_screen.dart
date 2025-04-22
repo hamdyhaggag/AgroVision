@@ -84,9 +84,9 @@ class _HomeScreenState extends State<HomeScreen> {
               } else if (state is HomeError) {
                 return _buildErrorState(state.message);
               }
-              return SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: const SizedBox.shrink(),
+              return const SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: SizedBox.shrink(),
               );
             },
           ),

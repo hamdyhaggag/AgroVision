@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../core/network/api_error_handler.dart';
 import '../../../core/network/api_result.dart';
@@ -15,20 +16,30 @@ class OrdersRepo {
       final response = await _apiService.getUserOrders(userId);
       return ApiResult.success(response.data.data);
     } on DioException catch (e) {
-      // Add detailed logging for Dio errors
-      print('❌ DioException: ${e.message}');
-      print('❌ Status Code: ${e.response?.statusCode}');
-      print('❌ Response Data: ${e.response?.data}');
-      print('❌ Error Type: ${e.type}');
+      if (kDebugMode) {
+        print('❌ DioException: ${e.message}');
+      }
+      if (kDebugMode) {
+        print('❌ Status Code: ${e.response?.statusCode}');
+      }
+      if (kDebugMode) {
+        print('❌ Response Data: ${e.response?.data}');
+      }
+      if (kDebugMode) {
+        print('❌ Error Type: ${e.type}');
+      }
 
       if (e.response?.statusCode == 500) {
         return ApiResult.failure(ErrorHandler.handle(e));
       }
       return ApiResult.failure(ErrorHandler.handle(e));
     } catch (error, stackTrace) {
-      // Log unexpected errors
-      print('❌ Unexpected Error: $error');
-      print('❌ Stack Trace: $stackTrace');
+      if (kDebugMode) {
+        print('❌ Unexpected Error: $error');
+      }
+      if (kDebugMode) {
+        print('❌ Stack Trace: $stackTrace');
+      }
       return ApiResult.failure(ErrorHandler.handle(error));
     }
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../models/api_order.dart';
 import '../../Api/orders_repo.dart';
@@ -31,9 +32,12 @@ class OrdersCubit extends Cubit<OrdersState> {
         failure: (error) => emit(OrdersError(error.toString())),
       );
     } catch (e, stackTrace) {
-      // Catch unhandled exceptions
-      print('🔥 Unhandled Exception: $e');
-      print('🔥 Stack Trace: $stackTrace');
+      if (kDebugMode) {
+        print('🔥 Unhandled Exception: $e');
+      }
+      if (kDebugMode) {
+        print('🔥 Stack Trace: $stackTrace');
+      }
       emit(OrdersError('Unexpected error: $e'));
     }
   }

@@ -168,7 +168,7 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
                 Text('"${item.category}" is not a valid category.'),
                 const SizedBox(height: 16),
                 const Text('Valid categories:'),
-                ...categories.map((c) => Text('- ${c.name.trim()}')).toList(),
+                ...categories.map((c) => Text('- ${c.name.trim()}')),
               ],
             ),
             actions: [
