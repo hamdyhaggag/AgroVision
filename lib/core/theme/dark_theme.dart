@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../themes/app_colors.dart';
 
 ThemeData darkTheme = ThemeData(
-  snackBarTheme: SnackBarThemeData(
+  snackBarTheme: const SnackBarThemeData(
     backgroundColor: AppColors.blackColor,
   ),
   brightness: Brightness.dark,
