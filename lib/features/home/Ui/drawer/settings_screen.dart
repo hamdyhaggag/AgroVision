@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:animate_do/animate_do.dart';
 
+import '../../../../core/routing/app_routes.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -51,9 +53,9 @@ class _SettingsScreenState extends State<SettingsScreen>
     _updateProfileImage();
   }
 
-  void _showComingSoonMessage() {
+  void _showComingSoonMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      _buildCustomSnackBar('Dark Mode is coming soon! Stay tuned. 🌙'),
+      _buildCustomSnackBar(message),
     );
   }
 
@@ -182,6 +184,14 @@ class _SettingsScreenState extends State<SettingsScreen>
               ),
               backgroundColor: Colors.transparent,
               elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                onPressed: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
             ),
             SliverToBoxAdapter(child: _buildSettingsContent()),
           ],
@@ -287,7 +297,8 @@ class _SettingsScreenState extends State<SettingsScreen>
               icon: Icons.dark_mode,
               title: 'Dark Mode',
               value: false,
-              onChanged: (_) => _showComingSoonMessage(),
+              onChanged: (_) => _showComingSoonMessage(
+                  'Dark mode is coming soon! Stay tuned.'),
             ),
             _buildSwitchTile(
               icon: Icons.notifications,
@@ -303,13 +314,13 @@ class _SettingsScreenState extends State<SettingsScreen>
             _buildActionTile(
               icon: Icons.star,
               title: 'Rate Us',
-              onTap: () {},
+              onTap: () => _showComingSoonMessage('Rate us is coming soon! '),
               color: Colors.amber,
             ),
             _buildActionTile(
               icon: Icons.feedback,
               title: 'Feedback',
-              onTap: () {},
+              onTap: () => _showComingSoonMessage('Feedback is coming soon! '),
               color: Colors.blue,
             ),
           ]),
@@ -319,7 +330,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             _buildActionTile(
               icon: Icons.logout,
               title: 'Log Out',
-              onTap: () {},
+              onTap: () => Navigator.pushNamed(context, AppRoutes.logout),
               color: Colors.red,
             ),
           ]),
@@ -336,9 +347,9 @@ class _SettingsScreenState extends State<SettingsScreen>
           children: [
             Text(title),
             const SizedBox(width: 10),
-            const Expanded(
+            Expanded(
               child: Divider(
-                color: AppColors.greyColor,
+                color: Colors.grey.shade200,
                 thickness: 2,
               ),
             ),
