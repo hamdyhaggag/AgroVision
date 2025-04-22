@@ -65,6 +65,7 @@ class CacheHelper {
 
   static int getInteger({required String key}) =>
       sharedPreferences!.getInt(key) ?? 0;
+
   static bool getBoolean({required String key}) =>
       sharedPreferences!.getBool(key) ?? false;
 
@@ -111,4 +112,12 @@ class CacheHelper {
 
   static final ValueNotifier<String> profileImageNotifier =
       ValueNotifier<String>('');
+
+  static setBool(String key, bool value) {
+    sharedPreferences?.setBool(key, value);
+  }
+
+  static bool getBool(String key) {
+    return sharedPreferences?.getBool(key) ?? false;
+  }
 }

@@ -10,6 +10,7 @@ import 'core/network/dio_factory.dart';
 import 'core/network/weather_service.dart';
 import 'core/routing/app_router.dart';
 import 'core/routing/app_routes.dart';
+import 'core/theme/theme_cubit/theme_cubit.dart';
 import 'core/themes/app_colors.dart';
 import 'core/utils/utils.dart';
 import 'features/authentication/Logic/auth cubit/auth_cubit.dart';
@@ -70,6 +71,9 @@ class AgroVision extends StatelessWidget {
                 create: (context) => ChatCubit(getIt<ChatRepository>())),
             BlocProvider(
               create: (context) => TaskCubit(),
+            ),
+            BlocProvider(
+              create: (context) => ThemeCubit()..getCurrentTheme(),
             ),
             Provider<FarmerChatApiService>(
               create: (context) =>
