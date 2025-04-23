@@ -23,7 +23,7 @@ import 'features/chat/services/farmer_chat_api_service.dart';
 import 'features/disease_detection/Api/disease_detection_service.dart';
 import 'features/disease_detection/Logic/disease_cubit.dart';
 import 'features/home/Api/orders_repo.dart';
-import 'features/home/Logic/home_cubit.dart';
+import 'features/home/Logic/home_cubit/home_cubit.dart';
 import 'features/home/Logic/orders_cubit/orders_cubit.dart';
 import 'features/home/Logic/task_cubit/task_cubit.dart';
 import 'features/monitoring/Api/sensor_data_service.dart';

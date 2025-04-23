@@ -6,13 +6,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:agro_vision/features/home/Logic/home_cubit.dart';
+import 'package:agro_vision/features/home/Logic/home_cubit/home_cubit.dart';
 
 import '../../../core/helpers/cache_helper.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../models/weather_model.dart';
-import '../Logic/home_state.dart';
+import '../Logic/home_cubit/home_state.dart';
 import 'widgets/quick_actions_grid.dart';
 
 class HomeScreen extends StatefulWidget {

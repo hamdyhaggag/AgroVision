@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../../../models/weather_model.dart';
+import '../../../../models/weather_model.dart';
 
 @immutable
 abstract class HomeState {}
