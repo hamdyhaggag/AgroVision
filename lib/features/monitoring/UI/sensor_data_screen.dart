@@ -21,6 +21,29 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   late final PumpControlService _pumpControlService;
 
   String _selectedSensor = 'EC';
+  double getMaxValue(String sensor) {
+    switch (sensor) {
+      case 'EC':
+        return 10.0; // Up to 10 dS/m
+      case 'Humidity':
+        return 100.0; // 0–100%
+      case 'PH':
+        return 14.0; // pH scale 0–14
+      case 'Temp':
+        return 50.0; // Up to 50 °C
+      case 'N':
+        return 50.0; // Up to 50 ppm
+      case 'P':
+        return 50.0; // Up to 50 ppm
+      case 'K':
+        return 300.0; // Up to 300 ppm
+      case 'Fertility':
+        return 10.0; // Up to 10%
+      default:
+        return 100.0; // Fallback
+    }
+  }
+
   Map<String, Map<String, bool>> pumpControls = {
     'EC': {'auto': false, 'manual': false},
     'Fertility': {'auto': false, 'manual': false},
@@ -244,6 +267,10 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   }
 
   Widget _buildGaugeCard(double value) {
+    final maxValue = getMaxValue(_selectedSensor);
+    final normalizedValue = (value / maxValue).clamp(0.0, 1.0);
+    final arcColor = getGaugeColor(_selectedSensor, value);
+
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -266,11 +293,11 @@ class SensorDataScreenState extends State<SensorDataScreen> {
             SizedBox(
               height: 220,
               child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: value / 100),
+                tween: Tween(begin: 0, end: normalizedValue),
                 duration: const Duration(milliseconds: 800),
-                builder: (context, normalizedValue, child) {
+                builder: (context, progress, child) {
                   return CustomPaint(
-                    painter: _GaugePainter(normalizedValue),
+                    painter: _GaugePainter(progress, arcColor),
                     child: Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -733,7 +760,10 @@ class SensorDataScreenState extends State<SensorDataScreen> {
 
 class _GaugePainter extends CustomPainter {
   final double progress;
-  _GaugePainter(this.progress);
+  final Color arcColor;
+
+  _GaugePainter(this.progress, this.arcColor);
+
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
@@ -743,12 +773,6 @@ class _GaugePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 20;
     canvas.drawCircle(center, radius, backgroundPaint);
-    final actualValue = progress * 100;
-    final arcColor = actualValue < 40
-        ? AppColors.warningColor
-        : actualValue < 80
-            ? AppColors.primaryColor
-            : AppColors.successColor;
     final progressPaint = Paint()
       ..color = arcColor
       ..style = PaintingStyle.stroke

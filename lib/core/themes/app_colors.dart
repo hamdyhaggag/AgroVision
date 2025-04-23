@@ -111,3 +111,39 @@ class AppColors {
   /// Text and icon color on [surface].
   static const Color onSurface = Color(0xFF2F2F2F);
 }
+
+Color getGaugeColor(String sensor, double value) {
+  switch (sensor) {
+    case 'EC':
+      if (value <= 1) return AppColors.successColor; // ≤ 1 dS/m
+      if (value <= 4) return AppColors.warningColor; // 1–4 dS/m
+      return AppColors.errorColor; // > 4 dS/m
+    case 'Humidity':
+      if (value >= 35 && value <= 75) return AppColors.successColor; // 35–75%
+      return AppColors.warningColor; // <35% or >75%
+    case 'PH':
+      if (value >= 6.0 && value <= 7.5) {
+        return AppColors.successColor; // 6.0–7.5
+      }
+      return AppColors.warningColor; // <6.0 or >7.5
+    case 'Temp':
+      if (value >= 18 && value <= 30) return AppColors.successColor; // 18–30 °C
+      return AppColors.warningColor; // <18 or >30
+    case 'N':
+      if (value >= 10) return AppColors.successColor; // ≥ 10 ppm
+      return AppColors.warningColor; // < 10 ppm
+    case 'P':
+      if (value >= 12) return AppColors.successColor; // ≥ 12 ppm
+      return AppColors.warningColor; // < 12 ppm
+    case 'K':
+      if (value >= 120 && value <= 170) {
+        return AppColors.successColor; // 120–170 ppm
+      }
+      return AppColors.warningColor; // <120 or >170
+    case 'Fertility':
+      if (value >= 3 && value <= 6) return AppColors.successColor; // 3–6%
+      return AppColors.warningColor; // <3% or >6%
+    default:
+      return AppColors.primaryColor; // Fallback
+  }
+}
