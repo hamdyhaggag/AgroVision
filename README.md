@@ -145,6 +145,7 @@ State management is handled via **Cubit**, decoupling UI from business logic and
 | ![Settings 1](screenshots/settings1.png) | ![Settings 2](screenshots/settings2.png) |
 
 ## Project Structure
+### 1. lib Structure
 ```
 lib/
 ├── core/
@@ -158,6 +159,61 @@ lib/
 └── models/
 ```
 
+### 2. core Structure
+```
+core
+├── constants
+│   ├── app_assets.dart
+│   └── constant.dart
+│
+├── dependency_injection
+│   └── di.dart
+│
+├── helpers
+│   ├── app_localizations.dart
+│   ├── app_regexp.dart
+│   ├── cache_helper.dart
+│   ├── enums.dart
+│   ├── extensions.dart
+│   ├── location_helper.dart
+│   ├── spaces.dart
+│   ├── validations.dart
+│   └── voice_recorder_utility.dart
+│
+├── network
+│   ├── api_constants.dart
+│   ├── api_error_handler.dart
+│   ├── api_error_model.dart
+│   ├── api_error_model.g.dart
+│   ├── api_result.dart
+│   ├── api_result_freezed.dart
+│   ├── api_service.dart
+│   ├── api_service.g.dart
+│   ├── dio_factory.dart
+│   └── weather_service.dart
+│
+├── routing
+│   ├── app_router.dart
+│   └── app_routes.dart
+│
+├── theme
+│   └── theme_cubit
+│       ├── theme_cubit.dart
+│       └── theme_state.dart
+│   ├── dark_theme.dart
+│   └── light_theme.dart
+│
+├── themes
+│   ├── app_colors.dart
+│   ├── app_theme.dart
+│   ├── font_weights.dart
+│   └── text_styles.dart
+│
+└── utils
+    ├── functions.dart
+    └── utils.dart
+
+```
 ## Testing
 - **Unit Tests**: `flutter test test/unit`
 - **Integration Tests**: `flutter test integration_test`
