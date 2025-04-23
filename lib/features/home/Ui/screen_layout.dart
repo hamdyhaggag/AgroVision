@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -27,6 +25,78 @@ class BottomNavItem {
     required this.label,
     this.hasAction = false,
   });
+}
+
+final List<String> availablePlants = [
+  'Tomato',
+  'Potato',
+];
+
+void _showPlantSelectionDialog(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) => Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Text(
+              'Select Plant Type',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'SYNE',
+                  ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _PlantButton(
+                imagePath: 'assets/images/tomato.png',
+                label: 'Tomato',
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _showImagePickerBottomSheet(context, 'tomato');
+                },
+              ),
+              _PlantButton(
+                imagePath: 'assets/images/potato.png',
+                label: 'Potato',
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _showImagePickerBottomSheet(context, 'potato');
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+void _showImagePickerBottomSheet(BuildContext context, String plantType) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (sheetContext) => ImageSourcePicker(
+      onImageSelected: (path) {
+        Navigator.pop(sheetContext);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PlantDetailsScreen(
+              imagePath: path,
+              plantType: plantType,
+            ),
+          ),
+        );
+      },
+    ),
+  );
 }
 
 class ScreenLayout extends StatelessWidget {
@@ -80,34 +150,10 @@ class ScreenLayout extends StatelessWidget {
     final item = _navItems[index];
 
     if (item.hasAction) {
-      _showImagePickerBottomSheet(context);
+      _showPlantSelectionDialog(context);
     } else {
       cubit.changeBottomNavIndex(index);
     }
-  }
-
-  void _showImagePickerBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) => ImageSourcePicker(
-        onImageSelected: (path) {
-          Navigator.pop(sheetContext);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => PlantDetailsScreen(
-                imagePath: path,
-                plantType: 'tomato',
-              ),
-            ),
-          );
-        },
-      ),
-    );
   }
 }
 
@@ -216,7 +262,7 @@ class ImageSourcePicker extends StatelessWidget {
     try {
       final image = await _picker.pickImage(source: source);
       if (image != null) {
-        onImageSelected(File(image.path).path);
+        onImageSelected(image.path);
       }
     } catch (e) {
       debugPrint('Image pick error: $e');
@@ -274,19 +320,74 @@ class _SourceButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        IconButton.filledTonal(
-          iconSize: 32,
-          style: IconButton.styleFrom(
-            backgroundColor: AppColors.primaryColor,
+    return GestureDetector(
+      onTap: onPressed,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, size: 40, color: Theme.of(context).primaryColor),
           ),
-          onPressed: onPressed,
-          icon: Icon(icon, color: AppColors.whiteColor),
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontFamily: 'SYNE')),
-      ],
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'SYNE',
+              color: AppColors.blackColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlantButton extends StatelessWidget {
+  final String imagePath;
+  final String label;
+  final VoidCallback onPressed;
+
+  const _PlantButton({
+    required this.imagePath,
+    required this.label,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Image.asset(imagePath, fit: BoxFit.contain),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'SYNE',
+              color: AppColors.blackColor,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

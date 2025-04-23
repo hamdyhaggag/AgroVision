@@ -29,9 +29,10 @@ class PlantDetailsScreen extends StatefulWidget {
   State<PlantDetailsScreen> createState() => _PlantDetailsScreenState();
 
   factory PlantDetailsScreen.fromDisease(DiseaseModel disease) {
+    final plantType = getPlantTypeFromStatus(disease.status);
     return PlantDetailsScreen(
       imagePath: disease.imageUrl,
-      plantType: disease.status,
+      plantType: plantType,
     );
   }
 
@@ -46,6 +47,14 @@ class PlantDetailsScreen extends StatefulWidget {
         'control': disease.control,
       },
     );
+  }
+
+  static String getPlantTypeFromStatus(String status) {
+    final parts = status.split('___');
+    if (parts.isNotEmpty) {
+      return parts[0].toLowerCase();
+    }
+    return 'unknown';
   }
 }
 
