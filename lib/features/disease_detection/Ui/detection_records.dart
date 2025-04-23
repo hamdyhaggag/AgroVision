@@ -214,7 +214,7 @@ class _DetectionRecordsState extends State<DetectionRecords> {
                               children: [
                                 Text(
                                   disease.date,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontFamily: 'SYNE',
                                     fontWeight: FontWeight.w500,
                                     fontSize: 15,
@@ -224,7 +224,7 @@ class _DetectionRecordsState extends State<DetectionRecords> {
                                 const SizedBox(height: 2),
                                 Text(
                                   disease.status,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontFamily: 'SYNE',
                                     fontWeight: FontWeight.w500,
                                     fontSize: 15,

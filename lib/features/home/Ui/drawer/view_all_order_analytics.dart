@@ -51,7 +51,7 @@ class InvoiceSectionView extends StatelessWidget {
             _buildHeader(
                 totalInvoices: totalInvoices, totalRevenue: totalRevenue),
             const SizedBox(height: 24),
-            Text('Recent Transactions',
+            const Text('Recent Transactions',
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -315,7 +315,7 @@ class FullClientsView extends StatelessWidget {
             _buildHeader(
                 totalClients: clients.length, totalOrders: totalOrders),
             const SizedBox(height: 24),
-            Text('Active Clients',
+            const Text('Active Clients',
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,

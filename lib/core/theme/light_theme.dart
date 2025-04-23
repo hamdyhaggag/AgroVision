@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../themes/app_colors.dart';
 
 ThemeData lightTheme = ThemeData(
-    snackBarTheme: SnackBarThemeData(
+    snackBarTheme: const SnackBarThemeData(
       backgroundColor: AppColors.whiteColor,
     ),
     brightness: Brightness.light,
@@ -11,7 +11,7 @@ ThemeData lightTheme = ThemeData(
     colorScheme: const ColorScheme.light(
       primary: AppColors.primaryColor,
     ),
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.whiteColor,
       surfaceTintColor: AppColors.whiteColor,
     ),

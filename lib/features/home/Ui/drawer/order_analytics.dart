@@ -228,7 +228,7 @@ class OrderAnalytics extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Top Clients',
                 style: TextStyle(
                   fontSize: 20,
@@ -246,7 +246,7 @@ class OrderAnalytics extends StatelessWidget {
                     ),
                   );
                 },
-                child: Text('View all',
+                child: const Text('View all',
                     style: TextStyle(
                       fontFamily: 'Syne',
                       color: AppColors.blackColor,
