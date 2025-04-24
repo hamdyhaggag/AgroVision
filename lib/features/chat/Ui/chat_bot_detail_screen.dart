@@ -606,14 +606,14 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget> {
   String? _recordedFilePath;
 
   @override
-  void dispose() {
-    _voiceRecorder.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _voiceRecorder.init();
   }
 
   Future<void> _toggleRecording() async {
     if (_isRecording) {
-      await _voiceRecorder.stopRecording();
+      _recordedFilePath = await _voiceRecorder.stopRecording();
       setState(() => _isRecording = false);
       if (_recordedFilePath != null) {
         context.read<ChatCubit>().sendVoiceMessage(
@@ -624,12 +624,15 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget> {
         Navigator.pop(context);
       }
     } else {
-      final filePath = await _voiceRecorder.startRecording();
-      setState(() {
-        _isRecording = true;
-        _recordedFilePath = filePath;
-      });
+      _recordedFilePath = await _voiceRecorder.startRecording();
+      setState(() => _isRecording = true);
     }
+  }
+
+  @override
+  void dispose() {
+    _voiceRecorder.dispose();
+    super.dispose();
   }
 
   @override

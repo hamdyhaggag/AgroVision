@@ -1,15 +1,15 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:agro_vision/core/themes/app_colors.dart';
-import 'package:audio_waveforms/audio_waveforms.dart'
-    as aw; // Alias for audio_waveforms
+import 'package:audio_waveforms/audio_waveforms.dart' as aw;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../models/chat_message.dart';
-
-// Note: Removed 'package:audioplayers/audioplayers.dart' as it's not used in VoiceMessageBubble
+import 'package:share_plus/share_plus.dart';
+import 'package:cross_file/cross_file.dart';
 
 class ChatBubble extends StatefulWidget {
   final Message message;
@@ -36,9 +36,7 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    if (widget.isLoading) {
-      _initializeAnimations();
-    }
+    if (widget.isLoading) _initializeAnimations();
   }
 
   void _initializeAnimations() {
@@ -46,7 +44,6 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat();
-
     for (var i = 0; i < 3; i++) {
       _dotAnimations.add(
         Tween<double>(begin: 1.0, end: 1.4).animate(
@@ -61,6 +58,7 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
 
   @override
   void didUpdateWidget(covariant ChatBubble oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.isLoading != oldWidget.isLoading) {
       if (widget.isLoading) {
         _initializeAnimations();
@@ -69,14 +67,14 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
         _dotAnimations.clear();
       }
     }
-    super.didUpdateWidget(oldWidget);
+    if (widget.message.voiceFilePath != oldWidget.message.voiceFilePath) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
-    if (widget.isLoading) {
-      _controller.dispose();
-    }
+    if (widget.isLoading) _controller.dispose();
     super.dispose();
   }
 
@@ -98,19 +96,20 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: widget.message.isSentByMe
-                    ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                    ? Theme.of(context).primaryColor.withOpacity(0.1)
                     : Colors.grey[200],
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Column(
-                crossAxisAlignment: widget.isLoading
-                    ? CrossAxisAlignment.start
-                    : CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (widget.message.imageUrl != null)
                     _buildImagePreview(widget.message.imageUrl!),
-                  if (widget.message.voiceFilePath != null && !widget.isLoading)
-                    _buildVoiceMessage(widget.message.voiceFilePath!),
+                  if (widget.message.voiceFilePath != null)
+                    VoiceMessageBubble(
+                      key: ValueKey(widget.message.voiceFilePath),
+                      filePath: widget.message.voiceFilePath!,
+                    ),
                   if (widget.isLoading && !widget.message.isSentByMe)
                     _buildTypingIndicator(),
                   if (widget.message.text.isNotEmpty) ...[
@@ -194,68 +193,58 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
 
   Widget _buildImagePreview(String url) {
     final isNetworkImage = url.startsWith('http');
-
-    Widget imageWidget;
-    if (isNetworkImage) {
-      imageWidget = CachedNetworkImage(
-        imageUrl: url,
-        width: 200,
-        height: 150,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          color: Colors.grey[200],
-          width: 200,
-          height: 150,
-        ),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
-      );
-    } else {
-      imageWidget = Image.file(
-        File(url),
-        width: 200,
-        height: 150,
-        fit: BoxFit.cover,
-        errorBuilder: (ctx, error, stack) => const Icon(Icons.broken_image),
-      );
-    }
-
     return GestureDetector(
-      onTap: () {
-        showDialog(
-          context: context,
-          builder: (context) => Dialog(
-            backgroundColor: Colors.transparent,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: InteractiveViewer(
-                child: isNetworkImage
-                    ? CachedNetworkImage(imageUrl: url)
-                    : Image.file(File(url)),
-              ),
+      onTap: () => showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          backgroundColor: Colors.transparent,
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: InteractiveViewer(
+              child: isNetworkImage
+                  ? CachedNetworkImage(imageUrl: url)
+                  : Image.file(File(url)),
             ),
           ),
-        );
-      },
+        ),
+      ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: imageWidget,
+        child: isNetworkImage
+            ? CachedNetworkImage(
+                imageUrl: url,
+                width: 200,
+                height: 150,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[200],
+                  width: 200,
+                  height: 150,
+                ),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+              )
+            : Image.file(
+                File(url),
+                width: 200,
+                height: 150,
+                fit: BoxFit.cover,
+                errorBuilder: (ctx, error, stack) =>
+                    const Icon(Icons.broken_image),
+              ),
       ),
     );
   }
 
-  Widget _buildVoiceMessage(String filePath) {
-    return VoiceMessageBubble(filePath: filePath);
-  }
-
-  bool isArabic(String text) {
-    final arabicRegex = RegExp(r'[\u0600-\u06FF]');
-    return arabicRegex.hasMatch(text);
-  }
+  bool isArabic(String text) => RegExp(r'[\u0600-\u06FF]').hasMatch(text);
 }
 
 class VoiceMessageBubble extends StatefulWidget {
   final String filePath;
-  const VoiceMessageBubble({super.key, required this.filePath});
+
+  const VoiceMessageBubble({
+    super.key,
+    required this.filePath,
+  });
 
   @override
   State<VoiceMessageBubble> createState() => _VoiceMessageBubbleState();
@@ -266,6 +255,7 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
   Duration? _duration;
   Duration _currentDuration = Duration.zero;
   aw.PlayerState? _playerState;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -281,8 +271,10 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
       final durationMs = await _playerController.getDuration();
       setState(() {
         _duration = Duration(milliseconds: durationMs);
+        _isLoading = false;
       });
     } catch (e) {
+      setState(() => _isLoading = false);
       debugPrint('Error preparing audio: $e');
     }
   }
@@ -291,24 +283,18 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
     _playerController.onPlayerStateChanged.listen((state) {
       setState(() {
         _playerState = state;
-        if (state == aw.PlayerState.stopped) {
-          _currentDuration = Duration.zero;
-        }
+        if (state == aw.PlayerState.stopped) _currentDuration = Duration.zero;
       });
     });
     _playerController.onCurrentDurationChanged.listen((durationMs) {
-      setState(() {
-        _currentDuration = Duration(milliseconds: durationMs);
-      });
+      setState(() => _currentDuration = Duration(milliseconds: durationMs));
     });
   }
 
   Future<void> _togglePlayPause() async {
-    if (_playerState == aw.PlayerState.playing) {
-      await _playerController.pausePlayer();
-    } else {
-      await _playerController.startPlayer();
-    }
+    _playerState == aw.PlayerState.playing
+        ? await _playerController.pausePlayer()
+        : await _playerController.startPlayer();
   }
 
   @override
@@ -317,15 +303,65 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
     super.dispose();
   }
 
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$minutes:$seconds';
-  }
+  String _formatDuration(Duration duration) =>
+      '${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:'
+      '${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}';
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 60,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -335,11 +371,9 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(
-              _playerState == aw.PlayerState.playing
-                  ? Icons.pause
-                  : Icons.play_arrow,
-            ),
+            icon: Icon(_playerState == aw.PlayerState.playing
+                ? Icons.pause
+                : Icons.play_arrow),
             onPressed: _togglePlayPause,
           ),
           Expanded(
@@ -355,17 +389,39 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
               ),
             ),
           ),
-          if (_duration != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Text(
-                _playerState == aw.PlayerState.playing
-                    ? _formatDuration(_currentDuration)
-                    : _formatDuration(_duration!),
-                style:
-                    const TextStyle(fontSize: 12, color: AppColors.blackColor),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_duration != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Text(
+                    _playerState == aw.PlayerState.playing
+                        ? _formatDuration(_currentDuration)
+                        : _formatDuration(_duration!),
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.blackColor),
+                  ),
+                ),
+              IconButton(
+                icon: const Icon(Icons.share, size: 20),
+                color: AppColors.primaryColor,
+                onPressed: () async {
+                  try {
+                    await Share.shareXFiles(
+                      [XFile(widget.filePath)],
+                      text: 'Shared voice message from AgroVision',
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Error sharing file: ${e.toString()}')),
+                    );
+                  }
+                },
               ),
-            ),
+            ],
+          ),
         ],
       ),
     );
