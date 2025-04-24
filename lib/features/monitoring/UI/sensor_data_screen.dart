@@ -48,6 +48,20 @@ class SensorDataScreenState extends State<SensorDataScreen> {
     }
   }
 
+  Color getGaugeColor(String sensor, double value) {
+    double maxValue = getMaxValue(sensor);
+    double seventyFivePercent = maxValue * 0.75;
+    double ninetyPercent = maxValue * 0.9;
+
+    if (value < seventyFivePercent) {
+      return SensorColors.successColor;
+    } else if (value >= seventyFivePercent && value < ninetyPercent) {
+      return SensorColors.warningColor;
+    } else {
+      return SensorColors.errorColor;
+    }
+  }
+
   Map<String, Map<String, bool>> pumpControls = {
     'EC': {'auto': false, 'manual': false},
     'Fertility': {'auto': false, 'manual': false},
