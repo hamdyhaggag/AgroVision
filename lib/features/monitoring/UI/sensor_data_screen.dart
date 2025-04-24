@@ -28,7 +28,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   double getMaxValue(String sensor) {
     switch (sensor) {
       case 'EC':
-        return 10.0; // Up to 10 dS/m
+        return 10000; // Up to 10000 uS/cm
       case 'Humidity':
         return 100.0; // 0–100%
       case 'PH':
@@ -36,13 +36,13 @@ class SensorDataScreenState extends State<SensorDataScreen> {
       case 'Temp':
         return 50.0; // Up to 50 °C
       case 'N':
-        return 50.0; // Up to 50 ppm
+        return 50.0; // Up to 50 mg/kg
       case 'P':
-        return 50.0; // Up to 50 ppm
+        return 50.0; // Up to 50 mg/kg
       case 'K':
-        return 300.0; // Up to 300 ppm
+        return 300.0; // Up to 300 mg/kg
       case 'Fertility':
-        return 10.0; // Up to 10%
+        return 1000; // Up to 1000mg/kg
       default:
         return 100.0; // Fallback
     }
@@ -61,7 +61,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   final List<Map<String, String>> sensors = [
     {
       'label': 'EC',
-      'unit': 'dS/m',
+      'unit': 'uS/cm',
       'svgPath': 'assets/images/sensor_icon/Ec.svg'
     },
     {
@@ -75,12 +75,24 @@ class SensorDataScreenState extends State<SensorDataScreen> {
       'unit': '°C',
       'svgPath': 'assets/images/sensor_icon/Temp.svg'
     },
-    {'label': 'N', 'unit': 'ppm', 'svgPath': 'assets/images/sensor_icon/N.svg'},
-    {'label': 'P', 'unit': 'ppm', 'svgPath': 'assets/images/sensor_icon/P.svg'},
-    {'label': 'K', 'unit': 'ppm', 'svgPath': 'assets/images/sensor_icon/K.svg'},
+    {
+      'label': 'N',
+      'unit': 'mg/kg',
+      'svgPath': 'assets/images/sensor_icon/N.svg'
+    },
+    {
+      'label': 'P',
+      'unit': 'mg/kg',
+      'svgPath': 'assets/images/sensor_icon/P.svg'
+    },
+    {
+      'label': 'K',
+      'unit': 'mg/kg',
+      'svgPath': 'assets/images/sensor_icon/K.svg'
+    },
     {
       'label': 'Fertility',
-      'unit': '%',
+      'unit': 'mg/kg',
       'svgPath': 'assets/images/sensor_icon/Fertility.svg'
     },
   ];
