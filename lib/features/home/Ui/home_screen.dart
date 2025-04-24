@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
@@ -12,6 +13,8 @@ import '../../../core/helpers/cache_helper.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../models/weather_model.dart';
+import '../../monitoring/notification/notification_cubit/notification_cubit.dart';
+import '../../monitoring/notification/notification_cubit/notification_state.dart';
 import '../Logic/home_cubit/home_state.dart';
 import 'widgets/quick_actions_grid.dart';
 
@@ -120,10 +123,80 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildAppBarActions() {
     return Row(
       children: [
-        IconButton(
-          icon: Icon(Icons.notifications_active, color: Colors.grey[800]),
-          onPressed: () =>
-              Navigator.pushNamed(context, AppRoutes.notificationsScreen),
+        BlocBuilder<NotificationCubit, NotificationState>(
+          builder: (context, state) {
+            final unreadCount =
+                state.notifications.where((n) => n.isUnread).length;
+
+            return Semantics(
+              label: '$unreadCount new notifications',
+              button: true,
+              child: Tooltip(
+                message: 'Notifications',
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(24),
+                  onTap: () => Navigator.pushNamed(
+                      context, AppRoutes.notificationsScreen),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.asset(
+                          'assets/icon/notifications.svg',
+                          width: 28,
+                          height: 28,
+                          colorFilter: ColorFilter.mode(
+                            Theme.of(context).colorScheme.onSurface,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
+                      if (unreadCount > 0)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder: (child, anim) =>
+                                ScaleTransition(scale: anim, child: child),
+                            child: PhysicalModel(
+                              key: ValueKey(unreadCount),
+                              color: Colors.transparent,
+                              elevation: 2,
+                              shape: BoxShape.circle,
+                              shadowColor: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withValues(alpha: 0.5),
+                              child: ClipOval(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 1),
+                                  color: Theme.of(context).colorScheme.primary,
+                                  child: Text(
+                                    '$unreadCount',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
         const SizedBox(width: 8),
         InkWell(
