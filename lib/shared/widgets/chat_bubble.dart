@@ -1,13 +1,15 @@
 import 'dart:io';
 import 'dart:ui' as ui;
-
-import 'package:audioplayers/audioplayers.dart';
+import 'package:agro_vision/core/themes/app_colors.dart';
+import 'package:audio_waveforms/audio_waveforms.dart'
+    as aw; // Alias for audio_waveforms
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../models/chat_message.dart';
-import 'package:audio_waveforms/audio_waveforms.dart';
+
+// Note: Removed 'package:audioplayers/audioplayers.dart' as it's not used in VoiceMessageBubble
 
 class ChatBubble extends StatefulWidget {
   final Message message;
@@ -260,73 +262,110 @@ class VoiceMessageBubble extends StatefulWidget {
 }
 
 class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
-  bool isPlaying = false;
-  late final PlayerController _playerController;
+  late final aw.PlayerController _playerController;
+  Duration? _duration;
+  Duration _currentDuration = Duration.zero;
+  aw.PlayerState? _playerState;
 
   @override
   void initState() {
     super.initState();
-    _audioPlayer.onPlayerComplete.listen((_) {
-      setState(() => isPlaying = false);
-      _playerController = PlayerController();
-      _preparePlayer();
-    });
+    _playerController = aw.PlayerController();
+    _preparePlayer();
+    _setupListeners();
   }
 
   Future<void> _preparePlayer() async {
     try {
       await _playerController.preparePlayer(path: widget.filePath);
+      final durationMs = await _playerController.getDuration();
+      setState(() {
+        _duration = Duration(milliseconds: durationMs);
+      });
     } catch (e) {
       debugPrint('Error preparing audio: $e');
     }
   }
 
-  Future<void> _togglePlayPause() async {
-    if (isPlaying) {
-      await _audioPlayer.pause();
-    } else {
-      await _audioPlayer.play(DeviceFileSource(widget.filePath));
-    }
-    setState(() {
-      isPlaying = !isPlaying;
+  void _setupListeners() {
+    _playerController.onPlayerStateChanged.listen((state) {
+      setState(() {
+        _playerState = state;
+        if (state == aw.PlayerState.stopped) {
+          _currentDuration = Duration.zero;
+        }
+      });
     });
+    _playerController.onCurrentDurationChanged.listen((durationMs) {
+      setState(() {
+        _currentDuration = Duration(milliseconds: durationMs);
+      });
+    });
+  }
+
+  Future<void> _togglePlayPause() async {
+    if (_playerState == aw.PlayerState.playing) {
+      await _playerController.pausePlayer();
+    } else {
+      await _playerController.startPlayer();
+    }
   }
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
     _playerController.dispose();
     super.dispose();
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(8),
-      margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
         color: Colors.grey[300],
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+            icon: Icon(
+              _playerState == aw.PlayerState.playing
+                  ? Icons.pause
+                  : Icons.play_arrow,
+            ),
             onPressed: _togglePlayPause,
           ),
           Expanded(
-            child: AudioFileWaveforms(
+            child: aw.AudioFileWaveforms(
               playerController: _playerController,
               size: const Size(double.infinity, 50),
-              waveformType: WaveformType.fitWidth,
+              waveformType: aw.WaveformType.fitWidth,
               enableSeekGesture: true,
-              playerWaveStyle: const PlayerWaveStyle(
-                fixedWaveColor: Colors.blueAccent,
+              playerWaveStyle: const aw.PlayerWaveStyle(
+                fixedWaveColor: AppColors.primaryColor,
+                liveWaveColor: Colors.grey,
+                spacing: 6,
               ),
             ),
           ),
+          if (_duration != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Text(
+                _playerState == aw.PlayerState.playing
+                    ? _formatDuration(_currentDuration)
+                    : _formatDuration(_duration!),
+                style:
+                    const TextStyle(fontSize: 12, color: AppColors.blackColor),
+              ),
+            ),
         ],
       ),
     );
