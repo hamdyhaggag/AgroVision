@@ -15,7 +15,7 @@ Future<void> showNotification(String title, String body) async {
   const NotificationDetails platformChannelSpecifics =
       NotificationDetails(android: androidPlatformChannelSpecifics);
   await flutterLocalNotificationsPlugin.show(
-    0, // Notification ID (can be unique per notification if needed)
+    0,
     title,
     body,
     platformChannelSpecifics,

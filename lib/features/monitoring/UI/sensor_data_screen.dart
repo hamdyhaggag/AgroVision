@@ -134,10 +134,18 @@ class SensorDataScreenState extends State<SensorDataScreen> {
       final label = sensor['label']!;
       final value = _getSensorValue(data, label);
       if (isSensorInError(label, value)) {
-        final recentNotifications = notificationCubit.state.notifications.where(
-            (n) => n.type == label && now.difference(n.timestamp).inHours < 1);
-        if (recentNotifications.isEmpty) {
+        /// Generate stable ID based on hour + sensor
+        final hourTimestamp = DateTime(now.year, now.month, now.day, now.hour);
+        final notificationId =
+            '${label}_${hourTimestamp.millisecondsSinceEpoch}';
+
+        /// Check if notification with this ID already exists
+        final exists = notificationCubit.state.notifications
+            .any((n) => n.id == notificationId);
+
+        if (!exists) {
           final notification = NotificationModel(
+            id: notificationId,
             title: '$label Alert',
             description:
                 '$label is outside optimal range: ${value.toStringAsFixed(1)}',
@@ -168,10 +176,12 @@ class SensorDataScreenState extends State<SensorDataScreen> {
         builder: (context, state) {
           if (state is SensorDataInitial) return _buildInitialState(context);
           if (state is SensorDataLoading) return _buildLoadingState();
-          if (state is SensorDataLoaded)
+          if (state is SensorDataLoaded) {
             return _buildLoadedState(context, state.data);
-          if (state is SensorDataError)
+          }
+          if (state is SensorDataError) {
             return _buildErrorState(context, state.error);
+          }
           return Container();
         },
       ),
@@ -196,7 +206,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                   ),
             ),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'Get started by loading sensor data',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -276,7 +286,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
             const SizedBox(height: 16),
             Container(
               height: 220,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.gaugeBackground,
                 shape: BoxShape.circle,
               ),
@@ -359,7 +369,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                         children: [
                           Text(
                             value.toStringAsFixed(1),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 32,
                               fontFamily: 'poppins',
                               fontWeight: FontWeight.w800,
@@ -465,6 +475,28 @@ class SensorDataScreenState extends State<SensorDataScreen> {
     );
   }
 
+  Widget _buildStatusIndicator(bool autoActive, bool manualActive) {
+    Color indicatorColor = Colors.grey;
+    if (autoActive || manualActive) indicatorColor = AppColors.primaryColor;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        color: indicatorColor,
+        shape: BoxShape.circle,
+        boxShadow: [
+          if (autoActive || manualActive)
+            BoxShadow(
+              color: indicatorColor.withValues(alpha: 0.4),
+              spreadRadius: 2,
+              blurRadius: 8,
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildPumpControlsSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -490,7 +522,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                 children: [
                   SvgPicture.asset(
                     'assets/icon/control.svg',
-                    colorFilter: ColorFilter.mode(
+                    colorFilter: const ColorFilter.mode(
                         AppColors.primaryColor, BlendMode.srcIn),
                     width: 24,
                     height: 24,
@@ -579,7 +611,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                   svgPath,
                   width: 28,
                   height: 28,
-                  colorFilter: ColorFilter.mode(
+                  colorFilter: const ColorFilter.mode(
                     AppColors.primaryColor,
                     BlendMode.srcIn,
                   ),
@@ -592,7 +624,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                   children: [
                     Text(
                       label,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -703,28 +735,6 @@ class SensorDataScreenState extends State<SensorDataScreen> {
     );
   }
 
-  Widget _buildStatusIndicator(bool autoActive, bool manualActive) {
-    Color indicatorColor = Colors.grey;
-    if (autoActive || manualActive) indicatorColor = AppColors.primaryColor;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      width: 12,
-      height: 12,
-      decoration: BoxDecoration(
-        color: indicatorColor,
-        shape: BoxShape.circle,
-        boxShadow: [
-          if (autoActive || manualActive)
-            BoxShadow(
-              color: indicatorColor.withValues(alpha: 0.4),
-              spreadRadius: 2,
-              blurRadius: 8,
-            ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildControlButton({
     required String label,
     required bool active,
@@ -788,7 +798,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                   ),
             ),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'Failed to fetch sensor data. Please check your internet connection',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -893,20 +903,20 @@ class _ShimmerLoaderState extends State<ShimmerLoader>
   }
 }
 
-class ChartStyle {
-  final Color backgroundColor;
-  final Color textColor;
-  final Color lineColor;
-  final Color axisLineColor;
-  final Color gridColor;
-  final Color borderColor;
-
-  const ChartStyle({
-    this.backgroundColor = Colors.white,
-    this.textColor = Colors.black,
-    this.lineColor = Colors.blue,
-    this.axisLineColor = Colors.grey,
-    this.gridColor = Colors.grey,
-    this.borderColor = Colors.transparent,
-  });
-}
+// class ChartStyle {
+//   final Color backgroundColor;
+//   final Color textColor;
+//   final Color lineColor;
+//   final Color axisLineColor;
+//   final Color gridColor;
+//   final Color borderColor;
+//
+//   const ChartStyle({
+//     this.backgroundColor = Colors.white,
+//     this.textColor = Colors.black,
+//     this.lineColor = Colors.blue,
+//     this.axisLineColor = Colors.grey,
+//     this.gridColor = Colors.grey,
+//     this.borderColor = Colors.transparent,
+//   });
+// }

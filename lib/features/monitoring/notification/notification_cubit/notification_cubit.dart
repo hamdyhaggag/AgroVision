@@ -14,14 +14,18 @@ class NotificationCubit extends Cubit<NotificationState> {
   }
 
   void addNotification(NotificationModel notification) {
-    final updatedNotifications = [notification, ...state.notifications];
-    emit(state.copyWith(notifications: updatedNotifications));
-    CacheHelper.saveNotifications(updatedNotifications);
+    final exists = state.notifications.any((n) => n.id == notification.id);
+    if (!exists) {
+      final updatedNotifications = [notification, ...state.notifications];
+      emit(state.copyWith(notifications: updatedNotifications));
+      CacheHelper.saveNotifications(updatedNotifications);
+    }
   }
 
   void markAllAsRead() {
     final updatedNotifications = state.notifications
         .map((n) => NotificationModel(
+              id: n.id,
               title: n.title,
               description: n.description,
               timeAgo: n.timeAgo,
@@ -36,8 +40,9 @@ class NotificationCubit extends Cubit<NotificationState> {
 
   void markAsRead(NotificationModel notification) {
     final updatedNotifications = state.notifications.map((n) {
-      if (n.timestamp == notification.timestamp) {
+      if (n.id == notification.id) {
         return NotificationModel(
+          id: n.id,
           title: n.title,
           description: n.description,
           timeAgo: n.timeAgo,

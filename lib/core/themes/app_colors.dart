@@ -147,3 +147,28 @@ Color getGaugeColor(String sensor, double value) {
       return AppColors.primaryColor; // Fallback
   }
 }
+
+Color getColorForType(String type) {
+  switch (type) {
+    case 'temperature':
+      return const Color(0xFFFF6D00);
+    case 'humidity':
+      return const Color(0xFF0288D1);
+    case 'soil':
+      return const Color(0xFF795548);
+    case 'ec':
+      return const Color(0xFF388E3C);
+    case 'ph':
+      return const Color(0xFF7B1FA2);
+    case 'n':
+      return const Color(0xFF1976D2);
+    case 'p':
+      return const Color(0xFFD32F2F);
+    case 'k': // Potassium
+      return const Color(0xFF388E3C);
+    case 'fertility':
+      return const Color(0xFFFBC02D);
+    default:
+      return const Color(0xFF9E9E9E);
+  }
+}

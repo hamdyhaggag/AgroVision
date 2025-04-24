@@ -1,4 +1,5 @@
 class NotificationModel {
+  final String id;
   final String title;
   final String description;
   final String timeAgo;
@@ -8,6 +9,7 @@ class NotificationModel {
 
   NotificationModel({
     required this.title,
+    required this.id,
     required this.description,
     required this.timeAgo,
     required this.isUnread,
@@ -30,6 +32,7 @@ class NotificationModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'title': title,
       'description': description,
       'timeAgo': timeAgo,
@@ -41,6 +44,7 @@ class NotificationModel {
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
+      id: json['id'],
       title: json['title'],
       description: json['description'],
       timeAgo: json['timeAgo'],
