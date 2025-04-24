@@ -197,7 +197,7 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> sendVoiceMessage(File voiceFile,
-      {String speak = 'false', String language = 'auto'}) async {
+      {String speak = 'true', String language = 'auto'}) async {
     final currentSession = _getCurrentSession();
     const userId = "55";
     final sessionId = currentSession.id;
