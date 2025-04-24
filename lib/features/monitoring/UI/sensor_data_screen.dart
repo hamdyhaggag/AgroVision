@@ -5,10 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/helpers/cache_helper.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../../models/notification_model.dart';
 import '../../../shared/widgets/custom_appbar.dart';
 import '../../../shared/widgets/custom_botton.dart';
 import '../Api/pump_control_service.dart';
 import '../Logic/sensor_data_cubit.dart';
+import '../notification/notification_cubit/notification_cubit.dart';
+import '../notification/notification_utils.dart';
+import '../utils/sensor_utils.dart';
 
 class SensorDataScreen extends StatefulWidget {
   final Map<String, String> field;
@@ -55,24 +59,39 @@ class SensorDataScreenState extends State<SensorDataScreen> {
     'P': {'auto': false, 'manual': false},
   };
   final List<Map<String, String>> sensors = [
-    {'label': 'EC', 'svgPath': 'assets/images/sensor_icon/Ec.svg'},
+    {
+      'label': 'EC',
+      'unit': 'dS/m',
+      'svgPath': 'assets/images/sensor_icon/Ec.svg'
+    },
+    {
+      'label': 'Humidity',
+      'unit': '%',
+      'svgPath': 'assets/images/sensor_icon/Humidity.svg'
+    },
+    {'label': 'PH', 'unit': '', 'svgPath': 'assets/images/sensor_icon/Ph.svg'},
+    {
+      'label': 'Temp',
+      'unit': '°C',
+      'svgPath': 'assets/images/sensor_icon/Temp.svg'
+    },
+    {'label': 'N', 'unit': 'ppm', 'svgPath': 'assets/images/sensor_icon/N.svg'},
+    {'label': 'P', 'unit': 'ppm', 'svgPath': 'assets/images/sensor_icon/P.svg'},
+    {'label': 'K', 'unit': 'ppm', 'svgPath': 'assets/images/sensor_icon/K.svg'},
     {
       'label': 'Fertility',
+      'unit': '%',
       'svgPath': 'assets/images/sensor_icon/Fertility.svg'
     },
-    {'label': 'Humidity', 'svgPath': 'assets/images/sensor_icon/Humidity.svg'},
-    {'label': 'PH', 'svgPath': 'assets/images/sensor_icon/Ph.svg'},
-    {'label': 'Temp', 'svgPath': 'assets/images/sensor_icon/Temp.svg'},
-    {'label': 'K', 'svgPath': 'assets/images/sensor_icon/K.svg'},
-    {'label': 'N', 'svgPath': 'assets/images/sensor_icon/N.svg'},
-    {'label': 'P', 'svgPath': 'assets/images/sensor_icon/P.svg'},
   ];
-
   @override
   void initState() {
     super.initState();
     _pumpControlService = PumpControlService();
+    pumpControls = Map.fromEntries(sensors.map((sensor) =>
+        MapEntry(sensor['label']!, {'auto': false, 'manual': false})));
     _loadPumpControls();
+    context.read<SensorDataCubit>().loadSensorData();
   }
 
   Future<void> _loadPumpControls() async {
@@ -102,22 +121,58 @@ class SensorDataScreenState extends State<SensorDataScreen> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  double _getSensorValue(Map<String, dynamic> data, String sensor) {
+    final sensorKey = sensor == 'Humidity' ? 'Hum' : sensor;
+    final value = data[sensorKey] ?? 0;
+    return value is String ? double.tryParse(value) ?? 0 : value.toDouble();
+  }
+
+  void _checkForErrorsAndNotify(
+      Map<String, dynamic> data, NotificationCubit notificationCubit) {
+    final now = DateTime.now();
+    for (var sensor in sensors) {
+      final label = sensor['label']!;
+      final value = _getSensorValue(data, label);
+      if (isSensorInError(label, value)) {
+        final recentNotifications = notificationCubit.state.notifications.where(
+            (n) => n.type == label && now.difference(n.timestamp).inHours < 1);
+        if (recentNotifications.isEmpty) {
+          final notification = NotificationModel(
+            title: '$label Alert',
+            description:
+                '$label is outside optimal range: ${value.toStringAsFixed(1)}',
+            timeAgo: 'Just now',
+            isUnread: true,
+            type: label.toLowerCase(),
+            timestamp: now,
+          );
+          notificationCubit.addNotification(notification);
+          showNotification(notification.title, notification.description);
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
       appBar: const CustomAppBar(title: 'Sensor Data', isHome: true),
-      body: BlocBuilder<SensorDataCubit, SensorDataState>(
+      body: BlocConsumer<SensorDataCubit, SensorDataState>(
+        listener: (context, state) {
+          if (state is SensorDataLoaded) {
+            _checkForErrorsAndNotify(
+                state.data, context.read<NotificationCubit>());
+          }
+        },
         builder: (context, state) {
           if (state is SensorDataInitial) return _buildInitialState(context);
           if (state is SensorDataLoading) return _buildLoadingState();
-          if (state is SensorDataLoaded) {
+          if (state is SensorDataLoaded)
             return _buildLoadedState(context, state.data);
-          }
-          if (state is SensorDataError) {
+          if (state is SensorDataError)
             return _buildErrorState(context, state.error);
-          }
-          return const SizedBox.shrink();
+          return Container();
         },
       ),
     );
@@ -141,7 +196,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                   ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Get started by loading sensor data',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -221,7 +276,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
             const SizedBox(height: 16),
             Container(
               height: 220,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.gaugeBackground,
                 shape: BoxShape.circle,
               ),
@@ -304,7 +359,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                         children: [
                           Text(
                             value.toStringAsFixed(1),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 32,
                               fontFamily: 'poppins',
                               fontWeight: FontWeight.w800,
@@ -435,7 +490,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                 children: [
                   SvgPicture.asset(
                     'assets/icon/control.svg',
-                    colorFilter: const ColorFilter.mode(
+                    colorFilter: ColorFilter.mode(
                         AppColors.primaryColor, BlendMode.srcIn),
                     width: 24,
                     height: 24,
@@ -458,9 +513,11 @@ class SensorDataScreenState extends State<SensorDataScreen> {
               child: _buildControlItem(
                 label: _selectedSensor,
                 svgPath: sensors.firstWhere(
-                    (sensor) => sensor['label'] == _selectedSensor)['svgPath']!,
-                autoActive: pumpControls[_selectedSensor]!['auto']!,
-                manualActive: pumpControls[_selectedSensor]!['manual']!,
+                  (sensor) => sensor['label'] == _selectedSensor,
+                  orElse: () => {'svgPath': 'assets/icons/default.svg'},
+                )['svgPath']!,
+                autoActive: pumpControls[_selectedSensor]!['auto'] ?? false,
+                manualActive: pumpControls[_selectedSensor]!['manual'] ?? false,
                 onAutoChanged: (value) async {
                   setState(() {
                     pumpControls[_selectedSensor]!['auto'] = value;
@@ -522,7 +579,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                   svgPath,
                   width: 28,
                   height: 28,
-                  colorFilter: const ColorFilter.mode(
+                  colorFilter: ColorFilter.mode(
                     AppColors.primaryColor,
                     BlendMode.srcIn,
                   ),
@@ -535,7 +592,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                   children: [
                     Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -731,7 +788,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                   ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Failed to fetch sensor data. Please check your internet connection',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -749,12 +806,6 @@ class SensorDataScreenState extends State<SensorDataScreen> {
         ),
       ),
     );
-  }
-
-  double _getSensorValue(Map<String, dynamic> data, String sensor) {
-    final sensorKey = sensor == 'Humidity' ? 'Hum' : sensor;
-    final value = data[sensorKey] ?? 0;
-    return value is String ? double.tryParse(value) ?? 0 : value.toDouble();
   }
 }
 

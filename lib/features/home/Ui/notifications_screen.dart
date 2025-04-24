@@ -1,64 +1,12 @@
 import 'package:agro_vision/shared/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/notification_model.dart';
+import '../../monitoring/notification/notification_cubit/notification_cubit.dart';
+import '../../monitoring/notification/notification_cubit/notification_state.dart';
 
-class NotificationsScreen extends StatefulWidget {
+class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
-
-  @override
-  State<NotificationsScreen> createState() => _NotificationsScreenState();
-}
-
-class _NotificationsScreenState extends State<NotificationsScreen> {
-  final List<NotificationModel> _notifications = [
-    NotificationModel(
-      title: 'Temperature Alert',
-      description: 'High temperature detected in greenhouse A.',
-      timeAgo: '2 mins ago',
-      isUnread: true,
-      type: 'temperature',
-      timestamp: DateTime.now().subtract(const Duration(minutes: 2)),
-    ),
-    NotificationModel(
-      title: 'Humidity Warning',
-      description: 'Low air humidity levels in field B.',
-      timeAgo: '15 mins ago',
-      isUnread: false,
-      type: 'humidity',
-      timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
-    ),
-    NotificationModel(
-      title: 'Soil Moisture Alert',
-      description: 'Soil moisture below threshold in sector C.',
-      timeAgo: '1 day ago',
-      isUnread: false,
-      type: 'soil',
-      timestamp: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-    NotificationModel(
-      title: 'Nutrient Alert - N',
-      description: 'Low nitrogen levels detected in field F.',
-      timeAgo: '2 days ago',
-      isUnread: false,
-      type: 'nutrient',
-      timestamp: DateTime.now().subtract(const Duration(days: 2)),
-    ),
-    NotificationModel(
-      title: 'Nutrient Alert - P',
-      description: 'Low phosphorus levels in sector G.',
-      timeAgo: '3 days ago',
-      isUnread: false,
-      type: 'nutrient',
-      timestamp: DateTime.now().subtract(const Duration(days: 3)),
-    ),
-  ];
-  void _markAllAsRead() {
-    setState(() {
-      for (var notification in _notifications) {
-        notification.isUnread = false;
-      }
-    });
-  }
 
   Widget _buildSectionHeader(String title) {
     return Padding(
@@ -80,30 +28,24 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<dynamic> notificationItems = [];
-    String? previousCategory;
-
-    for (var notification in _notifications) {
-      if (notification.category != previousCategory) {
-        notificationItems.add(notification.category);
-        previousCategory = notification.category;
-      }
-      notificationItems.add(notification);
-    }
-
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Notifications',
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all),
-            onPressed: _markAllAsRead,
+            onPressed: () {
+              context.read<NotificationCubit>().markAllAsRead();
+            },
             tooltip: 'Mark all as read',
           ),
         ],
       ),
-      body: notificationItems.isEmpty
-          ? const Center(
+      body: BlocBuilder<NotificationCubit, NotificationState>(
+        builder: (context, state) {
+          final notifications = state.notifications;
+          if (notifications.isEmpty) {
+            return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -115,31 +57,41 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                 ],
               ),
-            )
-          : RefreshIndicator(
-              onRefresh: () async {
-                await Future.delayed(const Duration(seconds: 1));
-              },
-              child: ListView.builder(
-                itemCount: notificationItems.length,
-                itemBuilder: (context, index) {
-                  final item = notificationItems[index];
-                  if (item is String) {
-                    return _buildSectionHeader(item);
-                  } else if (item is NotificationModel) {
-                    return NotificationCard(
+            );
+          }
+
+          List<dynamic> notificationItems = [];
+          String? previousCategory;
+          for (var notification in notifications) {
+            if (notification.category != previousCategory) {
+              notificationItems.add(notification.category);
+              previousCategory = notification.category;
+            }
+            notificationItems.add(notification);
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              await Future.delayed(const Duration(seconds: 1));
+            },
+            child: ListView.builder(
+              itemCount: notificationItems.length,
+              itemBuilder: (context, index) {
+                final item = notificationItems[index];
+                if (item is String) {
+                  return _buildSectionHeader(item);
+                } else if (item is NotificationModel) {
+                  return NotificationCard(
                       notification: item,
-                      onTap: () {
-                        setState(() {
-                          item.isUnread = false;
-                        });
-                      },
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
+                      onTap: () =>
+                          context.read<NotificationCubit>().markAsRead(item));
+                }
+                return const SizedBox.shrink();
+              },
             ),
+          );
+        },
+      ),
     );
   }
 }
@@ -148,17 +100,33 @@ class NotificationCard extends StatelessWidget {
   final NotificationModel notification;
   final VoidCallback onTap;
 
-  const NotificationCard(
-      {super.key, required this.notification, required this.onTap});
+  const NotificationCard({
+    super.key,
+    required this.notification,
+    required this.onTap,
+  });
 
   IconData _getIconForType(String type) {
     switch (type) {
       case 'temperature':
+      case 'temp':
         return Icons.thermostat;
       case 'humidity':
+      case 'hum':
         return Icons.water_drop;
       case 'soil':
         return Icons.grass;
+      case 'ec':
+        return Icons.electrical_services;
+      case 'ph':
+        return Icons.science;
+      case 'n':
+      case 'p':
+      case 'k':
+      case 'nutrient':
+        return Icons.local_florist;
+      case 'fertility':
+        return Icons.agriculture;
       default:
         return Icons.notifications;
     }
@@ -167,11 +135,24 @@ class NotificationCard extends StatelessWidget {
   Color _getColorForType(String type) {
     switch (type) {
       case 'temperature':
+      case 'temp':
         return Colors.red;
       case 'humidity':
+      case 'hum':
         return Colors.blue;
       case 'soil':
         return Colors.brown;
+      case 'ec':
+        return Colors.purple;
+      case 'ph':
+        return Colors.teal;
+      case 'n':
+      case 'p':
+      case 'k':
+      case 'nutrient':
+        return Colors.green;
+      case 'fertility':
+        return Colors.amber;
       default:
         return Colors.grey;
     }
@@ -186,12 +167,12 @@ class NotificationCard extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           color: notification.isUnread
-              ? Colors.green.withValues(alpha: 0.1)
+              ? Colors.green.withOpacity(0.1)
               : Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.1),
+              color: Colors.grey.withOpacity(0.1),
               blurRadius: 5,
               spreadRadius: 1,
             ),
@@ -204,8 +185,7 @@ class NotificationCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color:
-                    _getColorForType(notification.type).withValues(alpha: 0.1),
+                color: _getColorForType(notification.type).withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(

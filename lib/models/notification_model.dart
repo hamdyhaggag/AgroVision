@@ -27,4 +27,26 @@ class NotificationModel {
       return 'Older';
     }
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'description': description,
+      'timeAgo': timeAgo,
+      'isUnread': isUnread,
+      'type': type,
+      'timestamp': timestamp.toIso8601String(),
+    };
+  }
+
+  factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    return NotificationModel(
+      title: json['title'],
+      description: json['description'],
+      timeAgo: json['timeAgo'],
+      isUnread: json['isUnread'],
+      type: json['type'],
+      timestamp: DateTime.parse(json['timestamp']),
+    );
+  }
 }

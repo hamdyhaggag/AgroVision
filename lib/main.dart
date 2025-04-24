@@ -12,9 +12,11 @@ import 'core/network/api_service.dart';
 import 'core/network/dio_factory.dart';
 import 'core/routing/app_router.dart';
 import 'bloc_observer_checker.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 bool isEnterBefore = false;
-
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 void main() async {
   await dotenv.load(fileName: '.env');
 
@@ -24,7 +26,18 @@ void main() async {
   await CacheHelper.init();
   await initializeAppSettings();
   await setupGetIt();
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('app_icon');
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
 
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: (details) {
+      // Handle notification taps
+    },
+  );
   Bloc.observer = const BlocObserverChecker();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(

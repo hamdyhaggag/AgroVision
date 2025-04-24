@@ -30,6 +30,8 @@ import 'features/monitoring/Api/sensor_data_service.dart';
 import 'features/monitoring/Logic/sensor_data_cubit.dart';
 import 'package:provider/provider.dart';
 
+import 'features/monitoring/notification/notification_cubit/notification_cubit.dart';
+
 class AgroVision extends StatelessWidget {
   final AppRouter appRouter;
   final SensorDataService _sensorDataService =
@@ -71,6 +73,9 @@ class AgroVision extends StatelessWidget {
                 create: (context) => ChatCubit(getIt<ChatRepository>())),
             BlocProvider(
               create: (context) => TaskCubit(),
+            ),
+            BlocProvider<NotificationCubit>(
+              create: (context) => NotificationCubit(),
             ),
             BlocProvider(
               create: (context) => ThemeCubit()..getCurrentTheme(),
