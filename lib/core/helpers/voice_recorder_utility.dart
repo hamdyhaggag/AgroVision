@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
@@ -32,7 +33,20 @@ class VoiceRecorder {
   Future<String?> stopRecording() async {
     await _recorderController.stop();
     await Future.delayed(const Duration(milliseconds: 500));
-    return _filePath;
+    if (_filePath != null) {
+      final m4aFile = File(_filePath!);
+      try {
+        final wavFile = await convertToWav(m4aFile);
+        _filePath = wavFile.path;
+        return wavFile.path;
+      } catch (e) {
+        if (kDebugMode) {
+          print('Conversion failed: $e');
+        }
+        return null;
+      }
+    }
+    return null;
   }
 
   Future<File> convertToWav(File inputFile) async {
@@ -41,7 +55,7 @@ class VoiceRecorder {
         p.join(tempDir.path, '${DateTime.now().millisecondsSinceEpoch}.wav');
 
     final session = await FFmpegKit.execute('-y -i "${inputFile.path}" '
-        '-acodec pcm_s16le -ar 16000 -ac 1 -f wav "$outputPath"');
+        '-acodec pcm_s16le -ac 1 -f wav "$outputPath"');
 
     final returnCode = await session.getReturnCode();
 
