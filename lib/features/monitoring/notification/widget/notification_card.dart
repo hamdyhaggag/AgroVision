@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../models/notification_model.dart';
+import '../notification_utils.dart';
 
 class NotificationCard extends StatelessWidget {
   final NotificationModel notification;
@@ -97,7 +98,7 @@ class NotificationCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        notification.timeAgo,
+                        formatTimeAgo(notification.timestamp),
                         style: const TextStyle(
                           color: Colors.grey,
                           fontFamily: 'SYNE',

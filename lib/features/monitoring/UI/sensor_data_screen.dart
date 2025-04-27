@@ -175,7 +175,6 @@ class SensorDataScreenState extends State<SensorDataScreen> {
             title: '$label Alert',
             description:
                 '$label is outside optimal range: ${value.toStringAsFixed(1)}',
-            timeAgo: 'Just now',
             isUnread: true,
             type: label.toLowerCase(),
             timestamp: now,
