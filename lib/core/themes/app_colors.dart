@@ -116,7 +116,7 @@ Color getColorForType(String type) {
   switch (type) {
     case 'temperature':
       return const Color(0xFFFF6D00);
-    case 'humidity':
+    case 'moisture':
       return const Color(0xFF0288D1);
     case 'soil':
       return const Color(0xFF795548);

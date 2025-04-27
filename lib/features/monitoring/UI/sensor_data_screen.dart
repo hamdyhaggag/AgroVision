@@ -29,7 +29,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
     switch (sensor) {
       case 'EC':
         return 10000; // Up to 10000 uS/cm
-      case 'Humidity':
+      case 'Moisture':
         return 100.0; // 0–100%
       case 'PH':
         return 14.0; // pH scale 0–14
@@ -65,7 +65,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   Map<String, Map<String, bool>> pumpControls = {
     'EC': {'auto': false, 'manual': false},
     'Fertility': {'auto': false, 'manual': false},
-    'Humidity': {'auto': false, 'manual': false},
+    'Moisture': {'auto': false, 'manual': false},
     'PH': {'auto': false, 'manual': false},
     'Temp': {'auto': false, 'manual': false},
     'K': {'auto': false, 'manual': false},
@@ -79,7 +79,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
       'svgPath': 'assets/images/sensor_icon/Ec.svg'
     },
     {
-      'label': 'Humidity',
+      'label': 'Moisture',
       'unit': '%',
       'svgPath': 'assets/images/sensor_icon/Humidity.svg'
     },
@@ -148,7 +148,7 @@ class SensorDataScreenState extends State<SensorDataScreen> {
   }
 
   double _getSensorValue(Map<String, dynamic> data, String sensor) {
-    final sensorKey = sensor == 'Humidity' ? 'Hum' : sensor;
+    final sensorKey = sensor == 'Moisture' ? 'Hum' : sensor;
     final value = data[sensorKey] ?? 0;
     return value is String ? double.tryParse(value) ?? 0 : value.toDouble();
   }

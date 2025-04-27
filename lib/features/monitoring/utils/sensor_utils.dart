@@ -9,7 +9,7 @@ class SensorColors {
 
 Map<String, Map<String, double>> optimalRanges = {
   'EC': {'max': 1.0}, // Optimal <= 1, error > 4
-  'Humidity': {'min': 35.0, 'max': 75.0},
+  'Moisture': {'min': 35.0, 'max': 75.0},
   'PH': {'min': 6.0, 'max': 7.5},
   'Temp': {'min': 18.0, 'max': 30.0},
   'N': {'min': 10.0},

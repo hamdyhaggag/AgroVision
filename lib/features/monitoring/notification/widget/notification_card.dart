@@ -15,7 +15,7 @@ class NotificationCard extends StatelessWidget {
   });
   final Map<String, String> _svgAssetForType = {
     'temperature': 'assets/images/sensor_icon/Temp.svg',
-    'humidity': 'assets/images/sensor_icon/Humidity.svg',
+    'moisture': 'assets/images/sensor_icon/Humidity.svg',
     'ec': 'assets/images/sensor_icon/Ec.svg',
     'ph': 'assets/images/sensor_icon/Ph.svg',
     'n': 'assets/images/sensor_icon/N.svg',
