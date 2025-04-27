@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:agro_vision/features/chat/api/chatbot_service.dart';
 import 'package:agro_vision/models/chat_message.dart';
-
+import '../../models/chat_session.dart';
 import '../../models/new_session_request.dart';
 import '../../models/session_response.dart';
 
@@ -27,7 +27,6 @@ class ChatRepository {
   Future<ChatResponse> sendText(ChatRequestBody body) async {
     try {
       final response = await chatbotService.sendTextMessage(body);
-
       return response;
     } on DioException catch (e) {
       if (_isNetworkError(e)) {
@@ -60,7 +59,6 @@ class ChatRepository {
     String sessionId,
     String userId,
   ) async {
-    const String userId = "55";
     try {
       final response = await chatbotService.sendImageMessage(
         image,
@@ -80,12 +78,12 @@ class ChatRepository {
   }
 
   Future<ChatResponse> sendVoice(
-      File voiceFile,
-      String speak,
-      String language,
-      String userId,
-      String sessionId,
-      ) async {
+    File voiceFile,
+    String speak,
+    String language,
+    String userId,
+    String sessionId,
+  ) async {
     try {
       final response = await chatbotService.sendVoiceMessage(
         voiceFile,
@@ -100,6 +98,34 @@ class ChatRepository {
         throw NetworkUnavailableException();
       }
       throw ChatException('Voice upload failed: ${e.message}');
+    }
+  }
+
+  Future<void> deleteSession(String userId, String sessionId) async {
+    try {
+      await chatbotService.deleteSession(userId, sessionId);
+    } on DioException catch (e) {
+      if (_isNetworkError(e)) {
+        throw NetworkUnavailableException();
+      }
+      throw ChatException('Failed to delete session: ${e.message}');
+    }
+  }
+
+  Future<ChatSession> getSession(String sessionId) async {
+    try {
+      final response = await chatbotService.getSession(sessionId);
+      return ChatSession(
+        id: response.sessionId,
+        messages: response.messages,
+        createdAt: DateTime.parse(response.createdAt),
+        title: response.title,
+      );
+    } on DioException catch (e) {
+      if (_isNetworkError(e)) {
+        throw NetworkUnavailableException();
+      }
+      throw ChatException('Failed to get session: ${e.message}');
     }
   }
 

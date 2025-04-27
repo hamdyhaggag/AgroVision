@@ -37,4 +37,38 @@ abstract class ChatbotService {
     @Part(name: 'user_id') String userId,
     @Part(name: 'session_id') String sessionId,
   );
+
+  @DELETE('delete_session/{user_id}/{session_id}')
+  Future<void> deleteSession(
+    @Path('user_id') String userId,
+    @Path('session_id') String sessionId,
+  );
+
+  @GET('sessions/{session_id}')
+  Future<SessionApiModel> getSession(@Path('session_id') String sessionId);
+}
+
+class SessionApiModel {
+  final String sessionId;
+  final List<Message> messages;
+  final String createdAt;
+  final String? title;
+
+  SessionApiModel({
+    required this.sessionId,
+    required this.messages,
+    required this.createdAt,
+    this.title,
+  });
+
+  factory SessionApiModel.fromJson(Map<String, dynamic> json) {
+    return SessionApiModel(
+      sessionId: json['session_id'],
+      messages: (json['messages'] as List)
+          .map((msg) => Message.fromJson(msg))
+          .toList(),
+      createdAt: json['created_at'],
+      title: json['title'],
+    );
+  }
 }
