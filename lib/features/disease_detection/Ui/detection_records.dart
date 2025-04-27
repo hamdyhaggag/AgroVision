@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
 import '../../../models/disease_model.dart';
+import 'package:intl/intl.dart';
 
 class DetectionRecords extends StatefulWidget {
   const DetectionRecords({super.key});
@@ -213,7 +214,9 @@ class _DetectionRecordsState extends State<DetectionRecords> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  disease.date,
+                                  DateFormat('yyyy-MM-dd   hh:mm a')
+                                      .format(DateTime.parse(disease.date))
+                                      .toLowerCase(),
                                   style: const TextStyle(
                                     fontFamily: 'SYNE',
                                     fontWeight: FontWeight.w500,
