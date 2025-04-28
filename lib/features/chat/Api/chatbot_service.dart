@@ -46,6 +46,8 @@ abstract class ChatbotService {
 
   @GET('sessions/{session_id}')
   Future<SessionApiModel> getSession(@Path('session_id') String sessionId);
+  @GET('/sessions/{user_id}')
+  Future<List<SessionApiModel>> getSessions(@Path('user_id') String userId);
 }
 
 class SessionApiModel {

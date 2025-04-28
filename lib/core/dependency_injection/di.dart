@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import '../../features/authentication/Data/repos/login_repo.dart';
+import '../../features/authentication/Logic/auth cubit/auth_cubit.dart';
 import '../../features/authentication/Logic/login cubit/login_cubit.dart';
 import '../../features/authentication/Logic/logout cubit/logout_cubit.dart';
 import '../../features/chat/api/chatbot_service.dart';
@@ -31,5 +32,10 @@ Future<void> setupGetIt() async {
   getIt.registerLazySingleton<LogoutCubit>(() => LogoutCubit(getIt()));
 
   // Add this line if using MultiBlocProvider
-  getIt.registerFactory<ChatCubit>(() => ChatCubit(getIt<ChatRepository>()));
+  getIt.registerFactory<ChatCubit>(
+    () => ChatCubit(
+      getIt<ChatRepository>(),
+      getIt<AuthCubit>(),
+    ),
+  );
 }

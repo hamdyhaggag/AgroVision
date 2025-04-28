@@ -112,20 +112,22 @@ class ChatRepository {
     }
   }
 
-  Future<ChatSession> getSession(String sessionId) async {
+  Future<List<ChatSession>> getSessions(String userId) async {
     try {
-      final response = await chatbotService.getSession(sessionId);
-      return ChatSession(
-        id: response.sessionId,
-        messages: response.messages,
-        createdAt: DateTime.parse(response.createdAt),
-        title: response.title,
-      );
+      final response = await chatbotService.getSessions(userId);
+      return response
+          .map((apiModel) => ChatSession(
+                id: apiModel.sessionId,
+                messages: apiModel.messages,
+                createdAt: DateTime.parse(apiModel.createdAt),
+                title: apiModel.title,
+              ))
+          .toList();
     } on DioException catch (e) {
       if (_isNetworkError(e)) {
         throw NetworkUnavailableException();
       }
-      throw ChatException('Failed to get session: ${e.message}');
+      throw ChatException('Failed to fetch sessions: ${e.message}');
     }
   }
 
