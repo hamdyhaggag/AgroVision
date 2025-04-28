@@ -1,24 +1,46 @@
 import 'dart:io';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../core/helpers/cache_helper.dart';
 import '../../../models/chat_message.dart';
 import '../../../models/chat_session.dart';
 import '../chat_repository.dart';
+import '../../authentication/Logic/auth cubit/auth_cubit.dart';
 
 part 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
   final ChatRepository repository;
+  final AuthCubit authCubit;
   final List<Message> _pendingMessages = [];
   List<Message> get pendingMessages => _pendingMessages;
 
-  ChatCubit(this.repository) : super(const ChatInitial()) {
+  ChatCubit(this.repository, this.authCubit) : super(const ChatInitial()) {
     _loadCachedSessions();
   }
 
-  Future<void> loadSessions() => _loadCachedSessions();
+  Future<void> loadSessions() async {
+    final userId = authCubit.currentUser?.id;
+    if (userId == null) {
+      emit(ChatError(
+          sessions: state.sessions,
+          currentSessionId: state.currentSessionId,
+          error: 'User not logged in'));
+      return;
+    }
+    try {
+      final sessions = await repository.getSessions(userId.toString());
+      emit(ChatSuccess(
+        sessions: sessions,
+        currentSessionId: sessions.isNotEmpty ? sessions.last.id : null,
+        isCreatingSession: false,
+      ));
+    } catch (e) {
+      emit(ChatError(
+          sessions: state.sessions,
+          currentSessionId: state.currentSessionId,
+          error: e.toString()));
+    }
+  }
 
   Future<void> _loadCachedSessions() async {
     final cachedSessions = await CacheHelper.getSessions();
@@ -39,15 +61,31 @@ class ChatCubit extends Cubit<ChatState> {
     super.emit(state);
   }
 
-  void deleteSession(String sessionId) {
-    final updatedSessions =
-        state.sessions.where((s) => s.id != sessionId).toList();
-    final newCurrentSessionId =
-        updatedSessions.isNotEmpty ? updatedSessions.last.id : null;
-    emit(ChatSuccess(
-        sessions: updatedSessions,
-        currentSessionId: newCurrentSessionId,
-        isCreatingSession: false));
+  void deleteSession(String sessionId) async {
+    final userId = authCubit.currentUser?.id;
+    if (userId == null) {
+      emit(ChatError(
+          sessions: state.sessions,
+          currentSessionId: state.currentSessionId,
+          error: 'User not logged in'));
+      return;
+    }
+    try {
+      await repository.deleteSession(userId.toString(), sessionId);
+      final updatedSessions =
+          state.sessions.where((s) => s.id != sessionId).toList();
+      final newCurrentSessionId =
+          updatedSessions.isNotEmpty ? updatedSessions.last.id : null;
+      emit(ChatSuccess(
+          sessions: updatedSessions,
+          currentSessionId: newCurrentSessionId,
+          isCreatingSession: false));
+    } catch (e) {
+      emit(ChatError(
+          sessions: state.sessions,
+          currentSessionId: state.currentSessionId,
+          error: e.toString()));
+    }
   }
 
   void renameSession(String sessionId, String newTitle) {
@@ -101,8 +139,15 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> sendTextMessage(String text) async {
+    final userId = authCubit.currentUser?.id;
+    if (userId == null) {
+      emit(ChatError(
+          sessions: state.sessions,
+          currentSessionId: state.currentSessionId,
+          error: 'User not logged in'));
+      return;
+    }
     final currentSession = _getCurrentSession();
-    const userId = "55";
     final updatedSession = currentSession.copyWith(messages: [
       ...currentSession.messages,
       Message(
@@ -117,7 +162,7 @@ class ChatCubit extends Cubit<ChatState> {
     try {
       final response = await repository.sendText(ChatRequestBody(
         query: text,
-        userId: userId,
+        userId: userId.toString(),
         sessionId: currentSession.id,
       ));
       _handleSuccessResponse(updatedSession, response.answer);
@@ -138,12 +183,24 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<ChatSession> createNewSession() async {
+    final userId = authCubit.currentUser?.id;
+    if (userId == null) {
+      emit(ChatError(
+          sessions: state.sessions,
+          currentSessionId: state.currentSessionId,
+          error: 'User not logged in'));
+      return ChatSession(
+        id: 'default_${DateTime.now().millisecondsSinceEpoch}',
+        messages: [],
+        createdAt: DateTime.now(),
+      );
+    }
     emit(ChatSuccess(
         sessions: state.sessions,
         currentSessionId: state.currentSessionId,
         isCreatingSession: true));
     try {
-      final response = await repository.createNewSession("55");
+      final response = await repository.createNewSession(userId.toString());
       final newSession = ChatSession(
         id: response.sessionId,
         messages: [],
@@ -173,8 +230,15 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> sendImageMessage(
       File image, String question, String mode, String speak) async {
+    final userId = authCubit.currentUser?.id;
+    if (userId == null) {
+      emit(ChatError(
+          sessions: state.sessions,
+          currentSessionId: state.currentSessionId,
+          error: 'User not logged in'));
+      return;
+    }
     final currentSession = _getCurrentSession();
-    const userId = "55";
     final sessionId = currentSession.id;
     final updatedSession = currentSession.copyWith(messages: [
       ...currentSession.messages,
@@ -189,7 +253,7 @@ class ChatCubit extends Cubit<ChatState> {
         sessions: updatedSessions, currentSessionId: currentSession.id));
     try {
       final response = await repository.sendImage(
-          image, question, mode, speak, sessionId, userId);
+          image, question, mode, speak, sessionId, userId.toString());
       _handleSuccessResponse(updatedSession, response.answer);
     } catch (e) {
       _handleError(e, updatedSessions, currentSession, question, file: image);
@@ -198,8 +262,15 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> sendVoiceMessage(File voiceFile,
       {String speak = 'true', String language = 'auto'}) async {
+    final userId = authCubit.currentUser?.id;
+    if (userId == null) {
+      emit(ChatError(
+          sessions: state.sessions,
+          currentSessionId: state.currentSessionId,
+          error: 'User not logged in'));
+      return;
+    }
     final currentSession = _getCurrentSession();
-    const userId = "55";
     final sessionId = currentSession.id;
     final updatedSession = currentSession.copyWith(messages: [
       ...currentSession.messages,
@@ -217,7 +288,7 @@ class ChatCubit extends Cubit<ChatState> {
         voiceFile,
         speak,
         language,
-        userId,
+        userId.toString(),
         sessionId,
       );
       _handleSuccessResponse(updatedSession, response.answer);
