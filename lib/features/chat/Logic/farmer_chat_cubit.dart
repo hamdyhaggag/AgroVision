@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../models/farmer_chat_model.dart';
@@ -19,7 +20,27 @@ class FarmerChatCubit extends Cubit<FarmerChatState> {
         IO.OptionBuilder().setTransports(['websocket']).build());
     _socket.onConnect((_) {});
     _socket.on('new_message', (payload) {
-      final msg = Message.fromJson(payload as Map<String, dynamic>);
+      Map<String, dynamic> jsonPayload;
+
+      // Check payload type and parse accordingly
+      if (payload is String) {
+        try {
+          jsonPayload = jsonDecode(payload) as Map<String, dynamic>;
+        } catch (e) {
+          // Log error and skip invalid payload
+          print('Error decoding JSON payload: $e');
+          return;
+        }
+      } else if (payload is Map<String, dynamic>) {
+        jsonPayload = payload;
+      } else {
+        // Unexpected type; log and skip
+        print('Unexpected payload type: ${payload.runtimeType}');
+        return;
+      }
+
+      // Parse the message and update state
+      final msg = Message.fromJson(jsonPayload);
       final current = state;
       if (current is FarmerChatLoaded) {
         final convs = current.conversations.map((c) {
