@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -12,10 +13,12 @@ import 'package:agro_vision/features/home/Logic/home_cubit/home_cubit.dart';
 import '../../../core/helpers/cache_helper.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../../models/sensor_data_model.dart';
 import '../../../models/weather_model.dart';
 import '../../monitoring/notification/notification_cubit/notification_cubit.dart';
 import '../../monitoring/notification/notification_cubit/notification_state.dart';
 import '../Logic/home_cubit/home_state.dart';
+import 'home_screen.dart' as state;
 import 'widgets/quick_actions_grid.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -83,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
               if (state is HomeLoading) {
                 return _buildSkeletonLoading();
               } else if (state is HomeLoaded) {
-                return _buildBody(state.weather);
+                return _buildBody(state.weather, state.sensors);
               } else if (state is HomeError) {
                 return _buildErrorState(state.message);
               }
@@ -237,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildBody(WeatherModel weather) {
+  Widget _buildBody(WeatherModel weather, List<Sensor> sensors) {
     return CustomScrollView(
       slivers: [
         SliverPadding(
@@ -246,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
             delegate: SliverChildListDelegate([
               _buildWeatherSection(weather),
               const SizedBox(height: 24),
-              DevicesCard(sensors: sensors),
+              DevicesCard(sensors: sensors), // Use passed sensors
               const SizedBox(height: 24),
               _buildQuickActionsSection(),
             ]),
@@ -659,7 +662,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class DevicesCard extends StatelessWidget {
-  final List<Map<String, dynamic>> sensors;
+  final List<Sensor> sensors;
 
   const DevicesCard({super.key, required this.sensors});
 
@@ -690,107 +693,13 @@ class DevicesCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSensorRow(BuildContext context, Map<String, dynamic> sensor) {
-    final status = sensor['status']?.toString() ?? '';
-    final isActive = status.toLowerCase() == 'active';
+  Widget _buildSensorRow(BuildContext context, Sensor sensor) {
+    final isActive = sensor.status.toLowerCase() == 'active';
     final statusColor = isActive ? Colors.green : Colors.red;
+    final lastSeen = DateFormat('MMM dd, HH:mm').format(sensor.lastSeen);
 
     return InkWell(
-      onTap: () {
-        showDialog(
-          context: context,
-          barrierColor: Colors.black54,
-          builder: (context) {
-            return BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: AlertDialog(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                content: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade50,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.check_circle_rounded,
-                              color: Colors.green.shade600,
-                              size: 28,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Sensor Status Update',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey.shade800,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Optimal Soil Conditions',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        height: 1,
-                        color: Colors.grey.shade100,
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.green.shade600,
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            backgroundColor: Colors.green.shade50,
-                          ),
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text(
-                            'Dismiss',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
+      onTap: () => _showSensorStatusDialog(context, sensor),
       child: Padding(
         padding: const EdgeInsets.only(bottom: 12.0),
         child: Column(
@@ -800,26 +709,49 @@ class DevicesCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
-                    "${sensor['name']} ${sensor['id']}",
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        sensor.name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        'ID: ${sensor.id}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  status,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                    color: statusColor,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      sensor.status.toUpperCase(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        color: statusColor,
+                      ),
+                    ),
+                    Text(
+                      'Last seen: $lastSeen',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-            if (!isActive && sensor['issue'] != null)
+            if (!isActive && sensor.issue != null)
               Padding(
                 padding: const EdgeInsets.only(top: 4.0),
                 child: Row(
@@ -830,11 +762,13 @@ class DevicesCard extends StatelessWidget {
                       color: Colors.orange.shade400,
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      sensor['issue'],
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.orange.shade400,
+                    Expanded(
+                      child: Text(
+                        sensor.issue!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.orange.shade400,
+                        ),
                       ),
                     ),
                   ],
@@ -845,17 +779,136 @@ class DevicesCard extends StatelessWidget {
       ),
     );
   }
-}
 
-final List<Map<String, dynamic>> sensors = [
-  {
-    'id': '#SM201',
-    'name': 'Soil Moisture Sensor',
-    'type': 'moisture',
-    'status': 'Inactive',
-    'issue': 'Signal issue since 15/4/2025 at 04:02 PM',
-  },
-];
+  void _showSensorStatusDialog(BuildContext context, Sensor sensor) {
+    final isActive = sensor.status.toLowerCase() == 'active';
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (context) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: AlertDialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            content: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: isActive
+                              ? Colors.green.shade50
+                              : Colors.red.shade50,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isActive
+                              ? Icons.check_circle_rounded
+                              : Icons.error_rounded,
+                          color: isActive
+                              ? Colors.green.shade600
+                              : Colors.red.shade600,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sensor Status Update',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade800,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              isActive
+                                  ? 'Optimal Soil Conditions'
+                                  : 'Attention Required',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    height: 1,
+                    color: Colors.grey.shade100,
+                  ),
+                  const SizedBox(height: 12),
+                  if (sensor.issue != null) ...[
+                    Text(
+                      'Issue Details:',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      sensor.issue!,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: isActive
+                            ? Colors.green.shade600
+                            : Colors.red.shade600,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        backgroundColor: isActive
+                            ? Colors.green.shade50
+                            : Colors.red.shade50,
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text(
+                        'Dismiss',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});

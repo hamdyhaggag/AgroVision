@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,6 +24,7 @@ import 'features/chat/services/farmer_chat_api_service.dart';
 import 'features/disease_detection/Api/disease_detection_service.dart';
 import 'features/disease_detection/Logic/disease_cubit.dart';
 import 'features/home/Api/orders_repo.dart';
+import 'features/home/Api/sensor_service.dart';
 import 'features/home/Logic/home_cubit/home_cubit.dart';
 import 'features/home/Logic/orders_cubit/orders_cubit.dart';
 import 'features/home/Logic/task_cubit/task_cubit.dart';
@@ -67,6 +69,7 @@ class AgroVision extends StatelessWidget {
               create: (context) => HomeCubit(
                 weatherService: WeatherService(),
                 locationHelper: LocationHelper(),
+                sensorService: SensorService(Dio()),
               ),
             ),
             BlocProvider(

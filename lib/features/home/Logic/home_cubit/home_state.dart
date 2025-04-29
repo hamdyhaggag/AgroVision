@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../../../models/sensor_data_model.dart';
 import '../../../../models/weather_model.dart';
 
 @immutable
@@ -13,7 +14,9 @@ class HomeLoading extends HomeState {}
 @immutable
 class HomeLoaded extends HomeState {
   final WeatherModel weather;
-  HomeLoaded({required this.weather});
+  final List<Sensor> sensors;
+
+  HomeLoaded({required this.weather, required this.sensors});
 }
 
 @immutable
