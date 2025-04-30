@@ -7,9 +7,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../../models/chat_message.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:cross_file/cross_file.dart';
 
 class ChatBubble extends StatefulWidget {
   final Message message;
@@ -32,6 +32,7 @@ class ChatBubble extends StatefulWidget {
 class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
   late AnimationController _controller;
   final List<Animation<double>> _dotAnimations = [];
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -75,7 +76,12 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
   @override
   void dispose() {
     if (widget.isLoading) _controller.dispose();
+    _audioPlayer.dispose();
     super.dispose();
+  }
+
+  void _playAudio(String url) async {
+    await _audioPlayer.play(UrlSource(url));
   }
 
   @override
@@ -96,7 +102,7 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: widget.message.isSentByMe
-                    ? Theme.of(context).primaryColor.withOpacity(0.1)
+                    ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
                     : Colors.grey[200],
                 borderRadius: BorderRadius.circular(15),
               ),
@@ -144,6 +150,11 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                       },
                     ),
                   ],
+                  if (widget.message.audioUrl != null)
+                    IconButton(
+                      icon: const Icon(Icons.play_arrow),
+                      onPressed: () => _playAudio(widget.message.audioUrl!),
+                    ),
                   const SizedBox(height: 4),
                   Text(
                     DateFormat('HH:mm').format(widget.message.timestamp),

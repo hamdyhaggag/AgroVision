@@ -17,12 +17,14 @@ class ChatRequestBody {
 
 class ChatResponse {
   final String answer;
+  final String? audioUrl;
 
-  ChatResponse({required this.answer});
+  ChatResponse({required this.answer, this.audioUrl});
 
   factory ChatResponse.fromJson(Map<String, dynamic> json) {
     return ChatResponse(
       answer: json['answer'] ?? json['Answer'] ?? json['text'] ?? '',
+      audioUrl: json['audio_url'],
     );
   }
 }
