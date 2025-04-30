@@ -153,6 +153,7 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                   if (widget.message.audioUrl != null)
                     IconButton(
                       icon: const Icon(Icons.play_arrow),
+                      color: Theme.of(context).primaryColor,
                       onPressed: () => _playAudio(widget.message.audioUrl!),
                     ),
                   const SizedBox(height: 4),

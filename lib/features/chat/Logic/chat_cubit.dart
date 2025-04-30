@@ -165,7 +165,7 @@ class ChatCubit extends Cubit<ChatState> {
         userId: userId.toString(),
         sessionId: currentSession.id,
       ));
-      _handleSuccessResponse(updatedSession, response.answer);
+      _handleSuccessResponse(updatedSession, response.answer as ChatResponse);
     } catch (e) {
       emit(ChatSuccess(
           sessions: updatedSessions,
@@ -254,7 +254,7 @@ class ChatCubit extends Cubit<ChatState> {
     try {
       final response = await repository.sendImage(
           image, question, mode, speak, sessionId, userId.toString());
-      _handleSuccessResponse(updatedSession, response.answer);
+      _handleSuccessResponse(updatedSession, response.answer as ChatResponse);
     } catch (e) {
       _handleError(e, updatedSessions, currentSession, question, file: image);
     }
@@ -292,7 +292,8 @@ class ChatCubit extends Cubit<ChatState> {
         userId.toString(),
         sessionId,
       );
-      _handleSuccessResponse(updatedSession, response.answer);
+      _handleSuccessResponse(
+          updatedSession, response); // Pass the full response
     } catch (e) {
       _handleError(e, updatedSessions, currentSession, '', file: voiceFile);
     }
@@ -317,10 +318,15 @@ class ChatCubit extends Cubit<ChatState> {
     );
   }
 
-  void _handleSuccessResponse(ChatSession session, String answer) {
+  void _handleSuccessResponse(ChatSession session, ChatResponse response) {
     final finalSession = session.copyWith(messages: [
       ...session.messages,
-      Message(text: answer, isSentByMe: false, status: MessageStatus.delivered)
+      Message(
+        text: response.answer,
+        isSentByMe: false,
+        status: MessageStatus.delivered,
+        audioUrl: response.audioUrl,
+      )
     ]);
     emit(ChatSuccess(
         sessions: _updateSessions(finalSession),
