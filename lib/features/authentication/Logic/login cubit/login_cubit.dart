@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/helpers/cache_helper.dart';
+import '../../../home/Logic/home_cubit/home_cubit.dart';
 import '../../Data/model/login_request_body.dart';
 import '../../Data/model/user_model.dart';
 import '../../Data/repos/login_repo.dart';
@@ -18,17 +21,34 @@ class LoginCubit extends Cubit<LoginState> {
   Future<void> emitLoginStates(
       LoginRequestBody body, BuildContext context) async {
     emit(const LoginState.loading());
-    final response = await _loginRepo.login(body);
+    final result = await _loginRepo.login(body);
 
-    response.when(
-      success: (data) async {
-        await _persistUserData(data);
-        _updateAuthState(context, data);
-        emit(LoginState.success(data));
+    result.when(
+      success: (loginResponse) async {
+        await _persistUserData(loginResponse);
+        _updateAuthState(context, loginResponse);
+        unawaited(_handleSensorData(context));
+        emit(LoginState.success(loginResponse));
       },
-      failure: (error) => emit(LoginState.error(
-          error: error.apiErrorModel.message ?? 'Login failed')),
+      failure: (error) {
+        final errorMessage =
+            error.apiErrorModel.message ?? 'Invalid username or password';
+        emit(LoginState.error(error: errorMessage));
+      },
     );
+  }
+
+  Future<void> _handleSensorData(BuildContext context) async {
+    try {
+      final sensorData = await _fetchSensorData();
+      context.read<HomeCubit>().updateSensorData(sensorData);
+    } catch (e) {
+      context.read<HomeCubit>().handleSensorError(e.toString());
+    }
+  }
+
+  Future<Map<String, dynamic>> _fetchSensorData() async {
+    throw Exception('Sensor server offline');
   }
 
   Future<void> _persistUserData(dynamic responseData) async {

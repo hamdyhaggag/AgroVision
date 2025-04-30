@@ -24,7 +24,7 @@ class LoginScreen extends StatelessWidget {
           if (state is Success) {
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => ScreenLayout()),
+              MaterialPageRoute(builder: (context) => const ScreenLayout()),
               (route) => false,
             );
           } else if (state is Error) {
@@ -32,7 +32,7 @@ class LoginScreen extends StatelessWidget {
               context.read<LoginCubit>().passwordController.clear();
               showCustomNotification(
                 context,
-                'Invalid username or password',
+                state.error,
                 type: NotificationType.error,
                 durationSeconds: 3,
               );

@@ -15,8 +15,25 @@ class HomeLoading extends HomeState {}
 class HomeLoaded extends HomeState {
   final WeatherModel weather;
   final List<Sensor> sensors;
+  final String? sensorError;
 
-  HomeLoaded({required this.weather, required this.sensors});
+  HomeLoaded({
+    required this.weather,
+    required this.sensors,
+    this.sensorError,
+  });
+
+  HomeLoaded copyWith({
+    WeatherModel? weather,
+    List<Sensor>? sensors,
+    String? sensorError,
+  }) {
+    return HomeLoaded(
+      weather: weather ?? this.weather,
+      sensors: sensors ?? this.sensors,
+      sensorError: sensorError ?? this.sensorError,
+    );
+  }
 }
 
 @immutable

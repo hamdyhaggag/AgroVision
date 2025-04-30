@@ -101,6 +101,45 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildSensorErrorCard(String error) {
+    return Container(
+      margin: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange[100],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.warning_amber, color: Colors.orange[800]),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Sensor Data Unavailable',
+                  style: TextStyle(
+                    color: Colors.orange[800],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  error,
+                  style: TextStyle(color: Colors.orange[800]),
+                ),
+                TextButton(
+                  onPressed: () => context.read<HomeCubit>().getWeatherData(),
+                  child: Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
@@ -249,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
             delegate: SliverChildListDelegate([
               _buildWeatherSection(weather),
               const SizedBox(height: 24),
-              DevicesCard(sensors: sensors), // Use passed sensors
+              DevicesCard(sensors: sensors),
               const SizedBox(height: 24),
               _buildQuickActionsSection(),
             ]),
