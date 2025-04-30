@@ -11,8 +11,14 @@ class CacheHelper {
   static const String _chatMessagesKey = 'chat_messages';
   static const _sessionsKey = 'chat_sessions';
 
-  static init() async {
+  static Future<void> init() async {
     sharedPreferences = await SharedPreferences.getInstance();
+  }
+
+  static Future<void> ensureInitialized() async {
+    if (sharedPreferences == null) {
+      await init();
+    }
   }
 
   static Future<void> saveData({
@@ -33,19 +39,25 @@ class CacheHelper {
     if (value is bool) await sharedPreferences!.setBool(key, value);
   }
 
-  static Future<void> saveMessages(List<Message> messages) async {
-    final jsonList = messages.map((msg) => msg.toJson()).toList();
-    await saveData(
-      key: _chatMessagesKey,
-      value: jsonEncode(jsonList),
-    );
+  static Future<void> saveAudioFilePath(
+      String audioUrl, String localPath) async {
+    await ensureInitialized();
+    final key = 'audio_$audioUrl';
+    await sharedPreferences!.setString(key, localPath);
+    if (kDebugMode) {
+      print('💾 Cached audio path for $audioUrl at $localPath');
+    }
   }
 
-  static List<Message> getMessages() {
-    final jsonString = getString(key: _chatMessagesKey);
-    if (jsonString.isEmpty) return [];
-    final jsonList = jsonDecode(jsonString) as List<dynamic>;
-    return jsonList.map((json) => Message.fromJson(json)).toList();
+  static String getAudioFilePath(String audioUrl) {
+    ensureInitialized();
+    final key = 'audio_$audioUrl';
+    final path = sharedPreferences!.getString(key) ?? '';
+    if (kDebugMode) {
+      print(
+          '🔑 Retrieved audio path for $audioUrl: ${path.isEmpty ? '[not cached]' : path}');
+    }
+    return path;
   }
 
   static String getString({required String key}) {
@@ -60,6 +72,21 @@ class CacheHelper {
       print('🔑 Retrieved $key: ${value.isEmpty ? '[empty]' : value}');
     }
     return value;
+  }
+
+  static Future<void> saveMessages(List<Message> messages) async {
+    final jsonList = messages.map((msg) => msg.toJson()).toList();
+    await saveData(
+      key: _chatMessagesKey,
+      value: jsonEncode(jsonList),
+    );
+  }
+
+  static List<Message> getMessages() {
+    final jsonString = getString(key: _chatMessagesKey);
+    if (jsonString.isEmpty) return [];
+    final jsonList = jsonDecode(jsonString) as List<dynamic>;
+    return jsonList.map((json) => Message.fromJson(json)).toList();
   }
 
   static int getInt(String key) => sharedPreferences?.getInt(key) ?? -1;
@@ -86,12 +113,6 @@ class CacheHelper {
     final sessionsJson =
         sessions.map((session) => jsonEncode(session.toJson())).toList();
     prefs.setStringList(_sessionsKey, sessionsJson);
-  }
-
-  static Future<void> ensureInitialized() async {
-    if (sharedPreferences == null) {
-      await init();
-    }
   }
 
   void logout() {

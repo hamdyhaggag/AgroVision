@@ -6,8 +6,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
+import '../../core/helpers/cache_helper.dart';
 import '../../models/chat_message.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -80,13 +82,6 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _playAudio(String url) async {
-    final fullUrl = url.startsWith('http')
-        ? url
-        : 'https://immortal-basically-lemur.ngrok-free.app$url';
-    await _audioPlayer.play(UrlSource(fullUrl));
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -154,10 +149,11 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                     ),
                   ],
                   if (widget.message.audioUrl != null)
-                    IconButton(
-                      icon: const Icon(Icons.play_arrow),
-                      color: Theme.of(context).primaryColor,
-                      onPressed: () => _playAudio(widget.message.audioUrl!),
+                    AudioUrlBubble(
+                      audioUrl: widget.message.audioUrl!.startsWith('http')
+                          ? widget.message.audioUrl!
+                          : 'https://immortal-basically-lemur.ngrok-free.app${widget.message.audioUrl!}',
+                      key: ValueKey(widget.message.audioUrl),
                     ),
                   const SizedBox(height: 4),
                   Text(
@@ -253,6 +249,239 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
   bool isArabic(String text) => RegExp(r'[\u0600-\u06FF]').hasMatch(text);
 }
 
+class AudioUrlBubble extends StatefulWidget {
+  final String audioUrl;
+
+  const AudioUrlBubble({
+    super.key,
+    required this.audioUrl,
+  });
+
+  @override
+  State<AudioUrlBubble> createState() => _AudioUrlBubbleState();
+}
+
+class _AudioUrlBubbleState extends State<AudioUrlBubble>
+    with SingleTickerProviderStateMixin {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
+  PlayerState _playerState = PlayerState.stopped;
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  String? _localAudioPath;
+  bool _isLoadingAudio = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+    _setupAudioPlayer();
+    _loadLocalAudio();
+  }
+
+  Future<void> _loadLocalAudio() async {
+    setState(() {
+      _isLoadingAudio = true;
+    });
+    // Check if the audio path is already cached
+    final cachedPath = CacheHelper.getAudioFilePath(widget.audioUrl);
+    if (cachedPath.isNotEmpty && await File(cachedPath).exists()) {
+      setState(() {
+        _localAudioPath = cachedPath;
+        _isLoadingAudio = false;
+      });
+    } else {
+      try {
+        final localPath = await _downloadAudio(widget.audioUrl);
+        await CacheHelper.saveAudioFilePath(widget.audioUrl, localPath);
+        setState(() {
+          _localAudioPath = localPath;
+          _isLoadingAudio = false;
+        });
+      } catch (e) {
+        print('Error downloading audio: $e');
+        setState(() {
+          _isLoadingAudio = false;
+        });
+      }
+    }
+  }
+
+  Future<String> _downloadAudio(String url) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final fileName = url.split('/').last;
+    final filePath = '${dir.path}/$fileName';
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final file = File(filePath);
+      await file.writeAsBytes(response.bodyBytes);
+      return filePath;
+    } else {
+      throw Exception('Failed to download audio');
+    }
+  }
+
+  void _setupAudioPlayer() {
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      setState(() => _playerState = state);
+      if (state == PlayerState.playing) {
+        _animationController.repeat(reverse: true);
+      } else {
+        _animationController.reset();
+      }
+    });
+
+    _audioPlayer.onDurationChanged.listen((duration) {
+      setState(() => _duration = duration);
+    });
+
+    _audioPlayer.onPositionChanged.listen((position) {
+      setState(() => _position = position);
+    });
+  }
+
+  Future<void> _togglePlayPause() async {
+    if (_playerState == PlayerState.playing) {
+      await _audioPlayer.pause();
+    } else {
+      if (_localAudioPath != null) {
+        await _audioPlayer.play(DeviceFileSource(_localAudioPath!));
+      } else {
+        await _audioPlayer.play(UrlSource(widget.audioUrl));
+      }
+    }
+  }
+
+  String _formatDuration(Duration d) =>
+      '${(d.inMinutes).toString().padLeft(2, '0')}:'
+      '${(d.inSeconds % 60).toString().padLeft(2, '0')}';
+
+  Future<void> _shareAudio() async {
+    try {
+      await Share.share(widget.audioUrl);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error sharing: ${e.toString()}')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isPlaying = _playerState == PlayerState.playing;
+    final progress = _duration.inSeconds > 0
+        ? _position.inSeconds / _duration.inSeconds
+        : 0.0;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _isLoadingAudio
+                    ? const CircularProgressIndicator()
+                    : AnimatedBuilder(
+                        animation: _scaleAnimation,
+                        builder: (context, child) => Transform.scale(
+                          scale: _scaleAnimation.value,
+                          child: child,
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            isPlaying
+                                ? Icons.pause_rounded
+                                : Icons.play_arrow_rounded,
+                            size: 28,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          onPressed: _togglePlayPause,
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            padding: const EdgeInsets.all(12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Khedr’s voice',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${_formatDuration(_position)} / ${_formatDuration(_duration)}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.share_rounded, size: 20),
+                  color: Colors.grey[600],
+                  onPressed: _shareAudio,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: progress,
+                backgroundColor: Colors.grey[200],
+                color: Theme.of(context).primaryColor,
+                minHeight: 2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class VoiceMessageBubble extends StatefulWidget {
   final String filePath;
 
@@ -271,7 +500,6 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble>
   Duration? _duration;
   Duration _currentDuration = Duration.zero;
   aw.PlayerState? _playerState;
-  // bool _isLoading = true;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -299,10 +527,8 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble>
       final durationMs = await _playerController.getDuration();
       setState(() {
         _duration = Duration(milliseconds: durationMs);
-        // _isLoading = false;
       });
     } catch (e) {
-      // setState(() => _isLoading = false);
       debugPrint('Error preparing audio: $e');
     }
   }
@@ -350,20 +576,24 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble>
   }
 
   Future<void> _togglePlayPause() async {
-    print('Toggle play/pause. Player state: $_playerState, '
-        'Current duration: $_currentDuration, Total duration: $_duration');
+    if (kDebugMode) {
+      print('Toggle play/pause. Player state: $_playerState, '
+          'Current duration: $_currentDuration, Total duration: $_duration');
+    }
     if (_playerState == aw.PlayerState.playing) {
       await _playerController.pausePlayer();
-      print('Paused audio');
+      if (kDebugMode) {
+        print('Paused audio');
+      }
     } else {
-      // If the player is stopped or the audio has finished, prepare it again
       if (_playerState == aw.PlayerState.stopped ||
           _currentDuration >= _duration!) {
-        print('Preparing player again');
-        await _playerController.stopPlayer(); // Ensure it’s fully stopped
-        await _playerController.preparePlayer(
-            path: widget.filePath); // Re-prepare the player
-        await _playerController.seekTo(0); // Seek to start
+        if (kDebugMode) {
+          print('Preparing player again');
+        }
+        await _playerController.stopPlayer();
+        await _playerController.preparePlayer(path: widget.filePath);
+        await _playerController.seekTo(0);
       }
       try {
         await _playerController.startPlayer();
@@ -479,24 +709,6 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble>
             ),
           ),
           const SizedBox(height: 8),
-          // if (!_isLoading)
-          //   aw.AudioFileWaveforms(
-          //     playerController: _playerController,
-          //     size: const Size(double.infinity, 40),
-          //     waveformType: aw.WaveformType.fitWidth,
-          //     enableSeekGesture: true,
-          //     playerWaveStyle: aw.PlayerWaveStyle(
-          //       fixedWaveColor: Colors.grey[300]!,
-          //       liveWaveColor: Theme.of(context).primaryColor,
-          //       spacing: 6,
-          //       scaleFactor: 0.8,
-          //       waveThickness: 2,
-          //       showSeekLine: true,
-          //       seekLineColor: Theme.of(context).primaryColor,
-          //       seekLineThickness: 2,
-          //     ),
-          //   ),
-          // if (_isLoading) _ShimmerWaveformLoader(),
         ],
       ),
     );
@@ -515,20 +727,3 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble>
     }
   }
 }
-
-// class _ShimmerWaveformLoader extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Shimmer.fromColors(
-//       baseColor: Colors.grey[200]!,
-//       highlightColor: Colors.grey[100]!,
-//       child: Container(
-//         height: 40,
-//         decoration: BoxDecoration(
-//           color: Colors.white,
-//           borderRadius: BorderRadius.circular(8),
-//         ),
-//       ),
-//     );
-//   }
-// }
