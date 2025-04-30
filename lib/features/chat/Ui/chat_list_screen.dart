@@ -1025,6 +1025,10 @@ Widget _buildChatList(BuildContext context) {
                                       style: TextStyle(
                                         color: Colors.grey[700],
                                         fontSize: 14,
+                                        fontFamily:
+                                            isArabic(lastMessage.message)
+                                                ? 'DIN'
+                                                : 'SYNE',
                                       ),
                                     ),
                                   ),
@@ -1269,4 +1273,8 @@ class _FeatureChipState extends State<FeatureChip> {
       ),
     );
   }
+}
+
+bool isArabic(String text) {
+  return RegExp(r'[\u0600-\u06FF]').hasMatch(text);
 }
