@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:audio_waveforms/audio_waveforms.dart' as aw;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:shimmer/shimmer.dart';
@@ -308,6 +309,9 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble>
 
   void _setupListeners() {
     _playerController.onPlayerStateChanged.listen((state) {
+      if (kDebugMode) {
+        print('Player state changed to: $state');
+      }
       setState(() {
         _playerState = state;
         if (state == aw.PlayerState.playing) {
@@ -315,32 +319,62 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble>
         } else {
           _animationController.reset();
         }
-
         if (state == aw.PlayerState.stopped && _currentDuration >= _duration!) {
           _currentDuration = Duration.zero;
+          if (kDebugMode) {
+            print('Stopped and reset duration to zero');
+          }
         }
       });
     });
+
     _playerController.onCompletion.listen((_) {
+      if (kDebugMode) {
+        print('Audio completed');
+      }
       setState(() {
         _currentDuration = Duration.zero;
       });
       _playerController.seekTo(0);
+      if (kDebugMode) {
+        print('Seeked to 0 after completion');
+      }
     });
 
     _playerController.onCurrentDurationChanged.listen((durationMs) {
+      if (kDebugMode) {
+        print('Current duration updated: $durationMs ms');
+      }
       setState(() => _currentDuration = Duration(milliseconds: durationMs));
     });
   }
 
   Future<void> _togglePlayPause() async {
+    print('Toggle play/pause. Player state: $_playerState, '
+        'Current duration: $_currentDuration, Total duration: $_duration');
     if (_playerState == aw.PlayerState.playing) {
       await _playerController.pausePlayer();
+      print('Paused audio');
     } else {
-      if (_currentDuration >= _duration!) {
-        await _playerController.seekTo(0);
+      // If the player is stopped or the audio has finished, prepare it again
+      if (_playerState == aw.PlayerState.stopped ||
+          _currentDuration >= _duration!) {
+        print('Preparing player again');
+        await _playerController.stopPlayer(); // Ensure it’s fully stopped
+        await _playerController.preparePlayer(
+            path: widget.filePath); // Re-prepare the player
+        await _playerController.seekTo(0); // Seek to start
       }
-      await _playerController.startPlayer();
+      try {
+        await _playerController.startPlayer();
+        if (kDebugMode) {
+          print('Started playing');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error starting player: $e');
+        }
+      }
     }
   }
 
