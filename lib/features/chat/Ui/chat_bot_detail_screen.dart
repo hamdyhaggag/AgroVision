@@ -618,8 +618,8 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget> {
       if (_recordedFilePath != null) {
         context.read<ChatCubit>().sendVoiceMessage(
               File(_recordedFilePath!),
-              speak: 'false',
-              language: 'en',
+              speak: 'true',
+              language: 'auto',
             );
         Navigator.pop(context);
       }

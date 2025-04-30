@@ -270,6 +270,7 @@ class ChatCubit extends Cubit<ChatState> {
           error: 'User not logged in'));
       return;
     }
+
     final currentSession = _getCurrentSession();
     final sessionId = currentSession.id;
     final updatedSession = currentSession.copyWith(messages: [
