@@ -271,7 +271,7 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble>
   Duration? _duration;
   Duration _currentDuration = Duration.zero;
   aw.PlayerState? _playerState;
-  bool _isLoading = true;
+  // bool _isLoading = true;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -299,10 +299,10 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble>
       final durationMs = await _playerController.getDuration();
       setState(() {
         _duration = Duration(milliseconds: durationMs);
-        _isLoading = false;
+        // _isLoading = false;
       });
     } catch (e) {
-      setState(() => _isLoading = false);
+      // setState(() => _isLoading = false);
       debugPrint('Error preparing audio: $e');
     }
   }
@@ -403,7 +403,7 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -479,24 +479,24 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble>
             ),
           ),
           const SizedBox(height: 8),
-          if (!_isLoading)
-            aw.AudioFileWaveforms(
-              playerController: _playerController,
-              size: const Size(double.infinity, 40),
-              waveformType: aw.WaveformType.fitWidth,
-              enableSeekGesture: true,
-              playerWaveStyle: aw.PlayerWaveStyle(
-                fixedWaveColor: Colors.grey[300]!,
-                liveWaveColor: Theme.of(context).primaryColor,
-                spacing: 6,
-                scaleFactor: 0.8,
-                waveThickness: 2,
-                showSeekLine: true,
-                seekLineColor: Theme.of(context).primaryColor,
-                seekLineThickness: 2,
-              ),
-            ),
-          if (_isLoading) _ShimmerWaveformLoader(),
+          // if (!_isLoading)
+          //   aw.AudioFileWaveforms(
+          //     playerController: _playerController,
+          //     size: const Size(double.infinity, 40),
+          //     waveformType: aw.WaveformType.fitWidth,
+          //     enableSeekGesture: true,
+          //     playerWaveStyle: aw.PlayerWaveStyle(
+          //       fixedWaveColor: Colors.grey[300]!,
+          //       liveWaveColor: Theme.of(context).primaryColor,
+          //       spacing: 6,
+          //       scaleFactor: 0.8,
+          //       waveThickness: 2,
+          //       showSeekLine: true,
+          //       seekLineColor: Theme.of(context).primaryColor,
+          //       seekLineThickness: 2,
+          //     ),
+          //   ),
+          // if (_isLoading) _ShimmerWaveformLoader(),
         ],
       ),
     );
@@ -516,19 +516,19 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble>
   }
 }
 
-class _ShimmerWaveformLoader extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[200]!,
-      highlightColor: Colors.grey[100]!,
-      child: Container(
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    );
-  }
-}
+// class _ShimmerWaveformLoader extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Shimmer.fromColors(
+//       baseColor: Colors.grey[200]!,
+//       highlightColor: Colors.grey[100]!,
+//       child: Container(
+//         height: 40,
+//         decoration: BoxDecoration(
+//           color: Colors.white,
+//           borderRadius: BorderRadius.circular(8),
+//         ),
+//       ),
+//     );
+//   }
+// }
