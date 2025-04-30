@@ -165,7 +165,7 @@ class ChatCubit extends Cubit<ChatState> {
         userId: userId.toString(),
         sessionId: currentSession.id,
       ));
-      _handleSuccessResponse(updatedSession, response.answer as ChatResponse);
+      _handleSuccessResponse(updatedSession, response);
     } catch (e) {
       emit(ChatSuccess(
           sessions: updatedSessions,
@@ -254,7 +254,7 @@ class ChatCubit extends Cubit<ChatState> {
     try {
       final response = await repository.sendImage(
           image, question, mode, speak, sessionId, userId.toString());
-      _handleSuccessResponse(updatedSession, response.answer as ChatResponse);
+      _handleSuccessResponse(updatedSession, response);
     } catch (e) {
       _handleError(e, updatedSessions, currentSession, question, file: image);
     }
@@ -292,8 +292,7 @@ class ChatCubit extends Cubit<ChatState> {
         userId.toString(),
         sessionId,
       );
-      _handleSuccessResponse(
-          updatedSession, response); // Pass the full response
+      _handleSuccessResponse(updatedSession, response);
     } catch (e) {
       _handleError(e, updatedSessions, currentSession, '', file: voiceFile);
     }
