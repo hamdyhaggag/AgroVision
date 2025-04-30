@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:agro_vision/features/chat/api/chatbot_service.dart';
 import 'package:agro_vision/models/chat_message.dart';
+import 'package:flutter/foundation.dart';
 import '../../models/chat_session.dart';
 import '../../models/new_session_request.dart';
 import '../../models/session_response.dart';
@@ -27,8 +28,14 @@ class ChatRepository {
   Future<ChatResponse> sendText(ChatRequestBody body) async {
     try {
       final response = await chatbotService.sendTextMessage(body);
+      if (kDebugMode) {
+        print('sendText Response: ${response.answer}');
+      } // Log the response
       return response;
     } on DioException catch (e) {
+      if (kDebugMode) {
+        print('sendText Error: ${e.message}, Response: ${e.response?.data}');
+      } // Log the error
       if (_isNetworkError(e)) {
         throw NetworkUnavailableException();
       }
@@ -68,8 +75,14 @@ class ChatRepository {
         userId,
         sessionId,
       );
+      if (kDebugMode) {
+        print('sendImage Response: ${response.answer}');
+      }
       return response;
     } on DioException catch (e) {
+      if (kDebugMode) {
+        print('sendImage Error: ${e.message}, Response: ${e.response?.data}');
+      }
       if (_isNetworkError(e)) {
         throw NetworkUnavailableException();
       }

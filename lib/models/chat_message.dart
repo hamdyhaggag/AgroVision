@@ -22,7 +22,7 @@ class ChatResponse {
 
   factory ChatResponse.fromJson(Map<String, dynamic> json) {
     return ChatResponse(
-      answer: json['answer'] ?? json['text'] ?? '',
+      answer: json['answer'] ?? json['Answer'] ?? json['text'] ?? '',
     );
   }
 }
