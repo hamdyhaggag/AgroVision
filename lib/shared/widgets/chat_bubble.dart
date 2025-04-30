@@ -81,7 +81,10 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
   }
 
   void _playAudio(String url) async {
-    await _audioPlayer.play(UrlSource(url));
+    final fullUrl = url.startsWith('http')
+        ? url
+        : 'https://immortal-basically-lemur.ngrok-free.app$url';
+    await _audioPlayer.play(UrlSource(fullUrl));
   }
 
   @override
