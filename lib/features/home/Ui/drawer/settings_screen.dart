@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:agro_vision/core/helpers/cache_helper.dart';
 import 'package:agro_vision/core/themes/app_colors.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:animate_do/animate_do.dart';
-
+import '../../../../core/network/api_service.dart';
+import '../../../../core/network/dio_factory.dart';
 import '../../../../core/routing/app_routes.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -16,15 +18,22 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen>
     with SingleTickerProviderStateMixin {
+  final ApiService _apiService = ApiService(DioFactory.getAgrovisionDio());
   File? _profileImage;
   String username = 'User';
+  String? _email;
+  String? _phone;
+  String? _birthday;
   bool _notificationsEnabled = true;
   late AnimationController _controller;
   late Animation<double> _avatarAnimation;
+  final GlobalKey _profileHeaderKey = GlobalKey();
+  late TextEditingController _nameController;
 
   @override
   void initState() {
     super.initState();
+    _nameController = TextEditingController(text: username);
     _loadUserData();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -39,37 +48,82 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   void dispose() {
     _controller.dispose();
+    _nameController.dispose();
     CacheHelper.profileImageNotifier.removeListener(_updateProfileImage);
     super.dispose();
   }
 
   Future<void> _loadUserData() async {
     await CacheHelper.ensureInitialized();
-    String? fetchedUsername = CacheHelper.getString(key: 'userName');
     setState(() {
-      username = fetchedUsername;
+      username = CacheHelper.getString(key: 'userName') ?? 'User';
+      _email = CacheHelper.getString(key: 'email');
+      _phone = CacheHelper.getString(key: 'phone');
+      _birthday = CacheHelper.getString(key: 'birthday');
     });
     _updateProfileImage();
   }
 
-  void _showComingSoonMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      _buildCustomSnackBar(message),
-    );
+  Future<void> _updateProfile() async {
+    try {
+      final String? validEmail = _email ?? CacheHelper.getString(key: 'email');
+
+      if (validEmail == null || validEmail.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Email is required',
+                style: TextStyle(color: AppColors.surface)),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+
+      final response = await _apiService.updateAccount({
+        'name': username,
+        'email': validEmail,
+        'phone': _phone,
+        'birthday': _birthday,
+        'img': CacheHelper.getString(key: 'profileImage') ?? 'default.png',
+      });
+
+      if (response.data.message.contains('successfully')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.data.message),
+            backgroundColor: AppColors.primaryColor,
+          ),
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Profile update failed';
+      if (e.response?.statusCode == 422) {
+        final errors = e.response?.data['errors'];
+        errorMessage = errors?.entries.first.value.first ?? errorMessage;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An unexpected error occurred')),
+      );
+    }
   }
 
   void _updateProfileImage() {
-    String imagePath = CacheHelper.profileImageNotifier.value.isNotEmpty
+    String? imagePath = CacheHelper.profileImageNotifier.value.isNotEmpty
         ? CacheHelper.profileImageNotifier.value
         : CacheHelper.getString(key: 'profileImage');
+
     if (imagePath.isNotEmpty && File(imagePath).existsSync()) {
-      setState(() {
-        _profileImage = File(imagePath);
-      });
+      setState(() => _profileImage = File(imagePath));
     } else {
-      setState(() {
-        _profileImage = null;
-      });
+      setState(() => _profileImage = null);
     }
   }
 
@@ -77,15 +131,8 @@ class _SettingsScreenState extends State<SettingsScreen>
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
     if (pickedFile != null) {
-      String imagePath = pickedFile.path;
-      await CacheHelper.saveData(key: 'profileImage', value: imagePath);
-      CacheHelper.profileImageNotifier.value = imagePath;
-      setState(() {
-        _profileImage = File(imagePath);
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        _buildCustomSnackBar('Profile updated! ✨'),
-      );
+      await CacheHelper.saveData(key: 'profileImage', value: pickedFile.path);
+      _updateProfile();
     }
   }
 
@@ -145,32 +192,6 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  SnackBar _buildCustomSnackBar(String message, {bool isError = false}) {
-    return SnackBar(
-      content: Row(
-        children: [
-          Icon(
-            isError ? Icons.error : Icons.check_circle,
-            color: AppColors.surface,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(color: AppColors.surface),
-            ),
-          ),
-        ],
-      ),
-      backgroundColor: isError ? AppColors.error : AppColors.primaryColor,
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      duration: const Duration(seconds: 2),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -188,18 +209,13 @@ class _SettingsScreenState extends State<SettingsScreen>
               expandedHeight: 200.0,
               floating: false,
               pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: _buildProfileHeader(),
-              ),
+              flexibleSpace:
+                  FlexibleSpaceBar(background: _buildProfileHeader()),
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                onPressed: () {
-                  if (Navigator.canPop(context)) {
-                    Navigator.of(context).pop();
-                  }
-                },
+                onPressed: () => Navigator.maybePop(context),
               ),
             ),
             SliverToBoxAdapter(child: _buildSettingsContent()),
@@ -210,87 +226,177 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Widget _buildProfileHeader() {
-    return Container(
-      padding: const EdgeInsets.all(20.0),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primaryColor, AppColors.primaryColorshade],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: Container(
+            key: _profileHeaderKey,
+            padding: const EdgeInsets.symmetric(vertical: 24.0),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.primaryColor, AppColors.primaryColorshade],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 20,
+                  spreadRadius: 10,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: _showImagePickerOptions,
+                  child: Container(
+                    width: 110,
+                    height: 110,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.8),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 12,
+                          spreadRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        CircleAvatar(
+                          radius: 52,
+                          backgroundImage: _profileImage != null
+                              ? FileImage(_profileImage!)
+                              : const AssetImage('assets/images/user.png')
+                                  as ImageProvider,
+                        ),
+                        Positioned(
+                          bottom: -8,
+                          right: -8,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 6,
+                                ),
+                              ],
+                            ),
+                            child: Icon(Icons.edit_rounded,
+                                size: 22,
+                                color: AppColors.primaryColor.withOpacity(0.8)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 70),
+                    child: TextFormField(
+                      controller: _nameController,
+                      onTap: () => _nameController.text = '',
+                      onFieldSubmitted: (newName) {
+                        if (newName.trim().isNotEmpty && newName != username) {
+                          _showNameChangeDialog(username, newName.trim());
+                        }
+                      },
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                      textAlign: TextAlign.center,
+                      cursorColor: Colors.white,
+                      cursorWidth: 2,
+                      maxLines: 1,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.1),
+                        enabledBorder: _buildInputBorder(Colors.white54),
+                        focusedBorder: _buildInputBorder(Colors.white),
+                        hintText: 'Enter Display Name',
+                        hintStyle: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        suffixIcon: Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: Icon(
+                            Icons.verified_rounded,
+                            color: username.isNotEmpty
+                                ? AppColors.accentColor
+                                : Colors.white54,
+                            size: 26,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 20),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.workspace_premium_rounded,
+                          color: AppColors.accentColor, size: 18),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'Visionary Farmer',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTapDown: (_) => _controller.forward(),
-            onTapUp: (_) => _controller.reverse(),
-            onTapCancel: () => _controller.reverse(),
-            onTap: _showImagePickerOptions,
-            child: ScaleTransition(
-              scale: _avatarAnimation,
-              child: ElasticIn(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 3),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 10,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundImage: _profileImage != null
-                            ? FileImage(_profileImage!)
-                            : const AssetImage('assets/images/user.png')
-                                as ImageProvider,
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.edit,
-                            color: AppColors.primaryColor, size: 20),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            username,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const Text(
-            'Visionary Farmer',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white70,
-            ),
-          ),
-        ],
+    );
+  }
+
+  InputBorder _buildInputBorder(Color color) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(30),
+      borderSide: BorderSide(
+        color: color,
+        width: 1.5,
+        strokeAlign: BorderSide.strokeAlignOutside,
       ),
+      gapPadding: 10,
     );
   }
 
@@ -300,14 +406,42 @@ class _SettingsScreenState extends State<SettingsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('Personalization'),
+          _buildSectionTitle('Account Details'),
+          _buildSettingsCard([
+            _buildEditableTile(
+              icon: Icons.person,
+              title: 'Full Name',
+              value: username,
+              onEdit: () =>
+                  _showNameChangeDialog(username, _nameController.text),
+            ),
+            _buildInfoTile(
+              icon: Icons.email,
+              title: 'Email',
+              value: _email ?? 'Not available',
+            ),
+            _buildEditableTile(
+              icon: Icons.phone,
+              title: 'Phone Number',
+              value: _phone ?? 'Not set',
+              onEdit: _showPhoneEditDialog,
+            ),
+            _buildEditableTile(
+              icon: Icons.cake,
+              title: 'Birthday',
+              value: _birthday ?? 'Not set',
+              onEdit: _showBirthdayPicker,
+            ),
+          ]),
+          const SizedBox(height: 20),
+          _buildSectionTitle('Preferences'),
           _buildSettingsCard([
             _buildSwitchTile(
               icon: Icons.dark_mode,
               title: 'Dark Mode',
               value: false,
-              onChanged: (_) => _showComingSoonMessage(
-                  'Dark mode is coming soon! Stay tuned.'),
+              onChanged: (_) =>
+                  _showComingSoonMessage('Dark mode coming soon!'),
             ),
             _buildSwitchTile(
               icon: Icons.notifications,
@@ -323,13 +457,13 @@ class _SettingsScreenState extends State<SettingsScreen>
             _buildActionTile(
               icon: Icons.star,
               title: 'Rate Us',
-              onTap: () => _showComingSoonMessage('Rate us is coming soon! '),
+              onTap: () => _showComingSoonMessage('Rate us coming soon!'),
               color: Colors.amber,
             ),
             _buildActionTile(
               icon: Icons.feedback,
               title: 'Feedback',
-              onTap: () => _showComingSoonMessage('Feedback is coming soon! '),
+              onTap: () => _showComingSoonMessage('Feedback coming soon!'),
               color: Colors.blue,
             ),
           ]),
@@ -377,7 +511,7 @@ class _SettingsScreenState extends State<SettingsScreen>
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: AppColors.onSurface.withValues(alpha: 0.05),
+              color: AppColors.onSurface.withOpacity(0.05),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -388,6 +522,71 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
+  Widget _buildEditableTile({
+    required IconData icon,
+    required String title,
+    required String value,
+    required VoidCallback onEdit,
+  }) {
+    return ListTile(
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppColors.primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: AppColors.primaryColor),
+      ),
+      title: Text(title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.onSurface,
+          )),
+      subtitle: Text(value,
+          style: TextStyle(
+            fontSize: 16,
+            color: value == 'Not set' ? Colors.grey : AppColors.onSurface,
+          )),
+      trailing: IconButton(
+        icon: Icon(Icons.edit, size: 20, color: AppColors.primaryColor),
+        onPressed: onEdit,
+      ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 4),
+    );
+  }
+
+  Widget _buildInfoTile({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return ListTile(
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppColors.primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: AppColors.primaryColor),
+      ),
+      title: Text(title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.onSurface,
+          )),
+      subtitle: Text(value,
+          style: const TextStyle(
+            fontSize: 16,
+            color: AppColors.onSurface,
+          )),
+      contentPadding: const EdgeInsets.symmetric(vertical: 4),
+    );
+  }
+
   Widget _buildSwitchTile({
     required IconData icon,
     required String title,
@@ -395,14 +594,21 @@ class _SettingsScreenState extends State<SettingsScreen>
     required ValueChanged<bool> onChanged,
   }) {
     return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: AppColors.primaryColor,
-        child: Icon(icon, color: AppColors.surface),
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppColors.primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: AppColors.primaryColor),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(color: AppColors.onSurface),
-      ),
+      title: Text(title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.onSurface,
+          )),
       trailing: Switch(
         activeColor: AppColors.primaryColor,
         inactiveThumbColor: AppColors.divider,
@@ -419,20 +625,128 @@ class _SettingsScreenState extends State<SettingsScreen>
     required Color color,
   }) {
     return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: color.withValues(alpha: 0.15),
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
         child: Icon(icon, color: color),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(color: AppColors.onSurface),
-      ),
-      trailing: const Icon(
-        Icons.arrow_forward_ios,
-        size: 16,
-        color: AppColors.divider,
-      ),
+      title: Text(title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.onSurface,
+          )),
+      trailing:
+          Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.divider),
       onTap: onTap,
+    );
+  }
+
+  void _showNameChangeDialog(String oldName, String newName) async {
+    if (oldName == newName) return;
+
+    bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Name Change'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Old Name: $oldName'),
+            Text('New Name: $newName'),
+            const SizedBox(height: 16),
+            const Text('Are you sure you want to change your display name?'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() => username = newName);
+              _updateProfile();
+              Navigator.pop(context, true);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accentColor,
+            ),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPhoneEditDialog() {
+    final controller = TextEditingController(text: _phone);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Update Phone Number'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.phone,
+          decoration: const InputDecoration(
+            labelText: 'Phone Number',
+            hintText: 'Enter your phone number',
+            prefix: Text('+20 '),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (controller.text.trim().isNotEmpty) {
+                setState(() => _phone = controller.text.trim());
+                CacheHelper.saveData(key: 'phone', value: _phone);
+                _updateProfile();
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showBirthdayPicker() async {
+    final initialDate = _birthday != null
+        ? DateTime.parse(_birthday!)
+        : DateTime.now().subtract(const Duration(days: 365 * 18));
+
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now().subtract(const Duration(days: 365 * 13)),
+    );
+
+    if (pickedDate != null) {
+      final formattedDate =
+          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+      setState(() => _birthday = formattedDate);
+      CacheHelper.saveData(key: 'birthday', value: formattedDate);
+      _updateProfile();
+    }
+  }
+
+  void _showComingSoonMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.primaryColor,
+      ),
     );
   }
 }

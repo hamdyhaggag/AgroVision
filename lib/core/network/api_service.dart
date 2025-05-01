@@ -4,6 +4,7 @@ import '../../features/authentication/Data/model/login_request_body.dart';
 import '../../features/authentication/Data/model/login_response.dart';
 import '../../features/authentication/Data/model/message_read_response.dart';
 import '../../features/chat/models/farmer_chat_model.dart';
+import '../../features/home/Api/update_account_response.dart';
 import '../../features/home/Ui/drawer/widgets/crops_response.dart';
 import '../../features/home/Ui/drawer/widgets/update_crop_response.dart';
 import '../../models/category_model.dart';
@@ -48,6 +49,9 @@ abstract class ApiService {
     @Path('id') int id,
     @Body() Map<String, dynamic> body,
   );
+  @POST('update-account')
+  Future<HttpResponse<UpdateAccountResponse>> updateAccount(
+      @Body() Map<String, dynamic> body);
 
 //
 // @POST(ApiConstants.send)
