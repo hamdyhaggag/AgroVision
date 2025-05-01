@@ -1,6 +1,5 @@
 import 'package:meta/meta.dart';
-
-import '../../../../models/sensor_data_model.dart';
+import '../../../../models/sensor_data_model.dart' as sensor_data;
 import '../../../../models/weather_model.dart';
 
 @immutable
@@ -14,7 +13,7 @@ class HomeLoading extends HomeState {}
 @immutable
 class HomeLoaded extends HomeState {
   final WeatherModel weather;
-  final List<Sensor> sensors;
+  final List<sensor_data.Sensor> sensors;
   final String? sensorError;
 
   HomeLoaded({
@@ -25,7 +24,7 @@ class HomeLoaded extends HomeState {
 
   HomeLoaded copyWith({
     WeatherModel? weather,
-    List<Sensor>? sensors,
+    List<sensor_data.Sensor>? sensors,
     String? sensorError,
   }) {
     return HomeLoaded(

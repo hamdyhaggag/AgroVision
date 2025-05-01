@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:agro_vision/core/helpers/location_helper.dart';
 import 'package:agro_vision/core/network/weather_service.dart';
-
-import '../../../../models/sensor_data_model.dart';
+import 'package:agro_vision/core/helpers/cache_helper.dart';
+import '../../../../models/sensor_data_model.dart' as sensor_data;
 import '../../Api/sensor_service.dart';
 import 'home_state.dart';
 
@@ -25,13 +25,43 @@ class HomeCubit extends Cubit<HomeState> {
         position.latitude,
         position.longitude,
       );
-      final sensor = await sensorService.getSensorStatus();
-      emit(HomeLoaded(
-        weather: weather,
-        sensors: [sensor],
-      ));
+      try {
+        final sensor = await sensorService.getSensorStatus();
+        // Save the sensor data to cache
+        await CacheHelper.saveSensorData([sensor]);
+        emit(HomeLoaded(
+          weather: weather,
+          sensors: [sensor],
+        ));
+      } catch (e) {
+        // If sensor data fails, try to load from cache
+        final cachedSensors = CacheHelper.getSensorData();
+        if (cachedSensors.isNotEmpty) {
+          emit(HomeLoaded(
+            weather: weather,
+            sensors: cachedSensors,
+            sensorError: 'Using cached sensor data: ${e.toString()}',
+          ));
+        } else {
+          emit(HomeLoaded(
+            weather: weather,
+            sensors: [],
+            sensorError: 'Failed to load sensor data: ${e.toString()}',
+          ));
+        }
+      }
     } catch (e) {
       emit(HomeError(message: 'Failed to load data: ${e.toString()}'));
+    }
+  }
+
+  void updateSensors(List<sensor_data.Sensor> sensors) {
+    if (state is HomeLoaded) {
+      final currentState = state as HomeLoaded;
+      emit(currentState.copyWith(
+        sensors: sensors,
+        sensorError: null,
+      ));
     }
   }
 
@@ -49,7 +79,7 @@ class HomeCubit extends Cubit<HomeState> {
     if (state is HomeLoaded) {
       final currentState = state as HomeLoaded;
       emit(currentState.copyWith(
-        sensors: [Sensor.fromJson(data)],
+        sensors: [sensor_data.Sensor.fromJson(data)],
         sensorError: null,
       ));
     }

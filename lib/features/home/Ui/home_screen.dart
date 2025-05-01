@@ -8,15 +8,16 @@ import 'package:flutter_svg/svg.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:agro_vision/features/home/Logic/home_cubit/home_cubit.dart';
-
 import '../../../core/helpers/cache_helper.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/themes/app_colors.dart';
-import '../../../models/sensor_data_model.dart';
+import '../../../shared/widgets/custom_appbar.dart';
+import '../../../shared/widgets/custom_botton.dart';
+import '../../../models/sensor_data_model.dart' as sensor_data;
 import '../../../models/weather_model.dart';
 import '../../monitoring/notification/notification_cubit/notification_cubit.dart';
 import '../../monitoring/notification/notification_cubit/notification_state.dart';
+import '../Logic/home_cubit/home_cubit.dart';
 import '../Logic/home_cubit/home_state.dart';
 import 'home_screen.dart' as state;
 import 'widgets/quick_actions_grid.dart';
@@ -282,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildBody(WeatherModel weather, List<Sensor> sensors) {
+  Widget _buildBody(WeatherModel weather, List<sensor_data.Sensor> sensors) {
     return CustomScrollView(
       slivers: [
         SliverPadding(
@@ -704,7 +705,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class DevicesCard extends StatelessWidget {
-  final List<Sensor> sensors;
+  final List<sensor_data.Sensor> sensors;
 
   const DevicesCard({super.key, required this.sensors});
 
@@ -729,16 +730,16 @@ class DevicesCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          ...sensors.map((sensor) => _buildSensorRow(context, sensor)),
+          ...sensors.map((sensor) => _buildSensorStatus(context, sensor)),
         ],
       ),
     );
   }
 
-  Widget _buildSensorRow(BuildContext context, Sensor sensor) {
+  Widget _buildSensorStatus(BuildContext context, sensor_data.Sensor sensor) {
     final isActive = sensor.status.toLowerCase() == 'active';
     final statusColor = isActive ? Colors.green : Colors.red;
-    final lastSeen = DateFormat('MMM dd, HH:mm').format(sensor.lastSeen);
+    final lastSeen = sensor.lastSeen.toString().split('.').first;
 
     return InkWell(
       onTap: () => _showSensorStatusDialog(context, sensor),
@@ -822,7 +823,8 @@ class DevicesCard extends StatelessWidget {
     );
   }
 
-  void _showSensorStatusDialog(BuildContext context, Sensor sensor) {
+  void _showSensorStatusDialog(
+      BuildContext context, sensor_data.Sensor sensor) {
     final isActive = sensor.status.toLowerCase() == 'active';
 
     showDialog(

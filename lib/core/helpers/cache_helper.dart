@@ -5,11 +5,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:agro_vision/models/chat_message.dart';
 import '../../models/chat_session.dart';
 import '../../models/notification_model.dart';
+import '../../models/sensor.dart';
+import '../../models/sensor_data_model.dart' as sensor_data;
 
 class CacheHelper {
   static SharedPreferences? sharedPreferences;
   static const String _chatMessagesKey = 'chat_messages';
   static const _sessionsKey = 'chat_sessions';
+  static const String _notificationsKey = 'notifications';
+  static const String _sensorDataKey = 'sensor_data';
 
   static Future<void> init() async {
     sharedPreferences = await SharedPreferences.getInstance();
@@ -143,8 +147,6 @@ class CacheHelper {
     return sharedPreferences?.getBool(key) ?? false;
   }
 
-  static const String _notificationsKey = 'notifications';
-
   static Future<void> saveNotifications(
       List<NotificationModel> notifications) async {
     final jsonList = notifications.map((n) => n.toJson()).toList();
@@ -159,5 +161,35 @@ class CacheHelper {
     if (jsonString.isEmpty) return [];
     final jsonList = jsonDecode(jsonString) as List<dynamic>;
     return jsonList.map((json) => NotificationModel.fromJson(json)).toList();
+  }
+
+  static Future<void> saveSensorData(List<sensor_data.Sensor> sensors) async {
+    await ensureInitialized();
+    final jsonList = sensors
+        .map((sensor) => {
+              'sensor_id': sensor.id,
+              'status': sensor.status,
+              'last_seen': sensor.lastSeen.toIso8601String(),
+              'issue': sensor.issue,
+              'name': sensor.name,
+              'type': sensor.type,
+            })
+        .toList();
+    await sharedPreferences!.setString(_sensorDataKey, jsonEncode(jsonList));
+  }
+
+  static List<sensor_data.Sensor> getSensorData() {
+    try {
+      final jsonString = sharedPreferences!.getString(_sensorDataKey);
+      if (jsonString == null || jsonString.isEmpty) return [];
+
+      final List<dynamic> jsonList = jsonDecode(jsonString) as List<dynamic>;
+      return jsonList.map((json) => sensor_data.Sensor.fromJson(json)).toList();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error parsing cached sensor data: $e');
+      }
+      return [];
+    }
   }
 }
