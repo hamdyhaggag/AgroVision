@@ -23,6 +23,7 @@ class _ChatListScreenState extends State<ChatListScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _currentTabIndex = 0;
+  static const String baseUrl = 'http://final.agrovision.ltd/';
 
   @override
   void initState() {
@@ -945,6 +946,9 @@ Widget _buildChatList(BuildContext context) {
                     final lastMessage = conversation.messages.isNotEmpty
                         ? conversation.messages.last
                         : null;
+                    final otherUserImg = conversation.user1Id == currentUserId
+                        ? conversation.user2Img
+                        : conversation.user1Img;
 
                     return Container(
                       decoration: BoxDecoration(
@@ -968,27 +972,31 @@ Widget _buildChatList(BuildContext context) {
                         leading: Stack(
                           children: [
                             CircleAvatar(
-                              backgroundColor: Colors.grey[200],
                               radius: 28,
-                              child: Icon(Icons.person,
-                                  size: 24, color: Colors.grey[600]),
+                              backgroundImage: otherUserImg != null
+                                  ? NetworkImage(
+                                      '${_ChatListScreenState.baseUrl}$otherUserImg')
+                                  : const AssetImage(
+                                          'assets/images/farmer_avatar.png')
+                                      as ImageProvider,
                             ),
-                            Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: Container(
-                                width: 14,
-                                height: 14,
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 2,
+                            if (conversation.unreadCount > 0)
+                              Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: Container(
+                                  width: 14,
+                                  height: 14,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2,
+                                    ),
+                                    borderRadius: BorderRadius.circular(7),
                                   ),
-                                  borderRadius: BorderRadius.circular(7),
                                 ),
                               ),
-                            ),
                           ],
                         ),
                         title: Row(

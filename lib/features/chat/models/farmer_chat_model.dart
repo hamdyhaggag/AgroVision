@@ -20,10 +20,14 @@ class Conversation {
   final int user1Id;
   @JsonKey(name: 'user1_name')
   final String user1Name;
+  @JsonKey(name: 'user1_img')
+  final String? user1Img;
   @JsonKey(name: 'user2_id')
   final int user2Id;
   @JsonKey(name: 'user2_name')
   final String user2Name;
+  @JsonKey(name: 'user2_img')
+  final String? user2Img;
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
   @JsonKey(name: 'unread_count', defaultValue: 0)
@@ -34,8 +38,10 @@ class Conversation {
     required this.id,
     required this.user1Id,
     required this.user1Name,
+    this.user1Img,
     required this.user2Id,
     required this.user2Name,
+    this.user2Img,
     required this.createdAt,
     required this.unreadCount,
     this.messages = const [],
@@ -56,8 +62,10 @@ class Conversation {
     int? id,
     int? user1Id,
     String? user1Name,
+    String? user1Img,
     int? user2Id,
     String? user2Name,
+    String? user2Img,
     DateTime? createdAt,
     int? unreadCount,
     List<Message>? messages,
@@ -66,8 +74,10 @@ class Conversation {
       id: id ?? this.id,
       user1Id: user1Id ?? this.user1Id,
       user1Name: user1Name ?? this.user1Name,
+      user1Img: user1Img ?? this.user1Img,
       user2Id: user2Id ?? this.user2Id,
       user2Name: user2Name ?? this.user2Name,
+      user2Img: user2Img ?? this.user2Img,
       createdAt: createdAt ?? this.createdAt,
       unreadCount: unreadCount ?? this.unreadCount,
       messages: messages ?? this.messages,

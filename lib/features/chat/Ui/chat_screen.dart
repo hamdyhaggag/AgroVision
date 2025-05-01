@@ -33,6 +33,7 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
   late List<Animation<double>> _dotAnimations;
   late final StreamSubscription<FarmerChatState> _sub;
   int _lastMessageCount = 0;
+  static const String baseUrl = 'http://final.agrovision.ltd/';
 
   bool isArabic(String text) {
     final arabicRegex = RegExp(r'[\u0600-\u06FF]');
@@ -94,6 +95,14 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
   }
 
   PreferredSizeWidget _buildAppBar() {
+    final currentUserId = context.read<AuthCubit>().currentUser?.id ?? 0;
+    final otherUserImg = widget.conversation.user1Id == currentUserId
+        ? widget.conversation.user2Img
+        : widget.conversation.user1Img;
+    final otherUserName = widget.conversation.user1Id == currentUserId
+        ? widget.conversation.user2Name
+        : widget.conversation.user1Name;
+
     return AppBar(
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
@@ -111,8 +120,10 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
             ),
             child: CircleAvatar(
               radius: 20,
-              backgroundColor: Colors.grey[200],
-              child: Icon(Icons.person, color: Colors.grey[600]),
+              backgroundImage: otherUserImg != null
+                  ? NetworkImage('$baseUrl$otherUserImg')
+                  : const AssetImage('assets/images/farmer_avatar.png')
+                      as ImageProvider,
             ),
           ),
           const SizedBox(width: 12),
@@ -120,7 +131,7 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.conversation.user1Name,
+                otherUserName,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -166,6 +177,11 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
           onLongPress: () {},
           isLoading: false,
           isSentByMe: sentByMe,
+          userImage: sentByMe
+              ? null
+              : widget.conversation.user1Id == currentUserId
+                  ? widget.conversation.user2Img
+                  : widget.conversation.user1Img,
         );
       },
     );
@@ -316,6 +332,7 @@ class ChatBubble extends StatefulWidget {
   final VoidCallback onLongPress;
   final bool isLoading;
   final bool isSentByMe;
+  final String? userImage;
 
   const ChatBubble({
     super.key,
@@ -323,6 +340,7 @@ class ChatBubble extends StatefulWidget {
     required this.onLongPress,
     this.isLoading = false,
     required this.isSentByMe,
+    this.userImage,
   });
 
   @override
@@ -376,9 +394,12 @@ class _ChatBubbleState extends State<ChatBubble> {
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: CircleAvatar(
-                  backgroundColor: Colors.grey[200],
                   radius: 22,
-                  child: Icon(Icons.person, size: 24, color: Colors.grey[600]),
+                  backgroundImage: widget.userImage != null
+                      ? NetworkImage(
+                          '${_FarmerChatScreenState.baseUrl}${widget.userImage}')
+                      : const AssetImage('assets/images/farmer_avatar.png')
+                          as ImageProvider,
                 ),
               ),
             Flexible(

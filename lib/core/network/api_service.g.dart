@@ -295,6 +295,7 @@ class _ApiService implements ApiService {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
+    final _data = body;
     final _options =
         _setStreamType<HttpResponse<UpdateAccountResponse>>(Options(
       method: 'POST',
@@ -305,7 +306,7 @@ class _ApiService implements ApiService {
               _dio.options,
               'update-account',
               queryParameters: queryParameters,
-              data: body,
+              data: _data,
             )
             .copyWith(
                 baseUrl: _combineBaseUrls(
