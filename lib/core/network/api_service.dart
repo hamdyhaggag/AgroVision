@@ -51,7 +51,7 @@ abstract class ApiService {
   );
   @POST('update-account')
   Future<HttpResponse<UpdateAccountResponse>> updateAccount(
-      @Body() Map<String, dynamic> body);
+      @Body() FormData body);
 
 //
 // @POST(ApiConstants.send)

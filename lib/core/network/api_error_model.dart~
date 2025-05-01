@@ -1,0 +1,43 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'api_error_model.g.dart';
+
+@JsonSerializable()
+class ApiErrorModel {
+  @JsonKey(
+      name: 'message',
+      readValue: _readMessage,
+      defaultValue: 'Invalid credentials' // Default message
+  )
+  final String message;
+
+  @JsonKey(name: 'statusCode', defaultValue: 401) // Default to unauthorized
+  final int code;
+
+  ApiErrorModel({
+    required this.message,
+    required this.code,
+  });
+
+  factory ApiErrorModel.fromJson(Map<String, dynamic> json) {
+    // Handle empty response case
+    if (json.isEmpty) {
+      return ApiErrorModel(
+        message: 'Invalid email or password',
+        code: 401,
+      );
+    }
+    return _$ApiErrorModelFromJson(json);
+  }
+
+
+  Map<String, dynamic> toJson() => _$ApiErrorModelToJson(this);
+
+  static String _readMessage(Map json, String _) {
+    if (json['message'] != null) return json['message'].toString();
+    if (json['error'] != null) return json['error'].toString();
+    if (json['errors'] is List)
+      return json['errors'].first['message'].toString();
+    return 'Unknown error occurred';
+  }
+}

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lottie/lottie.dart';
 import '../../../core/utils/utils.dart';
 import '../../../shared/widgets/custom_botton.dart';
 import '../../../shared/widgets/emai_and_password.dart';
@@ -10,10 +11,17 @@ import '../../home/Ui/screen_layout.dart';
 import '../Data/model/login_request_body.dart';
 import '../Logic/login cubit/login_cubit.dart';
 import '../Logic/login cubit/login_state.dart';
-import 'package:lottie/lottie.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final GlobalKey<EmailAndPasswordState> _emailAndPasswordKey =
+      GlobalKey<EmailAndPasswordState>();
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +64,7 @@ class LoginScreen extends StatelessWidget {
                 SizedBox(
                   height: 22.h,
                 ),
-                const EmailAndPassword(),
+                EmailAndPassword(key: _emailAndPasswordKey),
                 // Align(
                 //   alignment: Alignment.centerLeft,
                 //   child: Padding(
@@ -124,7 +132,8 @@ class LoginScreen extends StatelessWidget {
 
   void validateThenDoLogin(BuildContext context) {
     final cubit = context.read<LoginCubit>();
-    if (cubit.formKey.currentState!.validate()) {
+    if (_emailAndPasswordKey.currentState?.formKey.currentState?.validate() ??
+        false) {
       cubit.emitLoginStates(
         LoginRequestBody(
           email: cubit.emailController.text.trim(),

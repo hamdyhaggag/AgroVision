@@ -5,14 +5,7 @@ import '../../core/helpers/app_regexp.dart';
 import '../../features/authentication/Logic/login cubit/login_cubit.dart';
 import 'custom_text_field.dart';
 
-class EmailAndPassword extends StatefulWidget {
-  const EmailAndPassword({super.key});
-
-  @override
-  State<EmailAndPassword> createState() => _EmailAndPasswordState();
-}
-
-class _EmailAndPasswordState extends State<EmailAndPassword> {
+class EmailAndPasswordState extends State<EmailAndPassword> {
   bool hasLowercase = false;
   bool hasUppercase = false;
   bool hasSpecialCharacters = false;
@@ -21,6 +14,8 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
   bool isPasswordObscureText = true;
 
   late TextEditingController passwordController;
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -40,7 +35,7 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
   @override
   Widget build(BuildContext context) {
     return Form(
-        key: context.read<LoginCubit>().formKey,
+        key: formKey,
         child: Column(
           children: [
             CustomTextField(
@@ -119,4 +114,11 @@ class _EmailAndPasswordState extends State<EmailAndPassword> {
     passwordController.dispose();
     super.dispose();
   }
+}
+
+class EmailAndPassword extends StatefulWidget {
+  const EmailAndPassword({super.key});
+
+  @override
+  State<EmailAndPassword> createState() => EmailAndPasswordState();
 }

@@ -291,12 +291,10 @@ class _ApiService implements ApiService {
 
   @override
   Future<HttpResponse<UpdateAccountResponse>> updateAccount(
-      Map<String, dynamic> body) async {
+      FormData body) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(body);
     final _options =
         _setStreamType<HttpResponse<UpdateAccountResponse>>(Options(
       method: 'POST',
@@ -307,7 +305,7 @@ class _ApiService implements ApiService {
               _dio.options,
               'update-account',
               queryParameters: queryParameters,
-              data: _data,
+              data: body,
             )
             .copyWith(
                 baseUrl: _combineBaseUrls(

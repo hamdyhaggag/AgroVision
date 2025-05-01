@@ -70,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen>
 
       if (validEmail == null || validEmail.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Email is required',
                 style: TextStyle(color: AppColors.surface)),
             backgroundColor: AppColors.error,
@@ -79,15 +79,24 @@ class _SettingsScreenState extends State<SettingsScreen>
         return;
       }
 
-      final response = await _apiService.updateAccount({
+      final formData = FormData.fromMap({
         'name': username,
         'email': validEmail,
         'phone': _phone,
         'birthday': _birthday,
-        'img': CacheHelper.getString(key: 'profileImage') ?? 'default.png',
+        if (_profileImage != null)
+          'img': await MultipartFile.fromFile(
+            _profileImage!.path,
+            filename: _profileImage!.path.split('/').last,
+          ),
       });
 
+      final response = await _apiService.updateAccount(formData);
+
       if (response.data.message.contains('successfully')) {
+        setState(() {
+          _updateProfileImage();
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.data.message),
@@ -95,23 +104,30 @@ class _SettingsScreenState extends State<SettingsScreen>
           ),
         );
       }
-    } on DioException catch (e) {
+    } catch (e) {
       String errorMessage = 'Profile update failed';
-      if (e.response?.statusCode == 422) {
+      if (e is DioException && e.response?.statusCode == 422) {
         final errors = e.response?.data['errors'];
         errorMessage = errors?.entries.first.value.first ?? errorMessage;
+      } else if (e is DioException && e.response?.statusCode == 401) {
+        if (context.mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/login',
+            (route) => false,
+          );
+          return;
+        }
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: AppColors.error,
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('An unexpected error occurred')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 
@@ -132,7 +148,11 @@ class _SettingsScreenState extends State<SettingsScreen>
     final pickedFile = await picker.pickImage(source: source);
     if (pickedFile != null) {
       await CacheHelper.saveData(key: 'profileImage', value: pickedFile.path);
-      _updateProfile();
+      CacheHelper.profileImageNotifier.value = pickedFile.path;
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+      await _updateProfile();
     }
   }
 
@@ -226,164 +246,103 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Widget _buildProfileHeader() {
-    return LayoutBuilder(
-      builder: (context, constraints) => SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: constraints.maxHeight),
-          child: Container(
-            key: _profileHeaderKey,
-            padding: const EdgeInsets.symmetric(vertical: 24.0),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.primaryColor, AppColors.primaryColorshade],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 20,
-                  spreadRadius: 10,
+    return Container(
+      padding: const EdgeInsets.all(20.0),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.primaryColor, AppColors.primaryColorshade],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          GestureDetector(
+            onTapDown: (_) => _controller.forward(),
+            onTapUp: (_) => _controller.reverse(),
+            onTapCancel: () => _controller.reverse(),
+            onTap: _showImagePickerOptions,
+            child: ScaleTransition(
+              scale: _avatarAnimation,
+              child: ElasticIn(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 10,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: _profileImage != null
+                            ? FileImage(_profileImage!)
+                            : const AssetImage('assets/images/user.png')
+                                as ImageProvider,
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.edit,
+                            color: AppColors.primaryColor, size: 20),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-            child: Column(
+          ),
+          const SizedBox(height: 10),
+          Text(
+            username,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                GestureDetector(
-                  onTap: _showImagePickerOptions,
-                  child: Container(
-                    width: 110,
-                    height: 110,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.8),
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 12,
-                          spreadRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        CircleAvatar(
-                          radius: 52,
-                          backgroundImage: _profileImage != null
-                              ? FileImage(_profileImage!)
-                              : const AssetImage('assets/images/user.png')
-                                  as ImageProvider,
-                        ),
-                        Positioned(
-                          bottom: -8,
-                          right: -8,
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 6,
-                                ),
-                              ],
-                            ),
-                            child: Icon(Icons.edit_rounded,
-                                size: 22,
-                                color: AppColors.primaryColor.withOpacity(0.8)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 70),
-                    child: TextFormField(
-                      controller: _nameController,
-                      onTap: () => _nameController.text = '',
-                      onFieldSubmitted: (newName) {
-                        if (newName.trim().isNotEmpty && newName != username) {
-                          _showNameChangeDialog(username, newName.trim());
-                        }
-                      },
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                      textAlign: TextAlign.center,
-                      cursorColor: Colors.white,
-                      cursorWidth: 2,
-                      maxLines: 1,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.1),
-                        enabledBorder: _buildInputBorder(Colors.white54),
-                        focusedBorder: _buildInputBorder(Colors.white),
-                        hintText: 'Enter Display Name',
-                        hintStyle: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        suffixIcon: Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: Icon(
-                            Icons.verified_rounded,
-                            color: username.isNotEmpty
-                                ? AppColors.accentColor
-                                : Colors.white54,
-                            size: 26,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 14, horizontal: 20),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.workspace_premium_rounded,
-                          color: AppColors.accentColor, size: 18),
-                      const SizedBox(width: 6),
-                      const Text(
-                        'Visionary Farmer',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ],
+                Icon(Icons.workspace_premium_rounded,
+                    color: AppColors.accentColor, size: 18),
+                SizedBox(width: 6),
+                Text(
+                  'Visionary Farmer',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.3,
                   ),
                 ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -550,8 +509,43 @@ class _SettingsScreenState extends State<SettingsScreen>
             color: value == 'Not set' ? Colors.grey : AppColors.onSurface,
           )),
       trailing: IconButton(
-        icon: Icon(Icons.edit, size: 20, color: AppColors.primaryColor),
-        onPressed: onEdit,
+        icon: const Icon(Icons.edit, size: 20, color: AppColors.primaryColor),
+        onPressed: () {
+          if (title == 'Full Name') {
+            _nameController.text = username;
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Edit Full Name'),
+                content: TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Full Name',
+                    hintText: 'Enter your full name',
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_nameController.text.trim().isNotEmpty) {
+                        setState(() => username = _nameController.text.trim());
+                        _updateProfile();
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: const Text('Save'),
+                  ),
+                ],
+              ),
+            );
+          } else {
+            onEdit();
+          }
+        },
       ),
       contentPadding: const EdgeInsets.symmetric(vertical: 4),
     );
@@ -640,8 +634,8 @@ class _SettingsScreenState extends State<SettingsScreen>
             fontWeight: FontWeight.w500,
             color: AppColors.onSurface,
           )),
-      trailing:
-          Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.divider),
+      trailing: const Icon(Icons.arrow_forward_ios,
+          size: 16, color: AppColors.divider),
       onTap: onTap,
     );
   }
@@ -721,9 +715,23 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Future<void> _showBirthdayPicker() async {
-    final initialDate = _birthday != null
-        ? DateTime.parse(_birthday!)
-        : DateTime.now().subtract(const Duration(days: 365 * 18));
+    DateTime? initialDate;
+    try {
+      if (_birthday != null && _birthday!.isNotEmpty) {
+        final parts = _birthday!.split('-');
+        if (parts.length == 3) {
+          initialDate = DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2]),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error parsing birthday: $e');
+    }
+
+    initialDate ??= DateTime.now().subtract(const Duration(days: 365 * 18));
 
     final pickedDate = await showDatePicker(
       context: context,

@@ -272,6 +272,9 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundImage: valid
                   ? FileImage(File(cachedPath))
                   : const AssetImage('assets/images/user.png') as ImageProvider,
+              onBackgroundImageError: (exception, stackTrace) {
+                debugPrint('Error loading profile image: $exception');
+              },
             );
           },
         );
