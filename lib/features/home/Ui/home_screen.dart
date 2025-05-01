@@ -8,6 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:intl/intl.dart';
 import '../../../core/helpers/cache_helper.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/themes/app_colors.dart';
@@ -739,7 +740,7 @@ class DevicesCard extends StatelessWidget {
   Widget _buildSensorStatus(BuildContext context, sensor_data.Sensor sensor) {
     final isActive = sensor.status.toLowerCase() == 'active';
     final statusColor = isActive ? Colors.green : Colors.red;
-    final lastSeen = sensor.lastSeen.toString().split('.').first;
+    final lastSeen = DateFormat('MMM dd, hh:mm a').format(sensor.lastSeen);
 
     return InkWell(
       onTap: () => _showSensorStatusDialog(context, sensor),
