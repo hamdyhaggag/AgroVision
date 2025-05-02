@@ -3,6 +3,7 @@ import 'package:agro_vision/shared/widgets/custom_appbar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/helpers/cache_helper.dart';
 import '../../../../core/network/api_service.dart';
@@ -80,6 +81,46 @@ class InventoryCardShimmer extends StatelessWidget {
   }
 }
 
+class EmptyStateWidget extends StatelessWidget {
+  const EmptyStateWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(
+            'assets/animations/empty_crops.json',
+            width: 250,
+            height: 250,
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'No Crops Found',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'SYNE',
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'You haven\'t added any crops to your inventory yet.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+              fontFamily: 'SYNE',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class FarmInventoryScreen extends StatefulWidget {
   const FarmInventoryScreen({super.key});
 
@@ -147,11 +188,46 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
         }).toList();
         isLoading = false;
       });
+    } on DioException catch (e) {
+      setState(() {
+        isLoading = false;
+        if (e.response?.statusCode == 404) {
+          errorMessage = null; // Clear error message for 404 case
+          inventoryItems = []; // Clear inventory items
+        } else {
+          errorMessage = _mapDioErrorToMessage(e);
+        }
+      });
     } catch (e) {
       setState(() {
         isLoading = false;
-        errorMessage = 'Failed to load data: ${e.toString()}';
+        errorMessage = 'An unexpected error occurred. Please try again later.';
       });
+    }
+  }
+
+  String _mapDioErrorToMessage(DioException e) {
+    if (e.response?.statusCode == 401) {
+      return 'Your session has expired. Please log in again.';
+    } else if (e.response?.statusCode == 403) {
+      return 'You don\'t have permission to access this resource.';
+    } else if (e.response?.statusCode == 500) {
+      return 'Server error. Please try again later.';
+    } else if (e.response?.statusCode == 502) {
+      return 'Service temporarily unavailable. Please try again later.';
+    } else if (e.response?.statusCode == 503) {
+      return 'Service is currently down for maintenance.';
+    } else if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout) {
+      return 'Connection timed out. Please check your internet connection.';
+    } else if (e.type == DioExceptionType.connectionError) {
+      return 'No internet connection. Please check your network settings.';
+    } else if (e.response?.data != null &&
+        e.response?.data['message'] != null) {
+      return e.response!.data['message'];
+    } else {
+      return 'An error occurred. Please try again later.';
     }
   }
 
@@ -252,10 +328,30 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
       );
     }
     if (errorMessage != null) {
-      return Center(child: Text(errorMessage!));
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 48, color: Colors.red.shade300),
+              const SizedBox(height: 16),
+              Text(
+                errorMessage!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textPrimary,
+                  fontFamily: 'SYNE',
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
     if (inventoryItems.isEmpty) {
-      return const Center(child: Text('No crops available.'));
+      return const EmptyStateWidget();
     }
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
