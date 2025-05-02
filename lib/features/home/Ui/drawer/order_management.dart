@@ -47,7 +47,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
   String _mapApiStatusToUiStatus(String apiStatus) {
     switch (apiStatus.toLowerCase()) {
       case 'delivered':
-        return 'Completed';
+        return 'Delivered';
       case 'pending':
         return 'Pending';
       case 'cancelled':
@@ -56,6 +56,21 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
         return 'Ordered';
       default:
         return 'Pending';
+    }
+  }
+
+  String _mapUiStatusToApiStatus(String uiStatus) {
+    switch (uiStatus.toLowerCase()) {
+      case 'delivered':
+        return 'delivered';
+      case 'pending':
+        return 'pending';
+      case 'cancelled':
+        return 'cancelled';
+      case 'ordered':
+        return 'ordered';
+      default:
+        return 'pending';
     }
   }
 
@@ -174,16 +189,63 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
       );
     }
 
+    // Filter orders based on selected statuses
+    final filteredOrders = selectedStatuses.isEmpty
+        ? orders
+        : orders
+            .where((order) =>
+                selectedStatuses.contains(order.status.toLowerCase()))
+            .toList();
+
+    if (filteredOrders.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset(
+              'assets/icon/shopping-bag.svg',
+              width: 64,
+              height: 64,
+              colorFilter: ColorFilter.mode(
+                Colors.grey[400]!,
+                BlendMode.srcIn,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No Orders Found',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
+                fontFamily: 'Poppins',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Try adjusting your filters',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                fontFamily: 'Poppins',
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       child: Column(children: [
         Expanded(
             child: ListView.separated(
           physics: const BouncingScrollPhysics(),
-          itemCount: orders.length,
+          itemCount: filteredOrders.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, index) =>
-              _OrderCard(order: orders[index], formatDate: _formatDate),
+              _OrderCard(order: filteredOrders[index], formatDate: _formatDate),
         )),
       ]),
     );
@@ -198,10 +260,10 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
                 title: const Text('Filter Orders'),
                 content: Column(mainAxisSize: MainAxisSize.min, children: [
                   CheckboxListTile(
-                    title: const Text('Completed'),
-                    value: currentSelected.contains('completed'),
+                    title: const Text('Delivered'),
+                    value: currentSelected.contains('delivered'),
                     onChanged: (value) => _updateFilters(
-                        currentSelected, 'completed', value, setState),
+                        currentSelected, 'delivered', value, setState),
                   ),
                   CheckboxListTile(
                     title: const Text('Pending'),
@@ -214,6 +276,12 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
                     value: currentSelected.contains('cancelled'),
                     onChanged: (value) => _updateFilters(
                         currentSelected, 'cancelled', value, setState),
+                  ),
+                  CheckboxListTile(
+                    title: const Text('Ordered'),
+                    value: currentSelected.contains('ordered'),
+                    onChanged: (value) => _updateFilters(
+                        currentSelected, 'ordered', value, setState),
                   ),
                 ]),
                 actions: [
@@ -234,7 +302,13 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
 
   void _updateFilters(
       List<String> current, String status, bool? value, Function setState) {
-    setState(() => value! ? current.add(status) : current.remove(status));
+    setState(() {
+      if (value == true) {
+        current.add(status);
+      } else {
+        current.remove(status);
+      }
+    });
   }
 }
 
