@@ -35,7 +35,8 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
   late List<Animation<double>> _dotAnimations;
   late final StreamSubscription<FarmerChatState> _sub;
   int _lastMessageCount = 0;
-  static const String baseUrl = 'http://final.agrovision.ltd/';
+  static const String baseUrl = 'http://final.agrovision.ltd';
+  static const String storagePath = '/storage/app/public';
 
   bool isArabic(String text) {
     final arabicRegex = RegExp(r'[\u0600-\u06FF]');
@@ -126,7 +127,8 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
               child: ClipOval(
                 child: otherUserImg != null
                     ? CachedNetworkImage(
-                        imageUrl: '$baseUrl$otherUserImg',
+                        imageUrl:
+                            '${_FarmerChatScreenState.baseUrl}${_FarmerChatScreenState.storagePath}/$otherUserImg',
                         fit: BoxFit.cover,
                         width: 40,
                         height: 40,
@@ -429,7 +431,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                     child: widget.userImage != null
                         ? CachedNetworkImage(
                             imageUrl:
-                                '${_FarmerChatScreenState.baseUrl}${widget.userImage}',
+                                '${_FarmerChatScreenState.baseUrl}${_FarmerChatScreenState.storagePath}/${widget.userImage}',
                             fit: BoxFit.cover,
                             width: 44,
                             height: 44,

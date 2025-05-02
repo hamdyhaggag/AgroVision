@@ -24,7 +24,8 @@ class _ChatListScreenState extends State<ChatListScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _currentTabIndex = 0;
-  static const String baseUrl = 'http://final.agrovision.ltd/';
+  static const String baseUrl = 'http://final.agrovision.ltd';
+  static const String storagePath = '/storage/app/public';
 
   @override
   void initState() {
@@ -978,10 +979,10 @@ Widget _buildChatList(BuildContext context) {
                                   .primaryColor
                                   .withOpacity(0.1),
                               child: ClipOval(
-                                child: otherUserImg != null
+                                child: otherUserImg?.isNotEmpty == true
                                     ? CachedNetworkImage(
                                         imageUrl:
-                                            '${_ChatListScreenState.baseUrl}$otherUserImg',
+                                            '${_ChatListScreenState.baseUrl}${_ChatListScreenState.storagePath}/$otherUserImg',
                                         fit: BoxFit.cover,
                                         width: 56,
                                         height: 56,
@@ -989,22 +990,25 @@ Widget _buildChatList(BuildContext context) {
                                             const CircularProgressIndicator(
                                           strokeWidth: 2,
                                         ),
-                                        errorWidget: (context, url, error) =>
-                                            SvgPicture.asset(
-                                          'assets/images/user_avatar.svg',
-                                          fit: BoxFit.cover,
-                                          width: 56,
-                                          height: 56,
-                                          colorFilter: ColorFilter.mode(
-                                              Colors.grey[400]!,
-                                              BlendMode.srcIn),
-                                        ),
+                                        errorWidget: (context, url, error) {
+                                          print(
+                                              'Error loading image: $error, URL: $url');
+                                          return SvgPicture.asset(
+                                            'assets/images/user_avatar.svg',
+                                            fit: BoxFit.cover,
+                                            width: 56,
+                                            height: 56,
+                                            colorFilter: ColorFilter.mode(
+                                                Colors.grey[400]!,
+                                                BlendMode.srcIn),
+                                          );
+                                        },
                                       )
                                     : SvgPicture.asset(
                                         'assets/images/user_avatar.svg',
                                         fit: BoxFit.cover,
-                                        width: 30,
-                                        height: 30,
+                                        width: 56,
+                                        height: 56,
                                         colorFilter: ColorFilter.mode(
                                             Colors.grey[400]!, BlendMode.srcIn),
                                       ),
