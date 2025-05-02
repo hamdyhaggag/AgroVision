@@ -163,6 +163,10 @@ class CacheHelper {
     return jsonList.map((json) => NotificationModel.fromJson(json)).toList();
   }
 
+  static Future<void> clearNotifications() async {
+    await removeData(key: _notificationsKey);
+  }
+
   static Future<void> saveSensorData(List<sensor_data.Sensor> sensors) async {
     await ensureInitialized();
     final jsonList = sensors

@@ -2,10 +2,19 @@ import 'package:bloc/bloc.dart';
 import 'package:agro_vision/models/notification_model.dart';
 import '../../../../core/helpers/cache_helper.dart';
 import 'notification_state.dart';
+import '../../../../features/authentication/Logic/auth cubit/auth_cubit.dart';
 
 class NotificationCubit extends Cubit<NotificationState> {
   NotificationCubit() : super(NotificationState(notifications: [])) {
-    _loadCachedNotifications();
+    // Don't load notifications on initialization
+  }
+
+  void handleAuthStateChange(AuthState state) {
+    if (state is UserUpdatedState) {
+      _loadCachedNotifications();
+    } else if (state is UserClearedState) {
+      clearNotifications();
+    }
   }
 
   Future<void> _loadCachedNotifications() async {
@@ -53,5 +62,10 @@ class NotificationCubit extends Cubit<NotificationState> {
     }).toList();
     emit(state.copyWith(notifications: updatedNotifications));
     CacheHelper.saveNotifications(updatedNotifications);
+  }
+
+  void clearNotifications() {
+    emit(state.copyWith(notifications: []));
+    CacheHelper.clearNotifications();
   }
 }
