@@ -11,6 +11,8 @@ import '../../authentication/Logic/auth cubit/auth_cubit.dart';
 import '../logic/farmer_chat_cubit.dart';
 import '../logic/farmer_chat_state.dart';
 import '../models/farmer_chat_model.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class FarmerChatScreen extends StatefulWidget {
   final Conversation conversation;
@@ -120,13 +122,36 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
             ),
             child: CircleAvatar(
               radius: 20,
-              backgroundImage: otherUserImg != null
-                  ? NetworkImage('$baseUrl$otherUserImg')
-                  : const AssetImage('assets/images/user_avatar.png')
-                      as ImageProvider,
-              onBackgroundImageError: (exception, stackTrace) {
-                debugPrint('Error loading profile image: $exception');
-              },
+              backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+              child: ClipOval(
+                child: otherUserImg != null
+                    ? CachedNetworkImage(
+                        imageUrl: '$baseUrl$otherUserImg',
+                        fit: BoxFit.cover,
+                        width: 40,
+                        height: 40,
+                        placeholder: (context, url) =>
+                            const CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                        errorWidget: (context, url, error) => SvgPicture.asset(
+                          'assets/images/user_avatar.svg',
+                          fit: BoxFit.cover,
+                          width: 30,
+                          height: 30,
+                          colorFilter: ColorFilter.mode(
+                              Colors.grey[400]!, BlendMode.srcIn),
+                        ),
+                      )
+                    : SvgPicture.asset(
+                        'assets/images/user_avatar.svg',
+                        fit: BoxFit.cover,
+                        width: 30,
+                        height: 30,
+                        colorFilter: ColorFilter.mode(
+                            Colors.grey[400]!, BlendMode.srcIn),
+                      ),
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -398,15 +423,39 @@ class _ChatBubbleState extends State<ChatBubble> {
                 padding: const EdgeInsets.only(right: 8),
                 child: CircleAvatar(
                   radius: 22,
-                  backgroundImage: widget.userImage != null
-                      ? NetworkImage(
-                          '${_FarmerChatScreenState.baseUrl}${widget.userImage}')
-                      : const AssetImage('assets/images/farmer_avatar.png')
-                          as ImageProvider,
-                  onBackgroundImageError: (exception, stackTrace) {
-                    // Handle image loading error
-                    debugPrint('Error loading chat bubble image: $exception');
-                  },
+                  backgroundColor:
+                      Theme.of(context).primaryColor.withOpacity(0.1),
+                  child: ClipOval(
+                    child: widget.userImage != null
+                        ? CachedNetworkImage(
+                            imageUrl:
+                                '${_FarmerChatScreenState.baseUrl}${widget.userImage}',
+                            fit: BoxFit.cover,
+                            width: 44,
+                            height: 44,
+                            placeholder: (context, url) =>
+                                const CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                            errorWidget: (context, url, error) =>
+                                SvgPicture.asset(
+                              'assets/images/user_avatar.svg',
+                              fit: BoxFit.cover,
+                              width: 44,
+                              height: 44,
+                              colorFilter: ColorFilter.mode(
+                                  Colors.grey[400]!, BlendMode.srcIn),
+                            ),
+                          )
+                        : SvgPicture.asset(
+                            'assets/images/user_avatar.svg',
+                            fit: BoxFit.cover,
+                            width: 44,
+                            height: 44,
+                            colorFilter: ColorFilter.mode(
+                                Colors.grey[400]!, BlendMode.srcIn),
+                          ),
+                  ),
                 ),
               ),
             Flexible(

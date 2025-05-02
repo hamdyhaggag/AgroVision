@@ -3,6 +3,7 @@ import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../models/chat_session.dart';
@@ -973,12 +974,41 @@ Widget _buildChatList(BuildContext context) {
                           children: [
                             CircleAvatar(
                               radius: 28,
-                              backgroundImage: otherUserImg != null
-                                  ? NetworkImage(
-                                      '${_ChatListScreenState.baseUrl}$otherUserImg')
-                                  : const AssetImage(
-                                          'assets/images/farmer_avatar.png')
-                                      as ImageProvider,
+                              backgroundColor: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.1),
+                              child: ClipOval(
+                                child: otherUserImg != null
+                                    ? CachedNetworkImage(
+                                        imageUrl:
+                                            '${_ChatListScreenState.baseUrl}$otherUserImg',
+                                        fit: BoxFit.cover,
+                                        width: 56,
+                                        height: 56,
+                                        placeholder: (context, url) =>
+                                            const CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            SvgPicture.asset(
+                                          'assets/images/user_avatar.svg',
+                                          fit: BoxFit.cover,
+                                          width: 56,
+                                          height: 56,
+                                          colorFilter: ColorFilter.mode(
+                                              Colors.grey[400]!,
+                                              BlendMode.srcIn),
+                                        ),
+                                      )
+                                    : SvgPicture.asset(
+                                        'assets/images/user_avatar.svg',
+                                        fit: BoxFit.cover,
+                                        width: 30,
+                                        height: 30,
+                                        colorFilter: ColorFilter.mode(
+                                            Colors.grey[400]!, BlendMode.srcIn),
+                                      ),
+                              ),
                             ),
                             if (conversation.unreadCount > 0)
                               Positioned(
