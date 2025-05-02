@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/helpers/cache_helper.dart';
@@ -134,6 +135,45 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
   }
 
   Widget _buildOrderList(List<Order> orders) {
+    if (orders.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset(
+              'assets/icon/shopping-bag.svg',
+              width: 64,
+              height: 64,
+              colorFilter: ColorFilter.mode(
+                Colors.grey[400]!,
+                BlendMode.srcIn,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No Orders Yet',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
+                fontFamily: 'Poppins',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'When you receive orders, they will appear here',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                fontFamily: 'Poppins',
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       child: Column(children: [
