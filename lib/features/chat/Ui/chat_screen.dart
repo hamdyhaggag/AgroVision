@@ -122,8 +122,11 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
               radius: 20,
               backgroundImage: otherUserImg != null
                   ? NetworkImage('$baseUrl$otherUserImg')
-                  : const AssetImage('assets/images/farmer_avatar.png')
+                  : const AssetImage('assets/images/user_avatar.png')
                       as ImageProvider,
+              onBackgroundImageError: (exception, stackTrace) {
+                debugPrint('Error loading profile image: $exception');
+              },
             ),
           ),
           const SizedBox(width: 12),
@@ -400,6 +403,10 @@ class _ChatBubbleState extends State<ChatBubble> {
                           '${_FarmerChatScreenState.baseUrl}${widget.userImage}')
                       : const AssetImage('assets/images/farmer_avatar.png')
                           as ImageProvider,
+                  onBackgroundImageError: (exception, stackTrace) {
+                    // Handle image loading error
+                    debugPrint('Error loading chat bubble image: $exception');
+                  },
                 ),
               ),
             Flexible(
