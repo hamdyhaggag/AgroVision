@@ -24,7 +24,7 @@ class _ChatListScreenState extends State<ChatListScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _currentTabIndex = 0;
-  static const String baseUrl = 'http://final.agrovision.ltd';
+  static const String baseUrl = 'https://final.agrovision.ltd';
   static const String storagePath = '/storage/app/public';
 
   @override
@@ -951,6 +951,10 @@ Widget _buildChatList(BuildContext context) {
                     final otherUserImg = conversation.user1Id == currentUserId
                         ? conversation.user2Img
                         : conversation.user1Img;
+
+                    print('Debug - Image path: $otherUserImg');
+                    print(
+                        'Debug - Full URL: ${_ChatListScreenState.baseUrl}${_ChatListScreenState.storagePath}/$otherUserImg');
 
                     return Container(
                       decoration: BoxDecoration(

@@ -35,7 +35,7 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
   late List<Animation<double>> _dotAnimations;
   late final StreamSubscription<FarmerChatState> _sub;
   int _lastMessageCount = 0;
-  static const String baseUrl = 'http://final.agrovision.ltd';
+  static const String baseUrl = 'https://final.agrovision.ltd';
   static const String storagePath = '/storage/app/public';
 
   bool isArabic(String text) {
