@@ -9,6 +9,8 @@ import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import '../../../core/helpers/cache_helper.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/themes/app_colors.dart';
@@ -60,7 +62,12 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
-    return shouldPop ?? false;
+    if (shouldPop == true) {
+      // Exit the app
+      SystemNavigator.pop();
+      return true;
+    }
+    return false;
   }
 
   @override
