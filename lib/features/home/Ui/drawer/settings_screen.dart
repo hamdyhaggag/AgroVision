@@ -695,7 +695,10 @@ class _SettingsScreenState extends State<SettingsScreen>
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              controller.dispose();
+              Navigator.pop(context);
+            },
             child: const Text('Cancel'),
           ),
           ElevatedButton(
@@ -704,6 +707,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 setState(() => _phone = controller.text.trim());
                 CacheHelper.saveData(key: 'phone', value: _phone);
                 _updateProfile();
+                controller.dispose();
                 Navigator.pop(context);
               }
             },
@@ -711,7 +715,10 @@ class _SettingsScreenState extends State<SettingsScreen>
           ),
         ],
       ),
-    );
+    ).then((_) {
+      // Ensure controller is disposed even if dialog is dismissed by tapping outside
+      controller.dispose();
+    });
   }
 
   Future<void> _showBirthdayPicker() async {
