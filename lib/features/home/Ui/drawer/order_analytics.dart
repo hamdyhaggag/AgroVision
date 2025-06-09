@@ -113,39 +113,24 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
       },
     ];
 
-    return isMobile
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: stats
-                .map((stat) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: _StatCard(
-                        title: stat['title'] as String,
-                        value: stat['value'] as String,
-                        icon: stat['icon'] as IconData,
-                        color: stat['color'] as Color,
-                        centerContent: false,
-                      ),
-                    ))
-                .toList(),
-          )
-        : GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 2.5,
-            ),
-            itemCount: stats.length,
-            itemBuilder: (context, index) => _StatCard(
-              title: stats[index]['title'] as String,
-              value: stats[index]['value'] as String,
-              icon: stats[index]['icon'] as IconData,
-              color: stats[index]['color'] as Color,
-            ),
-          );
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.8,
+      ),
+      itemCount: stats.length,
+      itemBuilder: (context, index) => _StatCard(
+        title: stats[index]['title'] as String,
+        value: stats[index]['value'] as String,
+        icon: stats[index]['icon'] as IconData,
+        color: stats[index]['color'] as Color,
+        centerContent: true,
+      ),
+    );
   }
 
   Widget _buildChartSection(
@@ -317,8 +302,7 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: width ?? double.infinity,
-      constraints: const BoxConstraints(minHeight: 140),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
@@ -331,58 +315,43 @@ class _StatCard extends StatelessWidget {
         ),
       ),
       child: Column(
-        crossAxisAlignment: centerContent
-            ? CrossAxisAlignment.center
-            : CrossAxisAlignment.start,
-        mainAxisAlignment: centerContent
-            ? MainAxisAlignment.center
-            : MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (!centerContent)
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 24),
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
             ),
-          if (!centerContent) const SizedBox(height: 16),
-          Column(
-            crossAxisAlignment: centerContent
-                ? CrossAxisAlignment.center
-                : CrossAxisAlignment.start,
-            children: [
-              if (centerContent)
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: color, size: 16),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontFamily: 'SYNE',
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.6),
+                  fontSize: 11,
                 ),
-              if (centerContent) const SizedBox(height: 16),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontFamily: 'SYNE',
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6),
-                    ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontFamily: 'SYNE',
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                    ),
-              ),
-            ],
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontFamily: 'SYNE',
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                  fontSize: 14,
+                ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
