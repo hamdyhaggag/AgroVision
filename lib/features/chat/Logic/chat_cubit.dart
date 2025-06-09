@@ -5,6 +5,7 @@ import '../../../models/chat_message.dart';
 import '../../../models/chat_session.dart';
 import '../chat_repository.dart';
 import '../../authentication/Logic/auth cubit/auth_cubit.dart';
+import 'package:flutter/foundation.dart';
 
 part 'chat_state.dart';
 
@@ -70,22 +71,28 @@ class ChatCubit extends Cubit<ChatState> {
           error: 'User not logged in'));
       return;
     }
-    try {
-      await repository.deleteSession(userId.toString(), sessionId);
-      final updatedSessions =
-          state.sessions.where((s) => s.id != sessionId).toList();
-      final newCurrentSessionId =
-          updatedSessions.isNotEmpty ? updatedSessions.last.id : null;
-      emit(ChatSuccess(
-          sessions: updatedSessions,
-          currentSessionId: newCurrentSessionId,
-          isCreatingSession: false));
-    } catch (e) {
-      emit(ChatError(
-          sessions: state.sessions,
-          currentSessionId: state.currentSessionId,
-          error: e.toString()));
+
+    // Only attempt to delete non-default sessions from the backend
+    if (!sessionId.startsWith('default_') && !sessionId.startsWith('local_')) {
+      try {
+        await repository.deleteSession(userId.toString(), sessionId);
+      } catch (e) {
+        // Log the error but continue with local deletion
+        if (kDebugMode) {
+          print('Error deleting session from backend: $e');
+        }
+      }
     }
+
+    // Always update local state
+    final updatedSessions =
+        state.sessions.where((s) => s.id != sessionId).toList();
+    final newCurrentSessionId =
+        updatedSessions.isNotEmpty ? updatedSessions.last.id : null;
+    emit(ChatSuccess(
+        sessions: updatedSessions,
+        currentSessionId: newCurrentSessionId,
+        isCreatingSession: false));
   }
 
   void renameSession(String sessionId, String newTitle) {
@@ -138,6 +145,25 @@ class ChatCubit extends Cubit<ChatState> {
         isCreatingSession: false));
   }
 
+  ChatSession _getCurrentSession() {
+    if (state.sessions.isEmpty) {
+      final newSession = ChatSession(
+        id: 'default_${DateTime.now().millisecondsSinceEpoch}',
+        messages: [],
+        createdAt: DateTime.now(),
+      );
+      emit(ChatSuccess(
+          sessions: [newSession],
+          currentSessionId: newSession.id,
+          isCreatingSession: false));
+      return newSession;
+    }
+    return state.sessions.firstWhere(
+      (s) => s.id == state.currentSessionId,
+      orElse: () => state.sessions.last,
+    );
+  }
+
   Future<void> sendTextMessage(String text) async {
     final userId = authCubit.currentUser?.id;
     if (userId == null) {
@@ -147,6 +173,29 @@ class ChatCubit extends Cubit<ChatState> {
           error: 'User not logged in'));
       return;
     }
+
+    // Create a new session if none exists
+    if (state.sessions.isEmpty) {
+      try {
+        final response = await repository.createNewSession(userId.toString());
+        final newSession = ChatSession(
+          id: response.sessionId,
+          messages: [],
+          createdAt: DateTime.now(),
+        );
+        emit(ChatSuccess(
+            sessions: [newSession],
+            currentSessionId: newSession.id,
+            isCreatingSession: false));
+      } catch (e) {
+        emit(ChatError(
+            sessions: state.sessions,
+            currentSessionId: state.currentSessionId,
+            error: 'Failed to create new session: ${e.toString()}'));
+        return;
+      }
+    }
+
     final currentSession = _getCurrentSession();
     final updatedSession = currentSession.copyWith(messages: [
       ...currentSession.messages,
@@ -167,10 +216,6 @@ class ChatCubit extends Cubit<ChatState> {
       ));
       _handleSuccessResponse(updatedSession, response);
     } catch (e) {
-      emit(ChatSuccess(
-          sessions: updatedSessions,
-          currentSessionId: currentSession.id,
-          isCreatingSession: false));
       if (e is NetworkUnavailableException) {
         _pendingMessages.add(Message(
           text: text,
@@ -179,53 +224,11 @@ class ChatCubit extends Cubit<ChatState> {
           timestamp: DateTime.now(),
         ));
       }
-    }
-  }
-
-  Future<ChatSession> createNewSession() async {
-    final userId = authCubit.currentUser?.id;
-    if (userId == null) {
       emit(ChatError(
-          sessions: state.sessions,
-          currentSessionId: state.currentSessionId,
-          error: 'User not logged in'));
-      return ChatSession(
-        id: 'default_${DateTime.now().millisecondsSinceEpoch}',
-        messages: [],
-        createdAt: DateTime.now(),
-      );
+          sessions: updatedSessions,
+          currentSessionId: currentSession.id,
+          error: e.toString()));
     }
-    emit(ChatSuccess(
-        sessions: state.sessions,
-        currentSessionId: state.currentSessionId,
-        isCreatingSession: true));
-    try {
-      final response = await repository.createNewSession(userId.toString());
-      final newSession = ChatSession(
-        id: response.sessionId,
-        messages: [],
-        createdAt: DateTime.now(),
-      );
-      _addNewSession(newSession);
-      return newSession;
-    } catch (e) {
-      final localSessionId = 'local_${DateTime.now().millisecondsSinceEpoch}';
-      final newSession = ChatSession(
-        id: localSessionId,
-        messages: [],
-        createdAt: DateTime.now(),
-      );
-      _addNewSession(newSession);
-      return newSession;
-    }
-  }
-
-  void _addNewSession(ChatSession newSession) {
-    final newSessions = [...state.sessions, newSession];
-    emit(ChatSuccess(
-        sessions: newSessions,
-        currentSessionId: newSession.id,
-        isCreatingSession: false));
   }
 
   Future<void> sendImageMessage(
@@ -296,25 +299,6 @@ class ChatCubit extends Cubit<ChatState> {
     } catch (e) {
       _handleError(e, updatedSessions, currentSession, '', file: voiceFile);
     }
-  }
-
-  ChatSession _getCurrentSession() {
-    if (state.sessions.isEmpty) {
-      final newSession = ChatSession(
-        id: 'default_${DateTime.now().millisecondsSinceEpoch}',
-        messages: [],
-        createdAt: DateTime.now(),
-      );
-      emit(ChatSuccess(
-          sessions: [newSession],
-          currentSessionId: newSession.id,
-          isCreatingSession: false));
-      return newSession;
-    }
-    return state.sessions.firstWhere(
-      (s) => s.id == state.currentSessionId,
-      orElse: () => state.sessions.last,
-    );
   }
 
   void _handleSuccessResponse(ChatSession session, ChatResponse response) {
@@ -405,5 +389,47 @@ class ChatCubit extends Cubit<ChatState> {
     return state.sessions
         .map((s) => s.id == updatedSession.id ? updatedSession : s)
         .toList();
+  }
+
+  Future<void> createNewSession() async {
+    final userId = authCubit.currentUser?.id;
+    if (userId == null) {
+      emit(ChatError(
+          sessions: state.sessions,
+          currentSessionId: state.currentSessionId,
+          error: 'User not logged in'));
+      return;
+    }
+
+    emit(ChatSuccess(
+        sessions: state.sessions,
+        currentSessionId: state.currentSessionId,
+        isCreatingSession: true));
+
+    try {
+      final response = await repository.createNewSession(userId.toString());
+      final newSession = ChatSession(
+        id: response.sessionId,
+        messages: [],
+        createdAt: DateTime.now(),
+      );
+      final newSessions = [...state.sessions, newSession];
+      emit(ChatSuccess(
+          sessions: newSessions,
+          currentSessionId: newSession.id,
+          isCreatingSession: false));
+    } catch (e) {
+      final localSessionId = 'local_${DateTime.now().millisecondsSinceEpoch}';
+      final newSession = ChatSession(
+        id: localSessionId,
+        messages: [],
+        createdAt: DateTime.now(),
+      );
+      final newSessions = [...state.sessions, newSession];
+      emit(ChatSuccess(
+          sessions: newSessions,
+          currentSessionId: newSession.id,
+          isCreatingSession: false));
+    }
   }
 }

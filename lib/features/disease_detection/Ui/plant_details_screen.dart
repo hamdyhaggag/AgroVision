@@ -487,10 +487,15 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen> {
                         setState(() => _isStartingChat = true);
                         try {
                           final chatCubit = context.read<ChatCubit>();
-                          final newSession = await chatCubit.createNewSession();
+                          await chatCubit.createNewSession();
+                          final currentSessionId =
+                              chatCubit.state.currentSessionId;
+                          if (currentSessionId == null) {
+                            throw Exception('Failed to create chat session');
+                          }
                           chatCubit.addBotMessage(
                             'Diagnosis Result:\n• Disease: ${data['class']}\n• Reason: ${data['reason']}\n• Control: ${data['control']}\n\nHow can I help?',
-                            newSession.id,
+                            currentSessionId,
                           );
                           Navigator.push(
                             context,
