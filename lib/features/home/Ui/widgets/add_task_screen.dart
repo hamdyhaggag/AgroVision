@@ -307,7 +307,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           backgroundColor: AppColors.primaryColor,
         ),
       );
-      Navigator.pushReplacementNamed(context, AppRoutes.allTasks);
+      Navigator.pop(context);
     }
   }
 }

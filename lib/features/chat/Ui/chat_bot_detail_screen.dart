@@ -77,30 +77,38 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
     return BlocListener<ChatCubit, ChatState>(
       listener: (context, state) {
         if (state is ChatNetworkError) {
+          String errorMessage = state.error;
+          IconData errorIcon = Icons.cloud_off;
+          Color errorColor = Colors.orange[800]!;
+
+          if (state.error.contains('ERR_NGROK') ||
+              state.error.contains('ngrok') ||
+              state.error.contains('offline') ||
+              state.error.contains('connection') ||
+              state.error.contains('network')) {
+            errorMessage =
+                'The AI service is currently unavailable. Please try again later.';
+          } else if (state.error.contains('timed out')) {
+            errorMessage =
+                'The AI service is taking longer than expected to respond. Please try again.';
+          }
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
                 children: [
-                  Icon(
-                    state.error.contains('timed out') ||
-                            state.error.contains('offline')
-                        ? Icons.timer_off
-                        : Icons.wifi_off,
-                    color: Colors.white,
-                  ),
+                  Icon(errorIcon, color: Colors.white),
                   const SizedBox(width: 8),
-                  Expanded(child: Text(state.error)),
-                  TextButton(
-                    child: const Text('RETRY'),
-                    onPressed: () =>
-                        context.read<ChatCubit>().retryPendingMessages(),
-                  ),
+                  Expanded(child: Text(errorMessage)),
+                  if (state.pendingMessages.isNotEmpty)
+                    TextButton(
+                      child: const Text('RETRY'),
+                      onPressed: () =>
+                          context.read<ChatCubit>().retryPendingMessages(),
+                    ),
                 ],
               ),
-              backgroundColor: state.error.contains('timed out') ||
-                      state.error.contains('offline')
-                  ? Colors.orange[800]
-                  : Colors.red[800],
+              backgroundColor: errorColor,
               duration: const Duration(seconds: 5),
               action: SnackBarAction(
                 label: 'Dismiss',
@@ -172,6 +180,182 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
         ),
         body: BlocBuilder<ChatCubit, ChatState>(
           builder: (context, state) {
+            if (state is ChatError) {
+              final isServerOffline =
+                  state.error.toLowerCase().contains('offline') ||
+                      state.error.toLowerCase().contains('connection') ||
+                      state.error.toLowerCase().contains('network') ||
+                      state.error.toLowerCase().contains('ngrok') ||
+                      state.error.toLowerCase().contains('timed out');
+
+              return Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Theme.of(context).scaffoldBackgroundColor,
+                      Theme.of(context)
+                          .scaffoldBackgroundColor
+                          .withOpacity(0.95),
+                    ],
+                  ),
+                ),
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color:
+                                Theme.of(context).primaryColor.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withOpacity(0.1),
+                                blurRadius: 20,
+                                spreadRadius: 5,
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.cloud_off,
+                            size: 48,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        Text(
+                          'Service Temporarily Unavailable',
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Theme.of(context).primaryColor,
+                                    letterSpacing: -0.5,
+                                  ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 24),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                'We\'re currently experiencing technical difficulties with our AI service. Our team has been notified and is working to resolve the issue.',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Colors.grey[700],
+                                      height: 1.6,
+                                    ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Please try again in a few moments.',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context).primaryColor,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: () {
+                                Navigator.maybePop(context);
+                              },
+                              icon: Icon(
+                                Icons.arrow_back,
+                                color: Theme.of(context).primaryColor,
+                                size: 20,
+                              ),
+                              label: Text(
+                                'Go Back',
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                                side: BorderSide(
+                                  color: Theme.of(context)
+                                      .primaryColor
+                                      .withOpacity(0.5),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                context.read<ChatCubit>().createNewSession();
+                              },
+                              icon: const Icon(
+                                Icons.refresh,
+                                size: 20,
+                              ),
+                              label: const Text(
+                                'Try Again',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                                backgroundColor: Theme.of(context).primaryColor,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+
             final currentSession = state.sessions.firstWhere(
               (s) => s.id == state.currentSessionId,
               orElse: () => ChatSession(
@@ -187,12 +371,14 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                   child: BlocListener<ChatCubit, ChatState>(
                     listener: (context, state) {
                       if (currentSession.messages.isNotEmpty) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          _scrollController.animateTo(
-                            _scrollController.position.maxScrollExtent,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOut,
-                          );
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          if (_scrollController.hasClients) {
+                            _scrollController.animateTo(
+                              _scrollController.position.maxScrollExtent,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOut,
+                            );
+                          }
                         });
                       }
                     },
@@ -244,6 +430,43 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                           ),
                   ),
                 ),
+                if (state is ChatLoading)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, -5),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          'Processing your request...',
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 _buildInputSection(context),
               ],
             );
