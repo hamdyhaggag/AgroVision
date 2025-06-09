@@ -1,24 +1,13 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:agro_vision/shared/services/notification_service.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 Future<void> showNotification(String title, String body) async {
-  const AndroidNotificationDetails androidPlatformChannelSpecifics =
-      AndroidNotificationDetails(
-    'sensor_alerts',
-    'Sensor Alerts',
-    importance: Importance.max,
-    priority: Priority.high,
-    showWhen: false,
-  );
-  const NotificationDetails platformChannelSpecifics =
-      NotificationDetails(android: androidPlatformChannelSpecifics);
-  await flutterLocalNotificationsPlugin.show(
-    0,
-    title,
-    body,
-    platformChannelSpecifics,
+  await NotificationService().showLocalNotification(
+    title: title,
+    body: body,
   );
 }
 

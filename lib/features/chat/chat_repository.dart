@@ -12,6 +12,16 @@ class NetworkUnavailableException implements Exception {
   String toString() => 'Internet connection unavailable';
 }
 
+class ServerTimeoutException implements Exception {
+  @override
+  String toString() => 'Server request timed out. Please try again.';
+}
+
+class ServerOfflineException implements Exception {
+  @override
+  String toString() => 'Server is currently offline. Please try again later.';
+}
+
 class ChatException implements Exception {
   final String message;
   ChatException(this.message);
@@ -38,6 +48,12 @@ class ChatRepository {
       } // Log the error
       if (_isNetworkError(e)) {
         throw NetworkUnavailableException();
+      }
+      if (_isTimeoutError(e)) {
+        throw ServerTimeoutException();
+      }
+      if (_isServerOfflineError(e)) {
+        throw ServerOfflineException();
       }
       if (e.response?.statusCode == 404) {
         throw ChatException(
@@ -149,5 +165,17 @@ class ChatRepository {
         e.error is SocketException ||
         (e.error?.toString().contains('Failed host lookup') ?? false) ||
         (e.message?.contains('Connection closed') ?? false);
+  }
+
+  bool _isTimeoutError(DioException e) {
+    return e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout;
+  }
+
+  bool _isServerOfflineError(DioException e) {
+    return e.response?.statusCode == 503 ||
+        e.response?.statusCode == 502 ||
+        e.response?.statusCode == 504;
   }
 }

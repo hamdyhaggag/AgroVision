@@ -180,7 +180,6 @@ class SensorDataScreenState extends State<SensorDataScreen> {
             timestamp: now,
           );
           notificationCubit.addNotification(notification);
-          showNotification(notification.title, notification.description);
         }
       }
     }
@@ -704,8 +703,8 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                         _showErrorSnackBar(
                           context,
                           newValue
-                              ? 'Couldn’t enable Auto mode.'
-                              : 'Couldn’t disable Auto mode.',
+                              ? "Couldn't enable Auto mode."
+                              : "Couldn't disable Auto mode.",
                         );
                         setState(() {
                           pumpControls[_selectedSensor]!['auto'] = !newValue;
@@ -742,8 +741,8 @@ class SensorDataScreenState extends State<SensorDataScreen> {
                         _showErrorSnackBar(
                           context,
                           newValue
-                              ? 'Couldn’t enable Manual mode.'
-                              : 'Couldn’t disable Manual mode.',
+                              ? "Couldn't enable Manual mode."
+                              : "Couldn't disable Manual mode.",
                         );
                         setState(() {
                           pumpControls[_selectedSensor]!['manual'] = !newValue;

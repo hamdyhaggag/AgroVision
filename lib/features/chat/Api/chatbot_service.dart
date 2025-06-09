@@ -9,7 +9,12 @@ part 'chatbot_service.g.dart';
 
 @RestApi(baseUrl: 'https://immortal-basically-lemur.ngrok-free.app/')
 abstract class ChatbotService {
-  factory ChatbotService(Dio dio) = _ChatbotService;
+  factory ChatbotService(Dio dio) {
+    dio.options.connectTimeout = const Duration(seconds: 30);
+    dio.options.receiveTimeout = const Duration(seconds: 30);
+    dio.options.sendTimeout = const Duration(seconds: 30);
+    return _ChatbotService(dio);
+  }
 
   @POST('text_convo')
   Future<ChatResponse> sendTextMessage(@Body() ChatRequestBody body);

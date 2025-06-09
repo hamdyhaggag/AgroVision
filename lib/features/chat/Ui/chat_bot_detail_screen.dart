@@ -81,7 +81,13 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.wifi_off, color: Colors.white),
+                  Icon(
+                    state.error.contains('timed out') ||
+                            state.error.contains('offline')
+                        ? Icons.timer_off
+                        : Icons.wifi_off,
+                    color: Colors.white,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(child: Text(state.error)),
                   TextButton(
@@ -91,7 +97,18 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                   ),
                 ],
               ),
-              backgroundColor: Colors.red[800],
+              backgroundColor: state.error.contains('timed out') ||
+                      state.error.contains('offline')
+                  ? Colors.orange[800]
+                  : Colors.red[800],
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                label: 'Dismiss',
+                textColor: Colors.white,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                },
+              ),
             ),
           );
         }

@@ -78,8 +78,8 @@ class AgroVision extends StatelessWidget {
             BlocProvider(
               create: (context) => TaskCubit(),
             ),
-            BlocProvider<NotificationCubit>(
-              create: (context) => NotificationCubit(),
+            BlocProvider(
+              create: (context) => NotificationCubit(context.read<AuthCubit>()),
             ),
             BlocProvider(
               create: (context) => ThemeCubit()..getCurrentTheme(),

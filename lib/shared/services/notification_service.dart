@@ -2,6 +2,8 @@ import 'dart:developer' as dev;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:agro_vision/models/notification_model.dart';
 import 'package:agro_vision/core/helpers/cache_helper.dart';
+import 'package:agro_vision/features/authentication/Logic/auth cubit/auth_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -10,6 +12,16 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+
+  bool _isUserLoggedIn() {
+    try {
+      return CacheHelper.getBoolean(key: 'isLoggedIn') == true;
+    } catch (e) {
+      dev.log('Error checking auth state',
+          name: 'NotificationService', error: e);
+      return false;
+    }
+  }
 
   Future<void> initialize() async {
     dev.log('Initializing NotificationService', name: 'NotificationService');
@@ -59,6 +71,14 @@ class NotificationService {
     String? payload,
     NotificationImportance importance = NotificationImportance.high,
   }) async {
+    if (!_isUserLoggedIn()) {
+      dev.log(
+        'User not logged in, skipping notification: $title',
+        name: 'NotificationService',
+      );
+      return;
+    }
+
     dev.log(
       'Showing local notification: $title',
       name: 'NotificationService',
@@ -98,6 +118,14 @@ class NotificationService {
   }
 
   Future<void> saveNotification(NotificationModel notification) async {
+    if (!_isUserLoggedIn()) {
+      dev.log(
+        'User not logged in, skipping notification save: ${notification.id}',
+        name: 'NotificationService',
+      );
+      return;
+    }
+
     dev.log(
       'Saving notification: ${notification.id}',
       name: 'NotificationService',
@@ -129,7 +157,46 @@ class NotificationService {
     }
   }
 
+  List<NotificationModel> getNotifications() {
+    if (!_isUserLoggedIn()) {
+      dev.log(
+        'User not logged in, returning empty notifications list',
+        name: 'NotificationService',
+      );
+      return [];
+    }
+
+    dev.log(
+      'Getting all notifications',
+      name: 'NotificationService',
+    );
+    try {
+      final notifications = CacheHelper.getNotifications();
+      dev.log(
+        'Retrieved ${notifications.length} notifications',
+        name: 'NotificationService',
+      );
+      return notifications;
+    } catch (e, stackTrace) {
+      dev.log(
+        'Failed to get notifications',
+        name: 'NotificationService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
   Future<void> markAsRead(String notificationId) async {
+    if (!_isUserLoggedIn()) {
+      dev.log(
+        'User not logged in, skipping mark as read: $notificationId',
+        name: 'NotificationService',
+      );
+      return;
+    }
+
     dev.log(
       'Marking notification as read: $notificationId',
       name: 'NotificationService',
@@ -166,6 +233,14 @@ class NotificationService {
   }
 
   Future<void> markAllAsRead() async {
+    if (!_isUserLoggedIn()) {
+      dev.log(
+        'User not logged in, skipping mark all as read',
+        name: 'NotificationService',
+      );
+      return;
+    }
+
     dev.log(
       'Marking all notifications as read',
       name: 'NotificationService',
@@ -199,6 +274,14 @@ class NotificationService {
   }
 
   Future<void> clearNotifications() async {
+    if (!_isUserLoggedIn()) {
+      dev.log(
+        'User not logged in, skipping clear notifications',
+        name: 'NotificationService',
+      );
+      return;
+    }
+
     dev.log(
       'Clearing all notifications',
       name: 'NotificationService',
@@ -220,30 +303,15 @@ class NotificationService {
     }
   }
 
-  List<NotificationModel> getNotifications() {
-    dev.log(
-      'Getting all notifications',
-      name: 'NotificationService',
-    );
-    try {
-      final notifications = CacheHelper.getNotifications();
-      dev.log(
-        'Retrieved ${notifications.length} notifications',
-        name: 'NotificationService',
-      );
-      return notifications;
-    } catch (e, stackTrace) {
-      dev.log(
-        'Failed to get notifications',
-        name: 'NotificationService',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      rethrow;
-    }
-  }
-
   int getUnreadCount() {
+    if (!_isUserLoggedIn()) {
+      dev.log(
+        'User not logged in, returning 0 unread count',
+        name: 'NotificationService',
+      );
+      return 0;
+    }
+
     dev.log(
       'Getting unread notification count',
       name: 'NotificationService',

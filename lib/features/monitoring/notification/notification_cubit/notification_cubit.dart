@@ -7,8 +7,10 @@ import '../../../../features/authentication/Logic/auth cubit/auth_cubit.dart';
 
 class NotificationCubit extends Cubit<NotificationState> {
   final NotificationService _notificationService = NotificationService();
+  final AuthCubit _authCubit;
 
-  NotificationCubit() : super(NotificationState(notifications: [])) {
+  NotificationCubit(this._authCubit)
+      : super(NotificationState(notifications: [])) {
     dev.log('Initializing NotificationCubit', name: 'NotificationCubit');
     _loadNotifications();
   }
@@ -26,6 +28,15 @@ class NotificationCubit extends Cubit<NotificationState> {
   }
 
   Future<void> _loadNotifications() async {
+    if (_authCubit.state is! UserUpdatedState) {
+      dev.log(
+        'User not logged in, skipping notification load',
+        name: 'NotificationCubit',
+      );
+      emit(state.copyWith(notifications: [], isLoading: false));
+      return;
+    }
+
     dev.log('Loading notifications', name: 'NotificationCubit');
     try {
       emit(state.copyWith(isLoading: true));
@@ -54,6 +65,14 @@ class NotificationCubit extends Cubit<NotificationState> {
   }
 
   Future<void> addNotification(NotificationModel notification) async {
+    if (_authCubit.state is! UserUpdatedState) {
+      dev.log(
+        'User not logged in, skipping notification: ${notification.id}',
+        name: 'NotificationCubit',
+      );
+      return;
+    }
+
     dev.log(
       'Adding notification: ${notification.id}',
       name: 'NotificationCubit',

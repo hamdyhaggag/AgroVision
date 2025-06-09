@@ -335,6 +335,22 @@ class ChatCubit extends Cubit<ChatState> {
         lastMessage: text,
         pendingMessages: _pendingMessages,
       ));
+    } else if (error is ServerTimeoutException ||
+        error is ServerOfflineException) {
+      _pendingMessages.add(Message(
+        text: text,
+        isSentByMe: true,
+        status: MessageStatus.pending,
+        imageUrl: file?.path,
+        voiceFilePath: file?.path,
+      ));
+      emit(ChatNetworkError(
+        sessions: sessions,
+        currentSessionId: session.id,
+        error: error.toString(),
+        lastMessage: text,
+        pendingMessages: _pendingMessages,
+      ));
     } else {
       emit(ChatError(
         sessions: sessions,
