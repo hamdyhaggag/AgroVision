@@ -6,6 +6,7 @@ import '../../../../shared/widgets/custom_appbar.dart';
 import 'package:agro_vision/features/home/data/models/order_analytics_model.dart'
     as data_models;
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class OrderAnalytics extends StatefulWidget {
   const OrderAnalytics({super.key});
@@ -16,9 +17,7 @@ class OrderAnalytics extends StatefulWidget {
 
 class _OrderAnalyticsState extends State<OrderAnalytics> {
   late Future<data_models.OrderAnalyticsData> _analyticsDataFuture;
-
-  final String jsonData =
-      """{ "total_orders": 3, "total_sales": 23.9, "status_counts": { "pending": 1, "delivered": 1, "canceled": 1 }, "monthly_sales": [ { "month": "Jan", "total": 0 }, { "month": "Feb", "total": 0 }, { "month": "Mar", "total": 0 }, { "month": "Apr", "total": 0 }, { "month": "May", "total": 8.9 }, { "month": "Jun", "total": 15 }, { "month": "Jul", "total": 0 }, { "month": "Aug", "total": 0 }, { "month": "Sep", "total": 0 }, { "month": "Oct", "total": 0 }, { "month": "Nov", "total": 0 }, { "month": "Dec", "total": 0 } ], "latest_orders": [ { "order_id": 37, "customer": "Salem Ashraf", "amount": 15, "created_at": "2025-06-04" }, { "order_id": 28, "customer": "feby emad", "amount": 7.1, "created_at": "2025-05-01" } ], "clients": [ { "name": "Salem Ashraf", "phone": "1098971853", "orders_count": 2 }, { "name": "feby emad", "phone": "1289379907", "orders_count": 1 } ]}""";
+  final String _apiUrl = 'https://final.agrovision.ltd/api/order-analytics';
 
   @override
   void initState() {
@@ -27,10 +26,19 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
   }
 
   Future<data_models.OrderAnalyticsData> _fetchAnalyticsData() async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-    final Map<String, dynamic> decodedData = json.decode(jsonData);
-    return data_models.OrderAnalyticsData.fromJson(decodedData);
+    try {
+      final response = await http.get(Uri.parse(_apiUrl));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> decodedData = json.decode(response.body);
+        return data_models.OrderAnalyticsData.fromJson(decodedData);
+      } else {
+        throw Exception(
+            'Failed to load analytics data: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to load analytics data: $e');
+    }
   }
 
   @override
@@ -89,7 +97,7 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
       },
       {
         'title': 'Total Sales',
-        'value': '\$' + totalSales.toStringAsFixed(2),
+        'value': '\$${totalSales.toStringAsFixed(2)}',
         'icon': Icons.attach_money_rounded,
         'color': Colors.blue
       },
@@ -179,12 +187,14 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Latest Orders',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontFamily: 'SYNE', fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontFamily: 'Syne',
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.blackColor,
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -196,7 +206,12 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
                     ),
                   );
                 },
-                child: const Text('View all'),
+                child: const Text('View all',
+                    style: TextStyle(
+                      fontFamily: 'Syne',
+                      color: AppColors.blackColor,
+                      fontWeight: FontWeight.w600,
+                    )),
               ),
             ],
           ),
@@ -219,7 +234,7 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
                 .map((order) => Column(children: [
                       _InvoiceTile(
                         company: order.customer,
-                        amount: '\$' + order.amount.toStringAsFixed(2),
+                        amount: '\$${order.amount.toStringAsFixed(2)}',
                         date: order.createdAt,
                         status: InvoiceStatus.paid,
                       ),
@@ -374,7 +389,9 @@ class _InvoiceChart extends StatelessWidget {
 
     double maxY =
         monthlySales.map((e) => e.total).reduce((a, b) => a > b ? a : b);
-    maxY = (maxY * 1.2).ceilToDouble(); // Add some padding to the max Y value
+    maxY = (maxY * 1.2).ceilToDouble();
+    // Ensure maxY is at least 1 to avoid zero interval
+    maxY = maxY < 1 ? 1 : maxY;
 
     final maxMonthValue = monthlySales.length.toDouble();
 
@@ -423,9 +440,9 @@ class _InvoiceChart extends StatelessWidget {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              interval: maxY / 5, // Dynamic interval based on max Y
+              interval: maxY / 5,
               getTitlesWidget: (value, meta) => Text(
-                '\$' + value.toInt().toString(),
+                '\$${value.toInt()}',
                 style: Theme.of(context)
                     .textTheme
                     .labelSmall
@@ -555,8 +572,7 @@ class _ClientCard extends StatelessWidget {
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => FullClientsView(
-                clients: const []), // Changed to do nothing specific on tap, as a single client detail view is not implemented yet. // Pass clients to FullClientsView
+            builder: (_) => const FullClientsView(clients: []),
           ),
         ),
         child: Padding(
