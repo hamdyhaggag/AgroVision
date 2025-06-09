@@ -59,7 +59,7 @@ dependencies:
   cached_network_image: ^3.3.1
   meta: ^1.9.1
   iconsax: ^0.0.8
-  flutter_sound: ^9.28.0
+  flutter_sound: ^9.2.13
   path_provider: ^2.1.5
   path: ^1.9.1
   permission_handler: ^11.4.0
@@ -71,7 +71,7 @@ dependencies:
   animate_do: ^4.2.0
   flutter_local_notifications: ^19.1.0
   share_plus: ^11.0.0
-  ffmpeg_kit_flutter_new: ^1.1.0
+  video_compress: ^3.1.2
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,7 @@
 import 'package:agro_vision/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:agro_vision/features/home/data/models/order_analytics_model.dart'
+    as data_models;
 
 import '../../../../shared/widgets/custom_appbar.dart';
 
@@ -233,6 +235,19 @@ class _InvoiceCard extends StatelessWidget {
     );
   }
 
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case "Paid":
+        return Colors.green;
+      case "Pending":
+        return Colors.orange;
+      case "Overdue":
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
   Widget _buildStatusIndicator(String status) {
     final color = _getStatusColor(status);
     return Container(
@@ -250,56 +265,21 @@ class _InvoiceCard extends StatelessWidget {
               color: color)),
     );
   }
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'paid':
-        return Colors.green.shade600;
-      case 'pending':
-        return Colors.orange.shade600;
-      case 'overdue':
-        return Colors.red.shade600;
-      default:
-        return Colors.grey.shade600;
-    }
-  }
 }
-
-class Invoice {
-  final String id;
-  final String client;
-  final String date;
-  final double amount;
-  final String status;
-
-  Invoice({
-    required this.id,
-    required this.client,
-    required this.date,
-    required this.amount,
-    required this.status,
-  });
-}
-////////////////////////////////////////////////////////////////
 
 class FullClientsView extends StatelessWidget {
-  const FullClientsView({super.key});
+  final List<data_models.Client> clients;
+  const FullClientsView({super.key, required this.clients});
 
   @override
   Widget build(BuildContext context) {
-    final clients = [
-      Client(name: "Ken Graphic Inc.", type: "Design Agency", orders: 183),
-      Client(name: "Fullspeedo Crew", type: "Photograph Agency", orders: 99),
-      Client(name: "Highspeed Studios", type: "Network Service", orders: 48),
-    ];
-
-    final totalOrders = clients.fold(0, (sum, client) => sum + client.orders);
-    final maxOrders =
-        clients.map((e) => e.orders).reduce((a, b) => a > b ? a : b);
+    final totalClients = clients.length;
+    final totalOrders =
+        clients.fold(0, (sum, client) => sum + client.ordersCount);
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Client Portfolio',
+        title: 'Clients',
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: AppColors.primaryColor),
@@ -312,10 +292,9 @@ class FullClientsView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(
-                totalClients: clients.length, totalOrders: totalOrders),
+            _buildHeader(totalClients: totalClients, totalOrders: totalOrders),
             const SizedBox(height: 24),
-            const Text('Active Clients',
+            const Text('All Clients',
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -326,10 +305,8 @@ class FullClientsView extends StatelessWidget {
               child: ListView.separated(
                 itemCount: clients.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, index) => _ClientCard(
-                  client: clients[index],
-                  maxOrders: maxOrders.toDouble(),
-                ),
+                itemBuilder: (context, index) =>
+                    _ClientCard(client: clients[index]),
               ),
             ),
           ],
@@ -343,8 +320,8 @@ class FullClientsView extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryColor.withValues(alpha: 0.9),
-            AppColors.primaryColor.withValues(alpha: 0.7)
+            AppColors.secondaryColor.withValues(alpha: 0.9),
+            AppColors.secondaryColor.withValues(alpha: 0.7)
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -352,7 +329,7 @@ class FullClientsView extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.indigo.withValues(alpha: 0.1),
+            color: Colors.lightBlue.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           )
@@ -366,13 +343,13 @@ class FullClientsView extends StatelessWidget {
             _buildStatItem(
               title: "Total Clients",
               value: totalClients.toString(),
-              icon: Icons.group_rounded,
+              icon: Icons.people_alt_rounded,
               color: Colors.white,
             ),
             _buildStatItem(
               title: "Total Orders",
               value: totalOrders.toString(),
-              icon: Icons.shopping_bag_rounded,
+              icon: Icons.shopping_cart_rounded,
               color: Colors.white,
             ),
           ],
@@ -415,15 +392,12 @@ class FullClientsView extends StatelessWidget {
 }
 
 class _ClientCard extends StatelessWidget {
-  final Client client;
-  final double maxOrders;
+  final data_models.Client client;
 
-  const _ClientCard({required this.client, required this.maxOrders});
+  const _ClientCard({required this.client});
 
   @override
   Widget build(BuildContext context) {
-    final progress = client.orders / maxOrders;
-
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () {},
@@ -441,102 +415,55 @@ class _ClientCard extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.primaryColor.withValues(alpha: 0.9),
-                          AppColors.secondaryColor.withValues(alpha: 0.4)
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        client.name.substring(0, 2),
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Syne',
-                            fontWeight: FontWeight.w600),
-                      ),
-                    ),
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
+                child: Text(
+                  client.name.substring(0, 1).toUpperCase(),
+                  style: const TextStyle(
+                    color: AppColors.primaryColor,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Syne',
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(client.name,
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'Syne',
-                                color: AppColors.primaryColor)),
-                        Text(client.type.toUpperCase(),
-                            style: TextStyle(
-                                fontSize: 12,
-                                fontFamily: 'Syne',
-                                color: Colors.grey.shade600,
-                                letterSpacing: 0.5)),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: _getProgressColor(progress).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color:
-                            _getProgressColor(progress).withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text("${client.orders} orders",
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Syne',
-                            color: _getProgressColor(progress))),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: Colors.grey.shade200,
-                  valueColor:
-                      AlwaysStoppedAnimation(_getProgressColor(progress)),
-                  minHeight: 8,
                 ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(client.name,
+                        style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Syne',
+                            color: AppColors.primaryColor)),
+                    const SizedBox(height: 4),
+                    Text("Phone: ${client.phone}",
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'Syne',
+                            color: Colors.grey.shade600)),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text("Order Volume",
+                  Text("${client.ordersCount}",
+                      style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Syne',
+                          color: AppColors.primaryColor)),
+                  const SizedBox(height: 4),
+                  Text("Orders",
                       style: TextStyle(
                           fontSize: 12,
                           fontFamily: 'Syne',
                           color: Colors.grey.shade600)),
-                  Text("${(progress * 100).toStringAsFixed(1)}%",
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Syne',
-                          color: _getProgressColor(progress))),
                 ],
               ),
             ],
@@ -545,22 +472,20 @@ class _ClientCard extends StatelessWidget {
       ),
     );
   }
-
-  Color _getProgressColor(double progress) {
-    if (progress > 0.75) return Colors.green.shade600;
-    if (progress > 0.5) return Colors.orange.shade600;
-    return Colors.red.shade600;
-  }
 }
 
-class Client {
-  final String name;
-  final String type;
-  final int orders;
+class Invoice {
+  final String id;
+  final String client;
+  final String date;
+  final double amount;
+  final String status;
 
-  Client({
-    required this.name,
-    required this.type,
-    required this.orders,
+  Invoice({
+    required this.id,
+    required this.client,
+    required this.date,
+    required this.amount,
+    required this.status,
   });
 }

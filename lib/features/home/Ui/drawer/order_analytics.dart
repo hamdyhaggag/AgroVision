@@ -3,117 +3,160 @@ import 'package:agro_vision/features/home/Ui/drawer/view_all_order_analytics.dar
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../../../shared/widgets/custom_appbar.dart';
+import 'package:agro_vision/features/home/data/models/order_analytics_model.dart'
+    as data_models;
+import 'dart:convert';
 
-class OrderAnalytics extends StatelessWidget {
+class OrderAnalytics extends StatefulWidget {
   const OrderAnalytics({super.key});
+
+  @override
+  State<OrderAnalytics> createState() => _OrderAnalyticsState();
+}
+
+class _OrderAnalyticsState extends State<OrderAnalytics> {
+  late Future<data_models.OrderAnalyticsData> _analyticsDataFuture;
+
+  final String jsonData =
+      """{ "total_orders": 3, "total_sales": 23.9, "status_counts": { "pending": 1, "delivered": 1, "canceled": 1 }, "monthly_sales": [ { "month": "Jan", "total": 0 }, { "month": "Feb", "total": 0 }, { "month": "Mar", "total": 0 }, { "month": "Apr", "total": 0 }, { "month": "May", "total": 8.9 }, { "month": "Jun", "total": 15 }, { "month": "Jul", "total": 0 }, { "month": "Aug", "total": 0 }, { "month": "Sep", "total": 0 }, { "month": "Oct", "total": 0 }, { "month": "Nov", "total": 0 }, { "month": "Dec", "total": 0 } ], "latest_orders": [ { "order_id": 37, "customer": "Salem Ashraf", "amount": 15, "created_at": "2025-06-04" }, { "order_id": 28, "customer": "feby emad", "amount": 7.1, "created_at": "2025-05-01" } ], "clients": [ { "name": "Salem Ashraf", "phone": "1098971853", "orders_count": 2 }, { "name": "feby emad", "phone": "1289379907", "orders_count": 1 } ]}""";
+
+  @override
+  void initState() {
+    super.initState();
+    _analyticsDataFuture = _fetchAnalyticsData();
+  }
+
+  Future<data_models.OrderAnalyticsData> _fetchAnalyticsData() async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+    final Map<String, dynamic> decodedData = json.decode(jsonData);
+    return data_models.OrderAnalyticsData.fromJson(decodedData);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
     return Scaffold(
       appBar: const CustomAppBar(title: 'Order Analytics'),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal: isMobile ? 16 : 24,
-          vertical: 16,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildStatsSection(context, isMobile),
-            const SizedBox(height: 32),
-            _buildChartSection(context),
-            const SizedBox(height: 32),
-            _buildInvoiceSection(context),
-            const SizedBox(height: 32),
-            _buildClientsSection(context, isMobile),
-          ],
-        ),
+      body: FutureBuilder<data_models.OrderAnalyticsData>(
+        future: _analyticsDataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            final data = snapshot.data!;
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 16 : 24,
+                vertical: 16,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildStatsSection(context, isMobile, data.totalOrders,
+                      data.totalSales, data.statusCounts),
+                  const SizedBox(height: 32),
+                  _buildChartSection(context, data.monthlySales),
+                  const SizedBox(height: 32),
+                  _buildInvoiceSection(context, data.latestOrders),
+                  const SizedBox(height: 32),
+                  _buildClientsSection(context, isMobile, data.clients),
+                ],
+              ),
+            );
+          } else {
+            return const Center(child: Text('No data available'));
+          }
+        },
       ),
     );
   }
 
-  Widget _buildStatsSection(BuildContext context, bool isMobile) {
+  Widget _buildStatsSection(
+      BuildContext context,
+      bool isMobile,
+      int totalOrders,
+      double totalSales,
+      data_models.StatusCounts statusCounts) {
     final stats = [
       {
-        'title': 'Total Balance',
-        'value': '\$12,560',
-        'icon': Icons.account_balance_wallet_rounded,
+        'title': 'Total Orders',
+        'value': totalOrders.toString(),
+        'icon': Icons.shopping_cart_rounded,
         'color': Colors.green
       },
       {
-        'title': 'Invoice Sent',
-        'value': '421',
-        'icon': Icons.send_rounded,
+        'title': 'Total Sales',
+        'value': '\$' + totalSales.toStringAsFixed(2),
+        'icon': Icons.attach_money_rounded,
         'color': Colors.blue
       },
       {
-        'title': 'Completed',
-        'value': '286',
-        'icon': Icons.check_circle_rounded,
+        'title': 'Pending Orders',
+        'value': statusCounts.pending.toString(),
+        'icon': Icons.pending_actions_rounded,
         'color': Colors.orange
+      },
+      {
+        'title': 'Delivered Orders',
+        'value': statusCounts.delivered.toString(),
+        'icon': Icons.check_circle_rounded,
+        'color': Colors.purple
+      },
+      {
+        'title': 'Canceled Orders',
+        'value': statusCounts.canceled.toString(),
+        'icon': Icons.cancel_rounded,
+        'color': Colors.red
       },
     ];
 
     return isMobile
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _StatCard(
-                      title: stats[0]['title'] as String,
-                      value: stats[0]['value'] as String,
-                      icon: stats[0]['icon'] as IconData,
-                      color: stats[0]['color'] as Color,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _StatCard(
-                      title: stats[1]['title'] as String,
-                      value: stats[1]['value'] as String,
-                      icon: stats[1]['icon'] as IconData,
-                      color: stats[1]['color'] as Color,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _StatCard(
-                title: stats[2]['title'] as String,
-                value: stats[2]['value'] as String,
-                icon: stats[2]['icon'] as IconData,
-                color: stats[2]['color'] as Color,
-                centerContent: true,
-              ),
-            ],
+            children: stats
+                .map((stat) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: _StatCard(
+                        title: stat['title'] as String,
+                        value: stat['value'] as String,
+                        icon: stat['icon'] as IconData,
+                        color: stat['color'] as Color,
+                        centerContent: false,
+                      ),
+                    ))
+                .toList(),
           )
-        : SizedBox(
-            height: 140,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: 3,
-              separatorBuilder: (_, __) => const SizedBox(width: 16),
-              itemBuilder: (context, index) => _StatCard(
-                title: stats[index]['title'] as String,
-                value: stats[index]['value'] as String,
-                icon: stats[index]['icon'] as IconData,
-                color: stats[index]['color'] as Color,
-                width: 200,
-              ),
+        : GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 2.5,
+            ),
+            itemCount: stats.length,
+            itemBuilder: (context, index) => _StatCard(
+              title: stats[index]['title'] as String,
+              value: stats[index]['value'] as String,
+              icon: stats[index]['icon'] as IconData,
+              color: stats[index]['color'] as Color,
             ),
           );
   }
 
-  Widget _buildChartSection(BuildContext context) {
+  Widget _buildChartSection(
+      BuildContext context, List<data_models.MonthlySale> monthlySales) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Text(
-            'Invoices Statistic (Monthly)',
+            'Sales Statistic (Monthly)',
             style: Theme.of(context)
                 .textTheme
                 .titleLarge
@@ -135,13 +178,14 @@ class OrderAnalytics extends StatelessWidget {
               ),
             ],
           ),
-          child: const _InvoiceChart(),
+          child: _InvoiceChart(monthlySales: monthlySales),
         ),
       ],
     );
   }
 
-  Widget _buildInvoiceSection(BuildContext context) {
+  Widget _buildInvoiceSection(
+      BuildContext context, List<data_models.LatestOrder> latestOrders) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -151,7 +195,7 @@ class OrderAnalytics extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Latest Invoice Payments',
+                'Latest Orders',
                 style: Theme.of(context)
                     .textTheme
                     .titleLarge
@@ -184,42 +228,26 @@ class OrderAnalytics extends StatelessWidget {
               )
             ],
           ),
-          child: const Column(
-            children: [
-              _InvoiceTile(
-                company: 'IBM Graphic Inc.',
-                amount: '\$1,500.96',
-                date: '2023-03-15',
-                status: InvoiceStatus.paid,
-              ),
-              _Divider(),
-              _InvoiceTile(
-                company: 'Hyperseed Data',
-                amount: '\$20,000.00',
-                date: '2023-03-14',
-                status: InvoiceStatus.paid,
-              ),
-              _Divider(),
-              _InvoiceTile(
-                company: 'XYZ Agency',
-                amount: '\$500.00',
-                date: '2023-03-13',
-                status: InvoiceStatus.pending,
-              ),
-            ],
+          child: Column(
+            children: latestOrders
+                .map((order) => Column(children: [
+                      _InvoiceTile(
+                        company: order.customer,
+                        amount: '\$' + order.amount.toStringAsFixed(2),
+                        date: order.createdAt,
+                        status: InvoiceStatus.paid,
+                      ),
+                      const _Divider(),
+                    ]))
+                .toList(),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildClientsSection(BuildContext context, bool isMobile) {
-    final clients = [
-      Client(name: "Ken Graphic Inc.", type: "Design Agency", orders: 183),
-      Client(name: "Fullspeedo Crew", type: "Photograph Agency", orders: 99),
-      Client(name: "Highspeed Studios", type: "Network Service", orders: 48),
-    ];
-
+  Widget _buildClientsSection(
+      BuildContext context, bool isMobile, List<data_models.Client> clients) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -242,7 +270,7 @@ class OrderAnalytics extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const FullClientsView(),
+                      builder: (_) => FullClientsView(clients: clients),
                     ),
                   );
                 },
@@ -260,7 +288,8 @@ class OrderAnalytics extends StatelessWidget {
         Wrap(
           spacing: 16,
           runSpacing: 16,
-          children: clients.map((client) => const _ClientCard()).toList(),
+          children:
+              clients.map((client) => _ClientCard(client: client)).toList(),
         )
       ],
     );
@@ -362,16 +391,29 @@ class _StatCard extends StatelessWidget {
 }
 
 class _InvoiceChart extends StatelessWidget {
-  const _InvoiceChart();
+  final List<data_models.MonthlySale> monthlySales;
+  const _InvoiceChart({required this.monthlySales});
 
   @override
   Widget build(BuildContext context) {
+    final spots = monthlySales.asMap().entries.map((entry) {
+      final index = entry.key;
+      final sale = entry.value;
+      return FlSpot((index + 1).toDouble(), sale.total);
+    }).toList();
+
+    double maxY =
+        monthlySales.map((e) => e.total).reduce((a, b) => a > b ? a : b);
+    maxY = (maxY * 1.2).ceilToDouble(); // Add some padding to the max Y value
+
+    final maxMonthValue = monthlySales.length.toDouble();
+
     return LineChart(
       LineChartData(
         gridData: FlGridData(
           show: true,
           drawVerticalLine: true,
-          horizontalInterval: 200,
+          horizontalInterval: maxY / 5,
           verticalInterval: 1,
           getDrawingHorizontalLine: (value) => FlLine(
             color: Colors.grey.withValues(alpha: 0.1),
@@ -396,21 +438,24 @@ class _InvoiceChart extends StatelessWidget {
               reservedSize: 30,
               interval: 1,
               getTitlesWidget: (value, meta) {
-                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-                return Text(
-                  months[value.toInt() - 1],
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface),
-                );
+                if (value.toInt() - 1 < monthlySales.length &&
+                    value.toInt() - 1 >= 0) {
+                  return Text(
+                    monthlySales[value.toInt() - 1].month,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface),
+                  );
+                }
+                return const Text('');
               },
             ),
           ),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              interval: 200,
+              interval: maxY / 5, // Dynamic interval based on max Y
               getTitlesWidget: (value, meta) => Text(
-                '\$${value.toInt()}',
+                '\$' + value.toInt().toString(),
                 style: Theme.of(context)
                     .textTheme
                     .labelSmall
@@ -424,19 +469,12 @@ class _InvoiceChart extends StatelessWidget {
           show: false,
         ),
         minX: 1,
-        maxX: 6,
+        maxX: maxMonthValue,
         minY: 0,
-        maxY: 1000,
+        maxY: maxY,
         lineBarsData: [
           LineChartBarData(
-            spots: const [
-              FlSpot(1, 200),
-              FlSpot(2, 500),
-              FlSpot(3, 800),
-              FlSpot(4, 600),
-              FlSpot(5, 750),
-              FlSpot(6, 950),
-            ],
+            spots: spots,
             isCurved: true,
             color: AppColors.primaryColor,
             barWidth: 4,
@@ -446,21 +484,6 @@ class _InvoiceChart extends StatelessWidget {
               show: true,
               color: AppColors.primaryColor.withValues(alpha: 0.2),
             ),
-          ),
-          LineChartBarData(
-            spots: const [
-              FlSpot(1, 300),
-              FlSpot(2, 400),
-              FlSpot(3, 650),
-              FlSpot(4, 450),
-              FlSpot(5, 550),
-              FlSpot(6, 700),
-            ],
-            isCurved: true,
-            color: Colors.grey,
-            barWidth: 2,
-            isStrokeCapRound: true,
-            dotData: const FlDotData(show: false),
           ),
         ],
       ),
@@ -507,7 +530,7 @@ class _InvoiceTile extends StatelessWidget {
             ?.copyWith(fontFamily: 'SYNE', fontWeight: FontWeight.w500),
       ),
       subtitle: Text(
-        'Due $date',
+        'Order Date: $date',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
             fontFamily: 'SYNE',
             color:
@@ -550,7 +573,8 @@ class _InvoiceTile extends StatelessWidget {
 enum InvoiceStatus { paid, pending, overdue }
 
 class _ClientCard extends StatelessWidget {
-  const _ClientCard();
+  final data_models.Client client;
+  const _ClientCard({required this.client});
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -561,7 +585,8 @@ class _ClientCard extends StatelessWidget {
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const FullClientsView(),
+            builder: (_) => FullClientsView(
+                clients: const []), // Changed to do nothing specific on tap, as a single client detail view is not implemented yet. // Pass clients to FullClientsView
           ),
         ),
         child: Padding(
@@ -571,9 +596,9 @@ class _ClientCard extends StatelessWidget {
               CircleAvatar(
                 radius: 24,
                 backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
-                child: const Text(
-                  'IB',
-                  style: TextStyle(
+                child: Text(
+                  client.name.substring(0, 1).toUpperCase(),
+                  style: const TextStyle(
                     color: AppColors.primaryColor,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'SYNE',
@@ -586,7 +611,7 @@ class _ClientCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'IBM Corp.',
+                      client.name,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             fontFamily: 'SYNE',
                             fontWeight: FontWeight.w600,
@@ -594,7 +619,7 @@ class _ClientCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Last order: \$12,500',
+                      'Orders: ${client.ordersCount}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontFamily: 'SYNE',
                             color: Theme.of(context)

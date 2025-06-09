@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:audio_waveforms/audio_waveforms.dart';
-import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -8,11 +8,15 @@ import 'package:permission_handler/permission_handler.dart';
 
 class VoiceRecorder {
   late final RecorderController _recorderController;
+  late final FlutterSoundRecorder _flutterSoundRecorder;
   String? _filePath;
 
   Future<void> init() async {
     final status = await Permission.microphone.request();
     if (!status.isGranted) throw Exception('Microphone permission denied');
+
+    _flutterSoundRecorder = FlutterSoundRecorder();
+    await _flutterSoundRecorder.openRecorder();
 
     _recorderController = RecorderController()
       ..androidEncoder = AndroidEncoder.aac
@@ -54,19 +58,31 @@ class VoiceRecorder {
     final outputPath =
         p.join(tempDir.path, '${DateTime.now().millisecondsSinceEpoch}.wav');
 
-    final session = await FFmpegKit.execute('-y -i "${inputFile.path}" '
-        '-acodec pcm_s16le -ac 1 -f wav "$outputPath"');
+    try {
+      await _flutterSoundRecorder.startRecorder(
+        toFile: outputPath,
+        codec: Codec.pcm16WAV,
+        numChannels: 1,
+        sampleRate: 44100,
+      );
 
-    final returnCode = await session.getReturnCode();
+      // Read the input file and write it to the output file
+      final bytes = await inputFile.readAsBytes();
+      final outputFile = File(outputPath);
+      await outputFile.writeAsBytes(bytes);
 
-    if (returnCode!.isValueSuccess()) {
-      return File(outputPath);
-    } else {
-      throw Exception('Audio conversion failed');
+      await _flutterSoundRecorder.stopRecorder();
+      return outputFile;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Audio conversion error: $e');
+      }
+      throw Exception('Audio conversion failed: $e');
     }
   }
 
   Future<void> dispose() async {
     _recorderController.dispose();
+    await _flutterSoundRecorder.closeRecorder();
   }
 }
