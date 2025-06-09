@@ -336,7 +336,7 @@ class _StatCard extends StatelessWidget {
                       .colorScheme
                       .onSurface
                       .withValues(alpha: 0.6),
-                  fontSize: 11,
+                  fontSize: 12,
                 ),
             textAlign: TextAlign.center,
             maxLines: 1,
@@ -349,7 +349,7 @@ class _StatCard extends StatelessWidget {
                   fontFamily: 'SYNE',
                   fontWeight: FontWeight.w700,
                   color: color,
-                  fontSize: 14,
+                  fontSize: 16,
                 ),
             textAlign: TextAlign.center,
           ),
