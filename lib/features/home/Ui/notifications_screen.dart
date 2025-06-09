@@ -6,6 +6,13 @@ import '../../monitoring/notification/notification_cubit/notification_cubit.dart
 import '../../monitoring/notification/notification_cubit/notification_state.dart';
 import '../../monitoring/notification/widget/notification_card.dart';
 import '../../authentication/Logic/auth cubit/auth_cubit.dart';
+import '../../../core/themes/app_colors.dart';
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1)}";
+  }
+}
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -15,12 +22,19 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    // Initialize notifications based on current auth state
     final authState = context.read<AuthCubit>().state;
     context.read<NotificationCubit>().handleAuthStateChange(authState);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -35,6 +49,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildContent(BuildContext context) {
     final isLoggedIn = context.watch<AuthCubit>().state is UserUpdatedState;
+    final theme = Theme.of(context);
 
     if (!isLoggedIn) {
       return Scaffold(
@@ -59,19 +74,53 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       appBar: CustomAppBar(
         title: 'Notifications',
         actions: [
-          IconButton(
-            icon: const Icon(Icons.done_all),
-            onPressed: () {
-              context.read<NotificationCubit>().markAllAsRead();
+          BlocBuilder<NotificationCubit, NotificationState>(
+            builder: (context, state) {
+              if (state.notifications.isEmpty) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.done_all),
+                onPressed: () {
+                  context.read<NotificationCubit>().markAllAsRead();
+                },
+                tooltip: 'Mark all as read',
+              );
             },
-            tooltip: 'Mark all as read',
           ),
         ],
       ),
       body: BlocBuilder<NotificationCubit, NotificationState>(
         builder: (context, state) {
-          final notifications = state.notifications;
-          if (notifications.isEmpty) {
+          if (state.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    state.error!,
+                    style: const TextStyle(fontSize: 18, fontFamily: 'SYNE'),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<NotificationCubit>().handleAuthStateChange(
+                            context.read<AuthCubit>().state,
+                          );
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state.isEmpty) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -87,56 +136,150 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             );
           }
 
-          List<dynamic> notificationItems = [];
-          String? previousCategory;
-          for (var notification in notifications) {
-            if (notification.category != previousCategory) {
-              notificationItems.add(notification.category);
-              previousCategory = notification.category;
-            }
-            notificationItems.add(notification);
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              await Future.delayed(const Duration(seconds: 1));
-            },
-            child: ListView.builder(
-              itemCount: notificationItems.length,
-              itemBuilder: (context, index) {
-                final item = notificationItems[index];
-                if (item is String) {
-                  return _buildSectionHeader(item);
-                } else if (item is NotificationModel) {
-                  return NotificationCard(
-                      notification: item,
-                      onTap: () =>
-                          context.read<NotificationCubit>().markAsRead(item));
-                }
-                return const SizedBox.shrink();
-              },
-            ),
+          return Column(
+            children: [
+              _buildFilterChips(context, state),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    context.read<NotificationCubit>().handleAuthStateChange(
+                          context.read<AuthCubit>().state,
+                        );
+                  },
+                  child: _buildNotificationList(context, state),
+                ),
+              ),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          title,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey[600],
-            letterSpacing: 0.8,
-          ),
+  Widget _buildFilterChips(BuildContext context, NotificationState state) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      controller: _scrollController,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          children: [
+            _buildFilterChip(
+              label: 'All',
+              isSelected: state.selectedFilter == null,
+              onSelected: (selected) {
+                if (selected) {
+                  context.read<NotificationCubit>().setFilter(null);
+                }
+              },
+            ),
+            const SizedBox(width: 8),
+            _buildFilterChip(
+              label: 'Unread',
+              isSelected: state.selectedFilter == 'unread',
+              onSelected: (selected) {
+                if (selected) {
+                  context.read<NotificationCubit>().setFilter('unread');
+                }
+              },
+            ),
+            const SizedBox(width: 8),
+            ...['moisture', 'n', 'p', 'k', 'fertility'].map((type) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: _buildFilterChip(
+                  label: type.capitalize(),
+                  isSelected: state.selectedFilter == type,
+                  onSelected: (selected) {
+                    if (selected) {
+                      context.read<NotificationCubit>().setFilter(type);
+                    }
+                  },
+                ),
+              );
+            }),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required bool isSelected,
+    required ValueChanged<bool> onSelected,
+  }) {
+    return FilterChip(
+      label: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? Colors.white : Theme.of(context).primaryColor,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      selected: isSelected,
+      onSelected: onSelected,
+      backgroundColor: Colors.white,
+      selectedColor: Theme.of(context).primaryColor,
+      checkmarkColor: Colors.white,
+      side: BorderSide(
+        color: isSelected
+            ? Theme.of(context).primaryColor
+            : Theme.of(context).primaryColor.withOpacity(0.5),
+        width: isSelected ? 2.0 : 1.0,
+      ),
+      elevation: isSelected ? 4.0 : 0.0,
+      shadowColor: isSelected
+          ? Theme.of(context).primaryColor.withOpacity(0.5)
+          : Colors.transparent,
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+    );
+  }
+
+  Widget _buildNotificationList(BuildContext context, NotificationState state) {
+    final filteredNotifications = state.filteredNotifications;
+
+    if (filteredNotifications.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.notifications_none,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              state.selectedFilter == null
+                  ? 'No notifications yet'
+                  : 'No ${state.selectedFilter} notifications',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: filteredNotifications.length,
+      itemBuilder: (context, index) {
+        final notification = filteredNotifications[index];
+        return _buildNotificationItem(notification);
+      },
+    );
+  }
+
+  Widget _buildNotificationItem(NotificationModel notification) {
+    return NotificationCard(
+      notification: notification,
+      onTap: () => context.read<NotificationCubit>().markAsRead(notification),
     );
   }
 }

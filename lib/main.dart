@@ -13,6 +13,7 @@ import 'core/network/dio_factory.dart';
 import 'core/routing/app_router.dart';
 import 'bloc_observer_checker.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:agro_vision/shared/services/notification_service.dart';
 
 bool isEnterBefore = false;
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -25,11 +26,19 @@ void main() async {
   await EasyLocalization.ensureInitialized();
   await CacheHelper.init();
   await initializeAppSettings();
+  await NotificationService().initialize();
   await setupGetIt();
   const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('app_icon');
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+  const DarwinInitializationSettings initializationSettingsIOS =
+      DarwinInitializationSettings(
+    requestAlertPermission: true,
+    requestBadgePermission: true,
+    requestSoundPermission: true,
+  );
   const InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
+    iOS: initializationSettingsIOS,
   );
 
   await flutterLocalNotificationsPlugin.initialize(
