@@ -191,7 +191,8 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const InvoiceSectionView(),
+                      builder: (_) =>
+                          InvoiceSectionView(latestOrders: latestOrders),
                     ),
                   );
                 },

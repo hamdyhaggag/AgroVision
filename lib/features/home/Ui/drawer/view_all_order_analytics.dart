@@ -6,34 +6,14 @@ import 'package:agro_vision/features/home/data/models/order_analytics_model.dart
 import '../../../../shared/widgets/custom_appbar.dart';
 
 class InvoiceSectionView extends StatelessWidget {
-  const InvoiceSectionView({super.key});
+  final List<data_models.LatestOrder> latestOrders;
+  const InvoiceSectionView({super.key, required this.latestOrders});
 
   @override
   Widget build(BuildContext context) {
-    final invoices = [
-      Invoice(
-          id: "#INV-2023-0451",
-          client: "Ken Graphic Inc.",
-          date: "2023-03-15",
-          amount: 2450.00,
-          status: "Paid"),
-      Invoice(
-          id: "#INV-2023-0452",
-          client: "Fullspeedo Crew",
-          date: "2023-03-18",
-          amount: 1800.00,
-          status: "Pending"),
-      Invoice(
-          id: "#INV-2023-0453",
-          client: "Highspeed Studios",
-          date: "2023-03-20",
-          amount: 3200.00,
-          status: "Overdue"),
-    ];
-
-    final totalInvoices = invoices.length;
+    final totalInvoices = latestOrders.length;
     final totalRevenue =
-        invoices.fold(0.0, (sum, invoice) => sum + invoice.amount);
+        latestOrders.fold(0.0, (sum, order) => sum + order.amount);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -62,10 +42,10 @@ class InvoiceSectionView extends StatelessWidget {
             const SizedBox(height: 16),
             Expanded(
               child: ListView.separated(
-                itemCount: invoices.length,
+                itemCount: latestOrders.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) =>
-                    _InvoiceCard(invoice: invoices[index]),
+                    _InvoiceCard(order: latestOrders[index]),
               ),
             ),
           ],
@@ -152,9 +132,9 @@ class InvoiceSectionView extends StatelessWidget {
 }
 
 class _InvoiceCard extends StatelessWidget {
-  final Invoice invoice;
+  final data_models.LatestOrder order;
 
-  const _InvoiceCard({required this.invoice});
+  const _InvoiceCard({required this.order});
 
   @override
   Widget build(BuildContext context) {
@@ -180,12 +160,12 @@ class _InvoiceCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(invoice.id,
+                  Text("#INV-${order.orderId}",
                       style: TextStyle(
                           fontSize: 14,
                           fontFamily: 'Syne',
                           color: Colors.grey.shade600)),
-                  _buildStatusIndicator(invoice.status),
+                  _buildStatusIndicator("Paid"),
                 ],
               ),
               const SizedBox(height: 12),
@@ -195,14 +175,14 @@ class _InvoiceCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(invoice.client,
+                      Text(order.customer,
                           style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               fontFamily: 'Syne',
                               color: AppColors.primaryColor)),
                       const SizedBox(height: 4),
-                      Text("Due: ${invoice.date}",
+                      Text("Due: ${order.createdAt}",
                           style: TextStyle(
                               fontSize: 12,
                               fontFamily: 'Syne',
@@ -212,7 +192,7 @@ class _InvoiceCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text("\$${invoice.amount.toStringAsFixed(2)}",
+                      Text("\$${order.amount.toStringAsFixed(2)}",
                           style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
