@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../features/chat/Ui/chat_screen.dart';
 import '../../features/chat/models/farmer_chat_model.dart';
+import '../../features/chat/logic/farmer_chat_cubit.dart';
 
 class ConversationListItem extends StatelessWidget {
   final Conversation conversation;
@@ -52,8 +54,11 @@ class ConversationListItem extends StatelessWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => FarmerChatScreen(
-            conversation: conversation,
+          builder: (context) => BlocProvider.value(
+            value: context.read<FarmerChatCubit>(),
+            child: FarmerChatScreen(
+              conversation: conversation,
+            ),
           ),
         ),
       ),

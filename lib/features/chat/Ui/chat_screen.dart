@@ -46,6 +46,8 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
   @override
   void initState() {
     super.initState();
+    final currentUserId = context.read<AuthCubit>().currentUser?.id ?? 0;
+    Conversation.setCurrentUserId(currentUserId);
     _typingController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -75,6 +77,10 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
 
   void _checkInputLanguage() {
     final currentText = _textController.text;
+    if (currentText.isEmpty) {
+      setState(() => _isInputArabic = false);
+      return;
+    }
     final isArabicText = isArabic(currentText);
     if (isArabicText != _isInputArabic) {
       setState(() => _isInputArabic = isArabicText);
@@ -313,33 +319,29 @@ class _FarmerChatScreenState extends State<FarmerChatScreen>
       if (authState is UserUpdatedState) {
         final uid = context.read<AuthCubit>().currentUser?.id ?? 0;
         if (uid == 0) return _buildLoginPrompt();
-        return BlocProvider(
-          create: (ctx) => FarmerChatCubit(ctx.read<FarmerChatApiService>())
-            ..loadConversations(),
-          child: Scaffold(
-            appBar: _buildAppBar(),
-            body: Column(
-              children: [
-                Expanded(
-                  child: BlocBuilder<FarmerChatCubit, FarmerChatState>(
-                    builder: (ctx, state) {
-                      if (state is FarmerChatLoaded) {
-                        final conv = state.conversations.firstWhere(
-                          (c) => c.id == widget.conversation.id,
-                          orElse: () => widget.conversation,
-                        );
-                        return _buildMessagesList(conv.messages, uid);
-                      } else if (state is FarmerChatError) {
-                        return Center(child: Text(state.errorMessage));
-                      } else {
-                        return _buildChatShimmerLoader();
-                      }
-                    },
-                  ),
+        return Scaffold(
+          appBar: _buildAppBar(),
+          body: Column(
+            children: [
+              Expanded(
+                child: BlocBuilder<FarmerChatCubit, FarmerChatState>(
+                  builder: (ctx, state) {
+                    if (state is FarmerChatLoaded) {
+                      final conv = state.conversations.firstWhere(
+                        (c) => c.id == widget.conversation.id,
+                        orElse: () => widget.conversation,
+                      );
+                      return _buildMessagesList(conv.messages, uid);
+                    } else if (state is FarmerChatError) {
+                      return Center(child: Text(state.errorMessage));
+                    } else {
+                      return _buildChatShimmerLoader();
+                    }
+                  },
                 ),
-                _buildMessageInput(widget.conversation.id),
-              ],
-            ),
+              ),
+              _buildMessageInput(widget.conversation.id),
+            ],
           ),
         );
       } else if (authState is UserClearedState) {

@@ -49,10 +49,15 @@ class Conversation {
 
   int get otherUserId {
     final currentId = _currentUserId;
+    if (currentId == 0) return user2Id; // Default to user2 if no current user
     return user1Id == currentId ? user2Id : user1Id;
   }
 
-  final int _currentUserId = 0;
+  static int _currentUserId = 0;
+
+  static void setCurrentUserId(int id) {
+    _currentUserId = id;
+  }
 
   factory Conversation.fromJson(Map<String, dynamic> json) =>
       _$ConversationFromJson(json);

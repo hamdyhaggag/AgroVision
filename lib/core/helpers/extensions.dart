@@ -30,3 +30,9 @@ extension HexColor on Color {
     return Color(int.parse(hexColorString, radix: 16));
   }
 }
+
+extension ColorExtension on Color {
+  Color withValues({double? alpha}) {
+    return withOpacity(alpha ?? 1.0);
+  }
+}

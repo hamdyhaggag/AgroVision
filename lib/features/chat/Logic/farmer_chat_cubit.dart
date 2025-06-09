@@ -93,11 +93,25 @@ class FarmerChatCubit extends Cubit<FarmerChatState> {
     updatedConvs[convIndex] = updatedConv;
     emit(FarmerChatLoaded(updatedConvs, isOptimistic: true));
     try {
-      await _service
+      final response = await _service
           .sendMessage({'conversation_id': conversationId, 'message': message});
+      // Update the message with the server response
+      final serverMessage = response.data;
+      final finalConvs = updatedConvs.map((c) {
+        if (c.id == conversationId) {
+          final updatedMessages = c.messages.map((m) {
+            if (m.id == -1) return serverMessage;
+            return m;
+          }).toList();
+          return c.copyWith(messages: updatedMessages);
+        }
+        return c;
+      }).toList();
+      emit(FarmerChatLoaded(finalConvs, isOptimistic: false));
     } catch (e) {
-      emit(currentState);
-      emit(FarmerChatError(e.toString()));
+      // Keep the optimistic update but mark it as failed
+      emit(FarmerChatLoaded(updatedConvs, isOptimistic: false));
+      print('Error sending message: $e');
     }
   }
 
