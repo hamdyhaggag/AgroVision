@@ -28,7 +28,6 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
 
   Future<data_models.OrderAnalyticsData> _fetchAnalyticsData() async {
     try {
-      // Get the token from shared preferences or your auth service
       final token = await SharedPreferences.getInstance()
           .then((prefs) => prefs.getString('token'));
 
@@ -43,19 +42,14 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> decodedData = json.decode(response.body);
-        print('API Response: $decodedData'); // Debug log
         return data_models.OrderAnalyticsData.fromJson(decodedData);
       } else if (response.statusCode == 401) {
-        print('Authentication Error: ${response.body}'); // Debug log
         throw Exception('Authentication failed. Please login again.');
       } else {
-        print(
-            'API Error: ${response.statusCode} - ${response.body}'); // Debug log
         throw Exception(
             'Failed to load analytics data: ${response.statusCode}');
       }
     } catch (e) {
-      print('Exception: $e'); // Debug log
       throw Exception('Failed to load analytics data: $e');
     }
   }
@@ -268,6 +262,11 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
 
   Widget _buildClientsSection(
       BuildContext context, bool isMobile, List<data_models.Client> clients) {
+    // Sort clients by orders count and take top 3
+    final topClients = clients
+      ..sort((a, b) => b.ordersCount.compareTo(a.ordersCount))
+      ..take(3);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -309,7 +308,7 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
           spacing: 16,
           runSpacing: 16,
           children:
-              clients.map((client) => _ClientCard(client: client)).toList(),
+              topClients.map((client) => _ClientCard(client: client)).toList(),
         )
       ],
     );

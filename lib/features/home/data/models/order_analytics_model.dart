@@ -18,7 +18,6 @@ class OrderAnalyticsData {
   });
 
   factory OrderAnalyticsData.fromJson(Map<String, dynamic> json) {
-    print('Parsing OrderAnalyticsData: $json'); // Debug log
     return OrderAnalyticsData(
       totalOrders: json['total_orders'] as int,
       totalSales: json['total_sales'] is int
