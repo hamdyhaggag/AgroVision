@@ -7,6 +7,7 @@ import 'package:agro_vision/features/home/data/models/order_analytics_model.dart
     as data_models;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderAnalytics extends StatefulWidget {
   const OrderAnalytics({super.key});
@@ -27,16 +28,34 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
 
   Future<data_models.OrderAnalyticsData> _fetchAnalyticsData() async {
     try {
-      final response = await http.get(Uri.parse(_apiUrl));
+      // Get the token from shared preferences or your auth service
+      final token = await SharedPreferences.getInstance()
+          .then((prefs) => prefs.getString('token'));
+
+      final response = await http.get(
+        Uri.parse(_apiUrl),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> decodedData = json.decode(response.body);
+        print('API Response: $decodedData'); // Debug log
         return data_models.OrderAnalyticsData.fromJson(decodedData);
+      } else if (response.statusCode == 401) {
+        print('Authentication Error: ${response.body}'); // Debug log
+        throw Exception('Authentication failed. Please login again.');
       } else {
+        print(
+            'API Error: ${response.statusCode} - ${response.body}'); // Debug log
         throw Exception(
             'Failed to load analytics data: ${response.statusCode}');
       }
     } catch (e) {
+      print('Exception: $e'); // Debug log
       throw Exception('Failed to load analytics data: $e');
     }
   }
