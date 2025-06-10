@@ -2,6 +2,7 @@ import 'package:agro_vision/features/authentication/UI/congratulation_screen.dar
 import 'package:agro_vision/features/home/Ui/widgets/add_task_screen.dart';
 import 'package:agro_vision/features/home/Ui/logout_screen.dart';
 import 'package:agro_vision/features/home/Ui/widgets/task_list_screen.dart';
+import 'package:agro_vision/features/notifications/screens/unified_notification_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/UI/create_password_screen.dart';
@@ -77,7 +78,7 @@ class AppRouter {
         );
       case AppRoutes.notificationsScreen:
         return MaterialPageRoute(
-          builder: (_) => NotificationsScreen(),
+          builder: (_) => const UnifiedNotificationScreen(),
         );
       case '/login':
         return MaterialPageRoute(
