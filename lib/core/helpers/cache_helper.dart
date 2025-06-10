@@ -30,14 +30,13 @@ class CacheHelper {
     required dynamic value,
   }) async {
     await ensureInitialized();
+    log("saving >>> $value into local >>> with key $key");
     if (value is String) {
       await sharedPreferences!.setString(key, value);
       if (kDebugMode) {
         print('💾 SAVED $key: $value');
       }
     }
-    log("saving >>> $value into local >>> with key $key");
-    if (value is String) await sharedPreferences!.setString(key, value);
     if (value is int) await sharedPreferences!.setInt(key, value);
     if (value is double) await sharedPreferences!.setDouble(key, value);
     if (value is bool) await sharedPreferences!.setBool(key, value);
