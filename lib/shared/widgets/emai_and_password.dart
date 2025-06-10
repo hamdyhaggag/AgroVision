@@ -20,17 +20,7 @@ class EmailAndPasswordState extends State<EmailAndPassword> {
   void initState() {
     super.initState();
     passwordController = context.read<LoginCubit>().passwordController;
-    // setupPasswordControllerListener();
   }
-
-  // void setupPasswordControllerListener() {
-  //   passwordController.addListener(() {
-  //     setState(() {
-  //       hasLowercase = AppRegex.hasLowerCase(passwordController.text);
-  //       hasNumber = AppRegex.hasNumber(passwordController.text);
-  //     });
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -89,30 +79,12 @@ class EmailAndPasswordState extends State<EmailAndPassword> {
                 if (!AppRegex.hasMinLength(value)) {
                   return 'Password must be at least 8 characters';
                 }
-                // if (!AppRegex.hasLowerCase(value)) {
-                //   return 'Include a lowercase letter';
-                // }
-                // if (!AppRegex.hasUpperCase(value)) {
-                //   return 'Include an uppercase letter';
-                // }
-                // if (!AppRegex.hasNumber(value)) {
-                //   return 'Include a number';
-                // }
-                // if (!AppRegex.hasSpecialCharacter(value)) {
-                //   return 'Include a special character';
-                // }
                 return null;
               },
               controller: context.read<LoginCubit>().passwordController,
             ),
           ],
         ));
-  }
-
-  @override
-  void dispose() {
-    passwordController.dispose();
-    super.dispose();
   }
 }
 
