@@ -402,7 +402,8 @@ class _InvoiceChart extends StatelessWidget {
     final spots = monthlySales.asMap().entries.map((entry) {
       final index = entry.key;
       final sale = entry.value;
-      return FlSpot((index + 1).toDouble(), sale.total);
+      return FlSpot(
+          (index + 1).toDouble(), double.parse(sale.total.toStringAsFixed(2)));
     }).toList();
 
     double maxY =
