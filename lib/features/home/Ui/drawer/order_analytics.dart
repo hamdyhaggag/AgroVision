@@ -263,9 +263,9 @@ class _OrderAnalyticsState extends State<OrderAnalytics> {
   Widget _buildClientsSection(
       BuildContext context, bool isMobile, List<data_models.Client> clients) {
     // Sort clients by orders count and take top 3
-    final topClients = clients
-      ..sort((a, b) => b.ordersCount.compareTo(a.ordersCount))
-      ..take(3);
+    final sortedClients = List<data_models.Client>.from(clients)
+      ..sort((a, b) => b.ordersCount.compareTo(a.ordersCount));
+    final topClients = sortedClients.take(3).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
