@@ -18,12 +18,6 @@ class InvoiceSectionView extends StatelessWidget {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Invoice Payments',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: AppColors.primaryColor),
-            onPressed: () {/* Implement search */},
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -260,12 +254,6 @@ class FullClientsView extends StatelessWidget {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Clients',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: AppColors.primaryColor),
-            onPressed: () {/* Implement search */},
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
