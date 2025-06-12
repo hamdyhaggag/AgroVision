@@ -953,8 +953,10 @@ Widget _buildChatList(BuildContext context) {
                         : conversation.user1Img;
 
                     print('Debug - Image path: $otherUserImg');
-                    print(
-                        'Debug - Full URL: ${_ChatListScreenState.baseUrl}${_ChatListScreenState.storagePath}/$otherUserImg');
+                    if (otherUserImg != null && otherUserImg.isNotEmpty) {
+                      print(
+                          'Debug - Full URL: ${_ChatListScreenState.baseUrl}${_ChatListScreenState.storagePath}/$otherUserImg');
+                    }
 
                     return Container(
                       decoration: BoxDecoration(

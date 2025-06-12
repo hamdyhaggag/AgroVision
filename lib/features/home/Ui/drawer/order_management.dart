@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../core/helpers/cache_helper.dart';
 import '../../../../core/network/api_service.dart';
 import '../../../../core/network/dio_factory.dart';
+import '../../../../core/themes/app_colors.dart';
 import '../../../../models/api_order.dart';
 import '../../../../shared/widgets/custom_appbar.dart';
 import '../../Api/orders_repo.dart';
@@ -511,14 +512,16 @@ class _OrderCard extends StatelessWidget {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'completed':
-        return Colors.green;
+      case 'delivered':
+        return AppColors.orderDelivered;
       case 'ordered':
-        return Colors.amber[700]!;
+        return AppColors.orderOrdered;
+      case 'pending':
+        return AppColors.orderPending;
       case 'cancelled':
-        return Colors.red;
+        return AppColors.orderCancelled;
       default:
-        return Colors.grey;
+        return AppColors.greyColor;
     }
   }
 }

@@ -99,6 +99,12 @@ class AppColors {
   /// Error indicators (e.g., text or icons).
   static const Color errorColor = Color(0xFFEF5350);
 
+  /// Order status colors
+  static const Color orderDelivered = Color(0xFF2E7D32);
+  static const Color orderPending = Color(0xFFFFC107);
+  static const Color orderCancelled = Color(0xFFD32F2F);
+  static const Color orderOrdered = Color(0xFFF57C00);
+
   // ----------------------
   // DIVIDER & SURFACES
   // ----------------------
