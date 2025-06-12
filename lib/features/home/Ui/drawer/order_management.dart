@@ -239,16 +239,42 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      child: Column(children: [
-        Expanded(
+      child: Column(
+        children: [
+          if (selectedStatuses.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Text(
+                    'Filtered by: ${selectedStatuses.map((s) => s.toUpperCase()).join(", ")}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {
+                      setState(() => selectedStatuses = []);
+                    },
+                    child: const Text('Clear Filters'),
+                  ),
+                ],
+              ),
+            ),
+          Expanded(
             child: ListView.separated(
-          physics: const BouncingScrollPhysics(),
-          itemCount: filteredOrders.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, index) =>
-              _OrderCard(order: filteredOrders[index], formatDate: _formatDate),
-        )),
-      ]),
+              physics: const BouncingScrollPhysics(),
+              itemCount: filteredOrders.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) => _OrderCard(
+                  order: filteredOrders[index], formatDate: _formatDate),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -287,8 +313,16 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
                 ]),
                 actions: [
                   TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel')),
+                    onPressed: () {
+                      setState(() => selectedStatuses = []);
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Clear All'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
                   TextButton(
                     onPressed: () {
                       setState(() => selectedStatuses = currentSelected);
