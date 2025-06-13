@@ -156,7 +156,7 @@ class _ChatListScreenState extends State<ChatListScreen>
         cacheExtent: 1000,
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         physics: const BouncingScrollPhysics(),
-        itemCount: sessions.length + (isCreatingSession ? 1 : 0),
+        itemCount: sessions.length + (isCreatingSession ? 1 : 0) + 1,
         separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           if (isCreatingSession && index == sessions.length) {
@@ -170,42 +170,25 @@ class _ChatListScreenState extends State<ChatListScreen>
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 120,
-                                height: 20,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(height: 8),
-                              Container(
-                                width: 200,
-                                height: 16,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  height: 80,
                 ),
               ),
+            );
+          }
+
+          if (index == sessions.length + (isCreatingSession ? 1 : 0)) {
+            return BlocBuilder<ChatCubit, ChatState>(
+              builder: (context, state) {
+                if (state is ChatLoading) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             );
           }
 
@@ -217,62 +200,95 @@ class _ChatListScreenState extends State<ChatListScreen>
 
           return Dismissible(
             key: Key(session.id),
-            dismissThresholds: const {DismissDirection.startToEnd: 0.4},
-            movementDuration: const Duration(milliseconds: 300),
-            background: _buildDismissBackground(context, Icons.delete,
-                AppColors.errorColor, Alignment.centerLeft),
-            secondaryBackground: _buildDismissBackground(context, Icons.edit,
-                AppColors.primaryColor, Alignment.centerRight),
+            direction: DismissDirection.horizontal,
             confirmDismiss: (direction) =>
                 _handleDismissConfirmation(context, direction, session),
             onDismissed: (direction) =>
                 _handleDismissAction(context, direction, session),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
+            background: Container(
               decoration: BoxDecoration(
-                color: AppColors.surfaceColor,
+                color: AppColors.errorColor,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
-              margin: const EdgeInsets.symmetric(vertical: 4),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.only(left: 24),
+              child: const Icon(Icons.delete, color: Colors.white),
+            ),
+            secondaryBackground: Container(
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 24),
+              child: const Icon(Icons.edit, color: Colors.white),
+            ),
+            child: GestureDetector(
+              onTap: () => _navigateToChatDetail(context, session),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  onTap: () => _navigateToChatDetail(context, session),
-                  hoverColor: AppColors.primaryColor.withValues(alpha: 0.05),
-                  highlightColor: AppColors.primaryColor.withValues(alpha: 0.1),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
                     ),
-                    child: Row(
-                      children: [
-                        _buildSessionIndicator(context, hasUnread),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildSessionHeader(context, session),
-                              const SizedBox(height: 6),
-                              _buildMessagePreview(context, lastMessage),
-                              if (hasUnread)
-                                _buildUnreadBadge(session.unreadCount),
-                            ],
-                          ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        _buildSessionActions(context, session),
-                      ],
-                    ),
+                        child: const Icon(
+                          Icons.auto_awesome,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              session.title ?? 'New Chat',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              session.messages.isNotEmpty
+                                  ? session.messages.last.text
+                                  : 'No messages yet',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (hasUnread)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: _buildUnreadBadge(session.unreadCount),
+                        ),
+                    ],
                   ),
                 ),
               ),

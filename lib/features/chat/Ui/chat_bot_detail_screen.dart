@@ -17,10 +17,13 @@ class ChatBotDetailScreen extends StatefulWidget {
   State<ChatBotDetailScreen> createState() => _ChatBotDetailScreenState();
 }
 
-class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
+class _ChatBotDetailScreenState extends State<ChatBotDetailScreen>
+    with SingleTickerProviderStateMixin {
   late bool _isInputArabic = false;
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late AnimationController _typingAnimationController;
+  late Animation<double> _typingAnimation;
 
   bool isArabic(String text) {
     final arabicRegex = RegExp(r'[\u0600-\u06FF]');
@@ -32,6 +35,21 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
     super.initState();
     _handleSessionAndPrefill();
     _controller.addListener(_checkInputLanguage);
+    _setupTypingAnimation();
+  }
+
+  void _setupTypingAnimation() {
+    _typingAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    _typingAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _typingAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   void _handleSessionAndPrefill() {
@@ -66,6 +84,7 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
 
   @override
   void dispose() {
+    _typingAnimationController.dispose();
     _controller.dispose();
     _scrollController.dispose();
     _controller.removeListener(_checkInputLanguage);
@@ -389,7 +408,6 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                             padding: const EdgeInsets.symmetric(
                                 vertical: 16, horizontal: 8),
                             itemCount: currentSession.messages.length +
-                                (state is ChatLoading ? 1 : 0) +
                                 _pendingMessagesCount(currentSession.id),
                             separatorBuilder: (_, __) =>
                                 const SizedBox(height: 12),
@@ -413,60 +431,12 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
                                       _showMessageOptions(message),
                                 );
                               }
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: ChatBubble(
-                                  message: Message(
-                                      text: '',
-                                      isSentByMe: false,
-                                      timestamp: DateTime.now()),
-                                  isLoading: true,
-                                  loadingColor: AppColors.primaryColor,
-                                  onLongPress: () {},
-                                ),
-                              );
+                              return const SizedBox.shrink();
                             },
                           ),
                   ),
                 ),
-                if (state is ChatLoading)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, -5),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Theme.of(context).primaryColor,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Text(
-                          'Processing your request...',
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).textTheme.bodyMedium?.color,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                if (state is ChatLoading) _buildTypingIndicator(),
                 _buildInputSection(context),
               ],
             );
@@ -689,6 +659,61 @@ class _ChatBotDetailScreenState extends State<ChatBotDetailScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTypingIndicator() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primaryColor.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const CircleAvatar(
+              radius: 16,
+              backgroundColor: Colors.transparent,
+              backgroundImage: AssetImage('assets/images/khedr.jpg'),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Row(
+            children: List.generate(3, (index) {
+              return AnimatedBuilder(
+                animation: _typingAnimation,
+                builder: (context, child) {
+                  return Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withOpacity(
+                        0.3 + (_typingAnimation.value * 0.7),
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                  );
+                },
+              );
+            }),
+          ),
+        ],
       ),
     );
   }

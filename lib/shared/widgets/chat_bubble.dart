@@ -31,53 +31,11 @@ class ChatBubble extends StatefulWidget {
   State<ChatBubble> createState() => _ChatBubbleState();
 }
 
-class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
-  late AnimationController _controller;
-  final List<Animation<double>> _dotAnimations = [];
+class _ChatBubbleState extends State<ChatBubble> {
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.isLoading) _initializeAnimations();
-  }
-
-  void _initializeAnimations() {
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat();
-    for (var i = 0; i < 3; i++) {
-      _dotAnimations.add(
-        Tween<double>(begin: 1.0, end: 1.4).animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: Interval(0.2 * i, 0.2 * i + 0.4, curve: Curves.easeInOut),
-          ),
-        ),
-      );
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant ChatBubble oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isLoading != oldWidget.isLoading) {
-      if (widget.isLoading) {
-        _initializeAnimations();
-      } else {
-        _controller.dispose();
-        _dotAnimations.clear();
-      }
-    }
-    if (widget.message.voiceFilePath != oldWidget.message.voiceFilePath) {
-      setState(() {});
-    }
-  }
-
-  @override
   void dispose() {
-    if (widget.isLoading) _controller.dispose();
     _audioPlayer.dispose();
     super.dispose();
   }
@@ -114,8 +72,6 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
                       key: ValueKey(widget.message.voiceFilePath),
                       filePath: widget.message.voiceFilePath!,
                     ),
-                  if (widget.isLoading && !widget.message.isSentByMe)
-                    _buildTypingIndicator(),
                   if (widget.message.text.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Builder(
@@ -170,35 +126,6 @@ class _ChatBubbleState extends State<ChatBubble> with TickerProviderStateMixin {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTypingIndicator() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(3, (index) {
-        return AnimatedBuilder(
-          animation: _dotAnimations[index],
-          builder: (context, child) {
-            return Transform.scale(
-              scale: _dotAnimations[index].value,
-              child: child,
-            );
-          },
-          child: Container(
-            width: 8,
-            height: 8,
-            margin: const EdgeInsets.symmetric(horizontal: 2),
-            decoration: BoxDecoration(
-              color: widget.loadingColor ??
-                  (widget.message.isSentByMe
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey[600]),
-              shape: BoxShape.circle,
-            ),
-          ),
-        );
-      }),
     );
   }
 
@@ -442,7 +369,7 @@ class _AudioUrlBubbleState extends State<AudioUrlBubble>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Khedr’s voice',
+                        "Khedr's voice",
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
