@@ -126,12 +126,14 @@ class AgroVision extends StatelessWidget {
             onGenerateRoute: appRouter.generateRoute,
             initialRoute: AppRoutes.splashScreen,
             builder: (context, child) {
-              return GestureDetector(
-                onTap: () => Utils.closeKeyboard,
-                child: MediaQuery(
-                  data: MediaQuery.of(context)
-                      .copyWith(textScaler: const TextScaler.linear(1.0)),
-                  child: child!,
+              final mediaQueryData = MediaQuery.of(context);
+              return MediaQuery(
+                data: mediaQueryData.copyWith(
+                  textScaler: const TextScaler.linear(1.0),
+                ),
+                child: GestureDetector(
+                  onTap: () => Utils.closeKeyboard,
+                  child: child ?? const SizedBox(),
                 ),
               );
             },
