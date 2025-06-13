@@ -52,30 +52,41 @@ abstract class ChatbotService {
   @GET('sessions/{session_id}')
   Future<SessionApiModel> getSession(@Path('session_id') String sessionId);
   @GET('/sessions/{user_id}')
-  Future<List<SessionApiModel>> getSessions(@Path('user_id') String userId);
+  Future<SessionApiModel> getSessions(@Path('user_id') String userId);
 }
 
 class SessionApiModel {
-  final String sessionId;
-  final List<Message> messages;
-  final String createdAt;
-  final String? title;
+  final String userId;
+  final List<SessionData> sessions;
 
   SessionApiModel({
-    required this.sessionId,
-    required this.messages,
-    required this.createdAt,
-    this.title,
+    required this.userId,
+    required this.sessions,
   });
 
   factory SessionApiModel.fromJson(Map<String, dynamic> json) {
     return SessionApiModel(
-      sessionId: json['session_id'],
-      messages: (json['messages'] as List)
-          .map((msg) => Message.fromJson(msg))
+      userId: json['user_id'],
+      sessions: (json['sessions'] as List)
+          .map((session) => SessionData.fromJson(session))
           .toList(),
-      createdAt: json['created_at'],
-      title: json['title'],
+    );
+  }
+}
+
+class SessionData {
+  final String sessionId;
+  final List<String> memory;
+
+  SessionData({
+    required this.sessionId,
+    required this.memory,
+  });
+
+  factory SessionData.fromJson(Map<String, dynamic> json) {
+    return SessionData(
+      sessionId: json['session_id'],
+      memory: (json['memory'] as List).map((msg) => msg.toString()).toList(),
     );
   }
 }

@@ -144,17 +144,32 @@ class ChatRepository {
   Future<List<ChatSession>> getSessions(String userId) async {
     try {
       final response = await chatbotService.getSessions(userId);
-      return response
-          .map((apiModel) => ChatSession(
-                id: apiModel.sessionId,
-                messages: apiModel.messages,
-                createdAt: DateTime.parse(apiModel.createdAt),
-                title: apiModel.title,
-              ))
-          .toList();
+      return response.sessions.map((sessionData) {
+        final messages = sessionData.memory.map((msg) {
+          final isUser = msg.startsWith('User:');
+          final text =
+              isUser ? msg.substring(5).trim() : msg.substring(10).trim();
+          return Message(
+            text: text,
+            isSentByMe: isUser,
+            status: MessageStatus.delivered,
+            timestamp: DateTime.now(),
+          );
+        }).toList();
+
+        return ChatSession(
+          id: sessionData.sessionId,
+          messages: messages,
+          createdAt: DateTime.now(),
+          title: messages.isNotEmpty ? messages.first.text : 'New Chat',
+        );
+      }).toList();
     } on DioException catch (e) {
       if (_isNetworkError(e)) {
         throw NetworkUnavailableException();
+      }
+      if (e.response?.statusCode == 404) {
+        throw ChatException('No sessions found for this user');
       }
       throw ChatException('Failed to fetch sessions: ${e.message}');
     }

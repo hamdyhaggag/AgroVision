@@ -27,7 +27,7 @@ class HomeCubit extends Cubit<HomeState> {
       );
       try {
         final sensor = await sensorService.getSensorStatus();
-        // Save the sensor data to cache
+        // Save the sensor data to cache with timestamp
         await CacheHelper.saveSensorData([sensor]);
         emit(HomeLoaded(
           weather: weather,
@@ -36,13 +36,16 @@ class HomeCubit extends Cubit<HomeState> {
       } catch (e) {
         // If sensor data fails, try to load from cache
         final cachedSensors = CacheHelper.getSensorData();
-        if (cachedSensors.isNotEmpty) {
+        if (cachedSensors.isNotEmpty && !CacheHelper.isSensorDataStale()) {
           emit(HomeLoaded(
             weather: weather,
             sensors: cachedSensors,
-            sensorError: 'Using cached sensor data: ${e.toString()}',
+            sensorError:
+                'Using cached sensor data from ${CacheHelper.getLastSensorDataUpdate()?.toString() ?? "unknown time"}: ${e.toString()}',
           ));
         } else {
+          // Clear stale cache if it exists
+          await CacheHelper.clearStaleSensorData();
           emit(HomeLoaded(
             weather: weather,
             sensors: [],

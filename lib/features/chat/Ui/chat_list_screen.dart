@@ -35,6 +35,9 @@ class _ChatListScreenState extends State<ChatListScreen>
       setState(() {
         _currentTabIndex = _tabController.index;
       });
+      if (_tabController.index == 1) {
+        context.read<ChatCubit>().loadSessions();
+      }
     });
   }
 

@@ -31,6 +31,8 @@ import 'features/home/Logic/task_cubit/task_cubit.dart';
 import 'features/monitoring/Api/sensor_data_service.dart';
 import 'features/monitoring/Logic/sensor_data_cubit.dart';
 import 'package:provider/provider.dart';
+import 'features/notifications/cubit/unified_notification_cubit.dart';
+import 'features/notifications/services/unified_notification_service.dart';
 
 import 'features/monitoring/notification/notification_cubit/notification_cubit.dart';
 
@@ -83,6 +85,11 @@ class AgroVision extends StatelessWidget {
             ),
             BlocProvider(
               create: (context) => ThemeCubit()..getCurrentTheme(),
+            ),
+            BlocProvider(
+              create: (context) => UnifiedNotificationCubit(
+                UnifiedNotificationService(),
+              )..loadNotifications(),
             ),
             Provider<FarmerChatApiService>(
               create: (context) =>

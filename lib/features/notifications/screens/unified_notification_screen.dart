@@ -4,11 +4,10 @@ import 'dart:developer' as dev;
 import '../../../core/themes/app_colors.dart';
 import '../../../shared/widgets/custom_appbar.dart';
 import '../cubit/unified_notification_cubit.dart';
-import '../services/unified_notification_service.dart';
 import '../../../models/unified_notification_model.dart';
 
 class UnifiedNotificationScreen extends StatelessWidget {
-  const UnifiedNotificationScreen({Key? key}) : super(key: key);
+  const UnifiedNotificationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,18 +17,13 @@ class UnifiedNotificationScreen extends StatelessWidget {
         title: 'Notifications',
         isHome: false,
       ),
-      body: BlocProvider(
-        create: (context) => UnifiedNotificationCubit(
-          UnifiedNotificationService(),
-        )..loadNotifications(),
-        child: const _NotificationContent(),
-      ),
+      body: const _NotificationContent(),
     );
   }
 }
 
 class _NotificationContent extends StatelessWidget {
-  const _NotificationContent({Key? key}) : super(key: key);
+  const _NotificationContent({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +103,7 @@ class _NotificationContent extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -250,11 +244,11 @@ class _FilterChip extends StatelessWidget {
   final ValueChanged<bool> onSelected;
 
   const _FilterChip({
-    Key? key,
+    super.key,
     required this.label,
     required this.isSelected,
     required this.onSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -270,7 +264,7 @@ class _FilterChip extends StatelessWidget {
       selected: isSelected,
       onSelected: onSelected,
       backgroundColor: Colors.grey[100],
-      selectedColor: AppColors.primaryColor.withOpacity(0.15),
+      selectedColor: AppColors.primaryColor.withValues(alpha: 0.15),
       checkmarkColor: AppColors.primaryColor,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       shape: RoundedRectangleBorder(
@@ -289,10 +283,10 @@ class _NotificationCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const _NotificationCard({
-    Key? key,
+    super.key,
     required this.notification,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -304,7 +298,7 @@ class _NotificationCard extends StatelessWidget {
         side: BorderSide(
           color: notification.isRead
               ? Colors.grey[200]!
-              : AppColors.primaryColor.withOpacity(0.2),
+              : AppColors.primaryColor.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -347,7 +341,7 @@ class _NotificationCard extends StatelessWidget {
                               boxShadow: [
                                 BoxShadow(
                                   color:
-                                      AppColors.primaryColor.withOpacity(0.3),
+                                      AppColors.primaryColor.withValues(alpha: 0.3),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -393,12 +387,12 @@ class _NotificationCard extends StatelessWidget {
       case NotificationType.order:
         icon = Icons.shopping_cart_outlined;
         iconColor = AppColors.primaryColor;
-        backgroundColor = AppColors.primaryColor.withOpacity(0.1);
+        backgroundColor = AppColors.primaryColor.withValues(alpha: 0.1);
         break;
       case NotificationType.general:
         icon = Icons.notifications_outlined;
         iconColor = AppColors.secondaryColor;
-        backgroundColor = AppColors.secondaryColor.withOpacity(0.1);
+        backgroundColor = AppColors.secondaryColor.withValues(alpha: 0.1);
         break;
       case NotificationType.system:
         icon = Icons.settings_outlined;
@@ -416,7 +410,7 @@ class _NotificationCard extends StatelessWidget {
             ? null
             : [
                 BoxShadow(
-                  color: iconColor.withOpacity(0.1),
+                  color: iconColor.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),

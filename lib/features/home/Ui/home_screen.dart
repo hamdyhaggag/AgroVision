@@ -18,8 +18,8 @@ import '../../../shared/widgets/custom_appbar.dart';
 import '../../../shared/widgets/custom_botton.dart';
 import '../../../models/sensor_data_model.dart' as sensor_data;
 import '../../../models/weather_model.dart';
-import '../../monitoring/notification/notification_cubit/notification_cubit.dart';
-import '../../monitoring/notification/notification_cubit/notification_state.dart';
+import '../../notifications/cubit/unified_notification_cubit.dart';
+import '../../notifications/services/unified_notification_service.dart';
 import '../Logic/home_cubit/home_cubit.dart';
 import '../Logic/home_cubit/home_state.dart';
 import 'home_screen.dart' as state;
@@ -174,10 +174,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildAppBarActions() {
     return Row(
       children: [
-        BlocBuilder<NotificationCubit, NotificationState>(
+        BlocBuilder<UnifiedNotificationCubit, UnifiedNotificationState>(
           builder: (context, state) {
-            final unreadCount =
-                state.notifications.where((n) => n.isUnread).length;
+            final unreadCount = state is UnifiedNotificationLoaded
+                ? state.notifications.where((n) => !n.isRead).length
+                : 0;
 
             return Semantics(
               label: '$unreadCount new notifications',

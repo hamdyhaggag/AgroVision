@@ -14,6 +14,8 @@ class CacheHelper {
   static const _sessionsKey = 'chat_sessions';
   static const String _notificationsKey = 'notifications';
   static const String _sensorDataKey = 'sensor_data';
+  static const String _sensorDataTimestampKey = 'sensor_data_timestamp';
+  static const Duration _sensorDataStaleDuration = Duration(hours: 1);
 
   static Future<void> init() async {
     sharedPreferences = await SharedPreferences.getInstance();
@@ -178,7 +180,15 @@ class CacheHelper {
               'type': sensor.type,
             })
         .toList();
+
+    // Save the sensor data
     await sharedPreferences!.setString(_sensorDataKey, jsonEncode(jsonList));
+
+    // Save the timestamp
+    await sharedPreferences!.setString(
+      _sensorDataTimestampKey,
+      DateTime.now().toIso8601String(),
+    );
   }
 
   static List<sensor_data.Sensor> getSensorData() {
@@ -193,6 +203,44 @@ class CacheHelper {
         print('Error parsing cached sensor data: $e');
       }
       return [];
+    }
+  }
+
+  static bool isSensorDataStale() {
+    try {
+      final timestampString =
+          sharedPreferences!.getString(_sensorDataTimestampKey);
+      if (timestampString == null || timestampString.isEmpty) return true;
+
+      final timestamp = DateTime.parse(timestampString);
+      final now = DateTime.now();
+      return now.difference(timestamp) > _sensorDataStaleDuration;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error checking sensor data staleness: $e');
+      }
+      return true;
+    }
+  }
+
+  static Future<void> clearStaleSensorData() async {
+    if (isSensorDataStale()) {
+      await sharedPreferences!.remove(_sensorDataKey);
+      await sharedPreferences!.remove(_sensorDataTimestampKey);
+    }
+  }
+
+  static DateTime? getLastSensorDataUpdate() {
+    try {
+      final timestampString =
+          sharedPreferences!.getString(_sensorDataTimestampKey);
+      if (timestampString == null || timestampString.isEmpty) return null;
+      return DateTime.parse(timestampString);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting last sensor data update: $e');
+      }
+      return null;
     }
   }
 }
