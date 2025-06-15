@@ -17,9 +17,8 @@ part 'api_service.g.dart';
 abstract class ApiService {
   factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
 
-  @GET('users/{user_id}/orders')
-  Future<HttpResponse<ApiOrdersResponse>> getUserOrders(
-    @Path('user_id') int userId, {
+  @GET('farmers/orders')
+  Future<HttpResponse<ApiOrdersResponse>> getUserOrders({
     @Query('page') int? page,
     @Query('status') String? status,
     @Query('search') String? search,

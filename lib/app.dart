@@ -103,7 +103,7 @@ class AgroVision extends StatelessWidget {
             BlocProvider(
               create: (context) => OrdersCubit(
                   OrdersRepo(ApiService(DioFactory.getAgrovisionDio())))
-                ..fetchOrders(CacheHelper.getInt('userId')),
+                ..fetchOrders(),
             ),
           ],
           child: MaterialApp(

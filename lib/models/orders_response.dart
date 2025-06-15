@@ -6,10 +6,9 @@ part 'orders_response.g.dart';
 
 @JsonSerializable()
 class ApiOrdersResponse {
-  final bool success;
-  final List<ApiOrder> data;
+  final List<ApiOrder> orders;
 
-  ApiOrdersResponse({required this.success, required this.data});
+  ApiOrdersResponse({required this.orders});
 
   factory ApiOrdersResponse.fromJson(Map<String, dynamic> json) {
     if (kDebugMode) {

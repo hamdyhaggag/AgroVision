@@ -23,10 +23,10 @@ class OrdersCubit extends Cubit<OrdersState> {
   final OrdersRepo _repo;
   OrdersCubit(this._repo) : super(OrdersInitial());
 
-  Future<void> fetchOrders(int userId) async {
+  Future<void> fetchOrders() async {
     emit(OrdersLoading());
     try {
-      final result = await _repo.getUserOrders(userId);
+      final result = await _repo.getUserOrders();
       result.when(
         success: (orders) => emit(OrdersLoaded(orders)),
         failure: (error) => emit(OrdersError(error.toString())),

@@ -50,7 +50,10 @@ class DioFactory {
         return handler.next(options);
       },
       onError: (error, handler) async {
-        if (error.response?.statusCode == 401) _redirectToLogin();
+        if (error.response?.statusCode == 401) {
+          CacheHelper().logout();
+          _redirectToLogin();
+        }
         return handler.next(error);
       },
     ));
@@ -87,7 +90,10 @@ class DioFactory {
         return handler.next(options);
       },
       onError: (error, handler) async {
-        if (error.response?.statusCode == 401) _redirectToLogin();
+        if (error.response?.statusCode == 401) {
+          CacheHelper().logout();
+          _redirectToLogin();
+        }
         return handler.next(error);
       },
     ));

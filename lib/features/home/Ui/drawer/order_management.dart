@@ -92,7 +92,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
     return BlocProvider(
       create: (context) =>
           OrdersCubit(OrdersRepo(ApiService(DioFactory.getAgrovisionDio())))
-            ..fetchOrders(userId),
+            ..fetchOrders(),
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: CustomAppBar(
@@ -119,7 +119,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
             if (state is OrdersLoading) {
               return RefreshIndicator(
                 onRefresh: () async =>
-                    context.read<OrdersCubit>().fetchOrders(userId),
+                    context.read<OrdersCubit>().fetchOrders(),
                 child: ListView.separated(
                   physics: const AlwaysScrollableScrollPhysics(),
                   itemCount: 6,
@@ -134,7 +134,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
             if (state is OrdersLoaded) {
               return RefreshIndicator(
                 onRefresh: () async =>
-                    context.read<OrdersCubit>().fetchOrders(userId),
+                    context.read<OrdersCubit>().fetchOrders(),
                 child: _buildOrderList(selectedStatuses.isEmpty
                     ? orders
                     : orders
@@ -446,9 +446,7 @@ class _ErrorWidget extends StatelessWidget {
               color: Colors.red,
             )),
         ElevatedButton(
-          onPressed: () => context
-              .read<OrdersCubit>()
-              .fetchOrders(CacheHelper.getInt('userId')),
+          onPressed: () => context.read<OrdersCubit>().fetchOrders(),
           child: const Text('Retry'),
         )
       ]),

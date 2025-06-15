@@ -11,10 +11,10 @@ class OrdersRepo {
 
   OrdersRepo(this._apiService);
 
-  Future<ApiResult<List<ApiOrder>>> getUserOrders(int userId) async {
+  Future<ApiResult<List<ApiOrder>>> getUserOrders() async {
     try {
-      final response = await _apiService.getUserOrders(userId);
-      return ApiResult.success(response.data.data);
+      final response = await _apiService.getUserOrders();
+      return ApiResult.success(response.data.orders);
     } on DioException catch (e) {
       if (kDebugMode) {
         print('❌ DioException: ${e.message}');

@@ -24,8 +24,7 @@ class _ApiService implements ApiService {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<HttpResponse<ApiOrdersResponse>> getUserOrders(
-    int userId, {
+  Future<HttpResponse<ApiOrdersResponse>> getUserOrders({
     int? page,
     String? status,
     String? search,
@@ -46,7 +45,7 @@ class _ApiService implements ApiService {
     )
         .compose(
           _dio.options,
-          'users/${userId}/orders',
+          'farmers/orders',
           queryParameters: queryParameters,
           data: _data,
         )

@@ -8,14 +8,12 @@ part of 'orders_response.dart';
 
 ApiOrdersResponse _$ApiOrdersResponseFromJson(Map<String, dynamic> json) =>
     ApiOrdersResponse(
-      success: json['success'] as bool,
-      data: (json['data'] as List<dynamic>)
+      orders: (json['orders'] as List<dynamic>)
           .map((e) => ApiOrder.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
 Map<String, dynamic> _$ApiOrdersResponseToJson(ApiOrdersResponse instance) =>
     <String, dynamic>{
-      'success': instance.success,
-      'data': instance.data,
+      'orders': instance.orders,
     };
