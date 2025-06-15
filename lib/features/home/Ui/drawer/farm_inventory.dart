@@ -231,6 +231,19 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
     }
   }
 
+  String _mapStatusToDisplay(String status) {
+    switch (status.toLowerCase()) {
+      case 'instock':
+        return 'In Stock';
+      case 'outofstock':
+        return 'Out of Stock';
+      case 'lowstock':
+        return 'Low Stock';
+      default:
+        return 'In Stock';
+    }
+  }
+
   void _postItem(InventoryItem item) async {
     try {
       if (item.categoryId == -1) {
@@ -280,7 +293,70 @@ class _FarmInventoryScreenState extends State<FarmInventoryScreen> {
       String message = 'Posting failed';
       Color color = Colors.red;
 
-      if (e.response?.statusCode == 400) {
+      if (e.response?.statusCode == 409) {
+        // Show dialog with existing product details
+        final existingProduct = e.response?.data['existing_product'];
+        if (existingProduct != null) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Product Already Exists'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                      'This product is already listed in the marketplace:'),
+                  const SizedBox(height: 16),
+                  Text('Name: ${existingProduct['name']}'),
+                  Text('Price: ${existingProduct['price']} EGP'),
+                  Text('Quantity: ${existingProduct['quantity']} Kg'),
+                  Text('Status: ${existingProduct['stock_status']}'),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Would you like to update the existing product instead?',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // Create an InventoryItem from the existing product data
+                    final existingItem = InventoryItem(
+                      id: existingProduct['crop_id'],
+                      userId: existingProduct['farmer_id'],
+                      imageUrl: existingProduct['images'] != null
+                          ? 'https://final.agrovision.ltd/storage/app/public/${existingProduct['images']}'
+                          : 'https://example.com/placeholder.png',
+                      productName: existingProduct['name'],
+                      category: categories
+                          .firstWhere(
+                            (c) => c.id == existingProduct['category_id'],
+                            orElse: () => Category(id: -1, name: 'Unknown'),
+                          )
+                          .name,
+                      categoryId: existingProduct['category_id'],
+                      price: '${existingProduct['price']} EGP',
+                      quantity: '${existingProduct['quantity']} Kg',
+                      status:
+                          _mapStatusToDisplay(existingProduct['stock_status']),
+                    );
+                    _editItem(context, existingItem);
+                  },
+                  child: const Text('Update Existing'),
+                ),
+              ],
+            ),
+          );
+          return;
+        }
+      } else if (e.response?.statusCode == 400) {
         final error = e.response?.data['error']?.toString() ?? '';
         message = error.contains('المنتج موجود بالفعل')
             ? 'Product already exists in marketplace'

@@ -37,7 +37,33 @@ class _EditCropDialogState extends State<EditCropDialog> {
     _quantityController =
         TextEditingController(text: widget.item.quantity.replaceAll(' Kg', ''));
     _selectedCategory = widget.item.category;
-    _selectedStatus = widget.item.status;
+    _selectedStatus = _mapStatusToDisplay(widget.item.status);
+  }
+
+  String _mapStatusToDisplay(String status) {
+    switch (status.toLowerCase()) {
+      case 'instock':
+        return 'In Stock';
+      case 'outofstock':
+        return 'Out of Stock';
+      case 'lowstock':
+        return 'Low Stock';
+      default:
+        return 'In Stock';
+    }
+  }
+
+  String _mapDisplayToStatus(String displayStatus) {
+    switch (displayStatus) {
+      case 'In Stock':
+        return 'instock';
+      case 'Out of Stock':
+        return 'outofstock';
+      case 'Low Stock':
+        return 'lowstock';
+      default:
+        return 'instock';
+    }
   }
 
   Future<void> _saveForm() async {
@@ -50,7 +76,7 @@ class _EditCropDialogState extends State<EditCropDialog> {
         'pricePerKilo': double.parse(_priceController.text),
         'productCategory': _selectedCategory,
         'quantity': int.parse(_quantityController.text),
-        'status': _selectedStatus,
+        'status': _mapDisplayToStatus(_selectedStatus),
         'user_id': widget.item.userId,
       };
       final success = await widget.onSave(formData);
@@ -134,6 +160,8 @@ class _EditCropDialogState extends State<EditCropDialog> {
                 ),
                 items: const [
                   DropdownMenuItem(value: 'In Stock', child: Text('In Stock')),
+                  DropdownMenuItem(
+                      value: 'Low Stock', child: Text('Low Stock')),
                   DropdownMenuItem(
                       value: 'Out of Stock', child: Text('Out of Stock')),
                 ],
