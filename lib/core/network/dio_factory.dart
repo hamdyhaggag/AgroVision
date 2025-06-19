@@ -9,7 +9,8 @@ import 'api_constants.dart';
 class DioFactory {
   static Dio getDio() {
     return Dio(BaseOptions(
-      baseUrl: 'https://api.openweathermap.org/data/2.5',
+      baseUrl: dotenv.env['OPENWEATHER_API_BASE_URL'] ??
+          'https://api.openweathermap.org/data/2.5',
       queryParameters: {'appid': dotenv.get('OPENWEATHER_API_KEY')},
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
@@ -19,7 +20,8 @@ class DioFactory {
 
   static Dio getChatDio() {
     return Dio(BaseOptions(
-      baseUrl: 'https://immortal-basically-lemur.ngrok-free.app/',
+      baseUrl: dotenv.env['CHATBOT_BASE_URL'] ??
+          'https://immortal-basically-lemur.ngrok-free.app/',
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       headers: {

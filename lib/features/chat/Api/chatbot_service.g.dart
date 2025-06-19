@@ -13,9 +13,7 @@ class _ChatbotService implements ChatbotService {
     this._dio, {
     this.baseUrl,
     this.errorLogger,
-  }) {
-    baseUrl ??= 'https://immortal-basically-lemur.ngrok-free.app/';
-  }
+  });
 
   final Dio _dio;
 

@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DiseaseDetectionService {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'https://positive-tiger-endlessly.ngrok-free.app',
+      baseUrl: dotenv.env['DISEASE_DETECTION_BASE_URL'] ??
+          'https://positive-tiger-endlessly.ngrok-free.app',
       connectTimeout: const Duration(seconds: 5),
       receiveTimeout: const Duration(seconds: 5),
     ),

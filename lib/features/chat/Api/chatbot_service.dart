@@ -1,15 +1,18 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:agro_vision/models/chat_message.dart';
 import '../../../models/new_session_request.dart';
 import '../../../models/session_response.dart';
 
 part 'chatbot_service.g.dart';
 
-@RestApi(baseUrl: 'https://immortal-basically-lemur.ngrok-free.app/')
+@RestApi(baseUrl: '')
 abstract class ChatbotService {
   factory ChatbotService(Dio dio) {
+    dio.options.baseUrl = dotenv.env['CHATBOT_BASE_URL'] ??
+        'https://immortal-basically-lemur.ngrok-free.app/';
     dio.options.connectTimeout = const Duration(seconds: 30);
     dio.options.receiveTimeout = const Duration(seconds: 30);
     dio.options.sendTimeout = const Duration(seconds: 30);

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PumpControlService {
   final Dio dio;
@@ -7,7 +8,8 @@ class PumpControlService {
   PumpControlService()
       : dio = Dio(
           BaseOptions(
-            baseUrl: 'https://positive-tiger-endlessly.ngrok-free.app/',
+            baseUrl: dotenv.env['DISEASE_DETECTION_BASE_URL'] ??
+                'https://positive-tiger-endlessly.ngrok-free.app/',
           ),
         ) {
     dio.interceptors.add(

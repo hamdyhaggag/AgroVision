@@ -13,9 +13,12 @@ import 'api_constants.dart';
 
 part 'api_service.g.dart';
 
-@RestApi(baseUrl: ApiConstants.baseUrl)
+@RestApi(baseUrl: '')
 abstract class ApiService {
-  factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
+  factory ApiService(Dio dio) {
+    dio.options.baseUrl = ApiConstants.baseUrl;
+    return _ApiService(dio);
+  }
 
   @GET('farmers/orders')
   Future<HttpResponse<ApiOrdersResponse>> getUserOrders({
@@ -48,30 +51,11 @@ abstract class ApiService {
     @Path('id') int id,
     @Body() Map<String, dynamic> body,
   );
+
   @POST('update-account')
   Future<HttpResponse<UpdateAccountResponse>> updateAccount(
       @Body() FormData body);
 
-//
-// @POST(ApiConstants.send)
-// Future<ForgotResponseBody> forgot(
-//   @Body() ForgotRequestBody forgotRequestBody,
-// );
-//
-// @POST(ApiConstants.resend)
-// Future<ResetPasswordResponseBody> reset(
-//   @Body() ResetPasswordRequestBody resetPasswordRequestBody,
-// );
-//
-// @POST(ApiConstants.verify)
-// Future<VerifyResponseBody> verify(
-//   @Body() VerifyRequestBody verifyRequestBody,
-// );
-//
-// @POST(ApiConstants.newPass)
-// Future<NewPasswordResponseBody> newPassword(
-//   @Body() NewPasswordRequestBody newPasswordRequestBody,
-// );
   @POST('/api/conversations')
   Future<HttpResponse<Conversation>> createConversation(
     @Body() Map<String, dynamic> body,

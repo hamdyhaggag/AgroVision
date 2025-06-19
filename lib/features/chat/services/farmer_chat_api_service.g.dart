@@ -13,9 +13,7 @@ class _FarmerChatApiService implements FarmerChatApiService {
     this._dio, {
     this.baseUrl,
     this.errorLogger,
-  }) {
-    baseUrl ??= 'http://final.agrovision.ltd/';
-  }
+  });
 
   final Dio _dio;
 

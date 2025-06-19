@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer' as dev;
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../core/helpers/cache_helper.dart';
 import '../../../models/unified_notification_model.dart';
 import '../../../models/order_notification_model.dart';
@@ -8,7 +9,8 @@ import '../../../models/notification_model.dart';
 import '../../../shared/services/notification_service.dart';
 
 class UnifiedNotificationService {
-  final String baseUrl = 'https://final.agrovision.ltd/api';
+  final String baseUrl = dotenv.env['AGROVISION_API_BASE_URL'] ??
+      'https://final.agrovision.ltd/api';
   final NotificationService _localNotificationService = NotificationService();
 
   Future<List<UnifiedNotification>> getNotifications() async {

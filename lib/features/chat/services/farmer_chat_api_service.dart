@@ -1,13 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:agro_vision/features/chat/models/farmer_chat_model.dart';
 
 part 'farmer_chat_api_service.g.dart';
 
-@RestApi(baseUrl: 'http://final.agrovision.ltd/')
+@RestApi(baseUrl: '')
 abstract class FarmerChatApiService {
-  factory FarmerChatApiService(Dio dio, {String baseUrl}) =
-      _FarmerChatApiService;
+  factory FarmerChatApiService(Dio dio) {
+    dio.options.baseUrl = dotenv.env['AGROVISION_CHAT_BASE_URL'] ??
+        'http://final.agrovision.ltd/';
+    return _FarmerChatApiService(dio);
+  }
 
   @GET('/api/conversations')
   Future<HttpResponse<ConversationsResponse>> getConversations();

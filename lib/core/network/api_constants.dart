@@ -1,7 +1,13 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class ApiConstants {
-  static const String baseUrl = 'https://final.agrovision.ltd/api/';
-  static const String farmerChatBaseUrl = 'http://final.agrovision.ltd/';
-  static const String openWeatherBaseUrl =
+  static String get baseUrl =>
+      dotenv.env['AGROVISION_API_BASE_URL'] ??
+      'https://final.agrovision.ltd/api/';
+  static String get farmerChatBaseUrl =>
+      dotenv.env['AGROVISION_CHAT_BASE_URL'] ?? 'http://final.agrovision.ltd/';
+  static String get openWeatherBaseUrl =>
+      dotenv.env['OPENWEATHER_API_BASE_URL'] ??
       'https://api.openweathermap.org/data/2.5';
   static const String login = 'login';
   static const String logout = 'logout';
