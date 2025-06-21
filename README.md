@@ -1,4 +1,3 @@
-```markdown
 <div align="center">
   <img src="assets/images/agrovision.png" alt="AgroVision Logo" width="150"/>
   <h1>AgroVision</h1>
@@ -32,13 +31,11 @@
 
 ## 📸 Screenshots
 
-*(Please replace these placeholders with actual screenshots of your application to showcase its interface and functionality.)*
-
 | Onboarding | Home Screen | Disease Detection |
 | :---: | :---: | :---: |
-| <img src="assets/screenshots/onboarding.png" alt="Onboarding Screen" width="200"/> | <img src="assets/screenshots/home.png" alt="Home Screen" width="200"/> | <img src="assets/screenshots/disease_detection.png" alt="Disease Detection Screen" width="200"/> |
+| | | |
 | **Sensor Monitoring** | **AI Chatbot** | **Dark Mode** |
-| <img src="assets/screenshots/sensor_monitoring.png" alt="Sensor Monitoring Screen" width="200"/> | <img src="assets/screenshots/chatbot.png" alt="AI Chatbot Screen" width="200"/> | <img src="assets/screenshots/dark_mode.png" alt="Dark Mode Example" width="200"/> |
+| | | |
 
 ---
 
@@ -114,7 +111,7 @@ Follow these steps to set up and run AgroVision on your local machine.
     ```
 4.  **Set up environment variables:**
     -   Create a `.env` file in the root of your project.
-    -   Add any necessary API keys or configuration variables (e.g., `API_BASE_URL=your_api_base_url_here`).
+    -   Add any necessary API keys or configuration variables (e.g., `API_BASE_URL=your_api_base_url_here`). This step is crucial for the app to function correctly.
 
 5.  **Run the code generator:**
     ```bash
@@ -127,14 +124,6 @@ Follow these steps to set up and run AgroVision on your local machine.
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License. See the `LICENSE` file in the repository for full details.
-
-
----
-
 <div align="center">
   <p>Made with ❤️ for a greener future</p>
 </div>
-```
