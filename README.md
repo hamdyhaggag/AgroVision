@@ -1,6 +1,10 @@
+<div align="center">
+  <img src="assets/images/agrovision.png" alt="AgroVision Logo" width="150"/>
+</div>
+
 # AgroVision Mobile Application
 
-**AgroVision** is a feature-rich, cross-platform mobile application designed to revolutionize agricultural management by providing real-time sensor monitoring, disease detection, order and inventory management, and multi-channel communication. Built with Flutter, Dart, and Cubit, the app delivers an intuitive and responsive user experience tailored for modern farming needs. 
+**AgroVision** is a feature-rich, cross-platform mobile application designed to revolutionize agricultural management by providing real-time sensor monitoring, disease detection, order and inventory management, and multi-channel communication. Built with Flutter, Dart, and Cubit, the app delivers an intuitive and responsive user experience tailored for modern farming needs.
 
 ---
 
@@ -21,30 +25,28 @@
 
 ## Overview
 AgroVision bridges field operations with centralized data analysis to enhance farm productivity and decision-making. Key functionalities include:
-- **Real-Time Sensor Monitoring**: View live data on soil pH, temperature, humidity, and more. citeturn0file0
-- **Crop Disease Detection**: Capture and analyze crop images for early disease diagnosis. citeturn0file0
-- **Order & Inventory Management**: Track orders, financials, and stock levels seamlessly. citeturn0file0
-- **Multi-Channel Communication**: Chat with a chatbot or directly with farmers and e-commerce clients. citeturn0file0
+- **Real-Time Sensor Monitoring**: View live data on soil pH, temperature, humidity, and more.
+- **Crop Disease Detection**: Capture and analyze crop images for early disease diagnosis.
+- **Task Management**: Efficiently organize and manage your farming activities.
+- **Multi-Channel Communication**: Chat with a chatbot or directly with fellow farmers.
 
 ## Features
-- **Splash & Onboarding** with live sensor metrics and weather data.
-- **Secure Authentication** with instant feedback and contextual weather info.
+- **Splash & Onboarding** with a smooth and welcoming user experience.
+- **Secure Authentication** with instant feedback for login and registration.
 - **Dashboard**: Quick actions for crop health, tasks, sensor data, and detection history.
 - **Disease Detection**: In-app image processing with confidence scores and recommendations.
 - **Detailed Sensor Module**: Real-time and historical data visualization.
-- **Order Analytics**: Comprehensive reporting of transactions and invoice statistics.
-- **Chats**: Tabbed interface for chatbot (Khedr) and peer communication.
-- **Settings**: Profile, notifications, dark mode, feedback, and logout.
-- **Farm Inventory**: Categorized produce management with dynamic pricing and stock status. citeturn0file0
+- **Chats**: Tabbed interface for an AI chatbot and peer-to-peer communication.
+- **Settings**: Profile management, notifications, dark mode, feedback, and logout.
 
 ## Architecture
-AgroVision employs a **feature-based modular architecture** for scalability and maintainability: citeturn0file0
-- **Core** (`lib/core`): Constants, DI, helpers, network, themes.
-- **Features** (`lib/features`): Encapsulated modules (API, repository, model, logic, UI).
-- **Shared** (`lib/shared`): Common widgets and services.
-- **Global Models** (`lib/models`): Cross-cutting data structures.
+AgroVision employs a **feature-based modular architecture** for scalability and maintainability:
+- **Core** (`lib/core`): Contains shared utilities like constants, dependency injection, helpers, networking services, and theming.
+- **Features** (`lib/features`): Encapsulated modules where each feature (e.g., `authentication`, `chat`) contains its own API, repository, model, logic (Cubit), and UI.
+- **Shared** (`lib/shared`): Common widgets and services that can be reused across different features.
+- **Global Models** (`lib/models`): Cross-cutting data structures used by multiple features.
 
-State management is handled via **Cubit**, decoupling UI from business logic and ensuring real-time responsiveness. citeturn0file0
+State management is handled via **Cubit**, which decouples the UI from business logic and ensures a responsive, real-time user experience.
 
 ## Technology Stack
 | Layer                 | Technology                |
@@ -54,33 +56,39 @@ State management is handled via **Cubit**, decoupling UI from business logic and
 | State Management      | Cubit (BLoC Library)      |
 | IDE                   | VS Code, Android Studio   |
 | Version Control       | Git / GitHub              |
-| Testing               | Unit, Integration, UI     |
 
 ## Installation
 1. **Prerequisites**:
-   - Flutter SDK ≥ 3.x
-   - Dart ≥ 2.x
+   - Flutter SDK ≥ 3.5.0
+   - Dart ≥ 3.0.0
    - Git
 2. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-org/agrovision-mobile.git
-   cd agrovision-mobile
+   git clone https://github.com/hamdyhaggag/agro_vision.git
+   cd agro_vision
    ```
 3. **Install dependencies**:
    ```bash
    flutter pub get
    ```
-4. **Run on device/emulator**:
+4.  **Set up environment variables**:
+    -   Create a `.env` file in the root of your project.
+    -   Add any necessary API keys or configuration variables (e.g., `API_BASE_URL=your_api_base_url_here`). This step is crucial for the app to function correctly.
+5.  **Run the code generator**:
+    ```bash
+    flutter pub run build_runner build --delete-conflicting-outputs
+    ```
+6. **Run on device/emulator**:
    ```bash
    flutter run
    ```
 
 ## Usage
 - **Login** with your credentials to access the dashboard.
-- **Navigate** using the bottom navigation bar to access modules: Home, Disease Detection, Sensor Data, Chats.
-- **Open the drawer** for Order Analytics, Inventory, and Settings.
+- **Navigate** using the bottom navigation bar to access modules: Home, Disease Detection, Monitoring, and Chat.
+- **Open the drawer** for additional features and settings.
 
-## Screenshots
+### Screenshots
 
 ### Splash & Onboarding & Login (6 images)
 
@@ -144,80 +152,40 @@ State management is handled via **Cubit**, decoupling UI from business logic and
 |:----------:|:----------:|
 | ![Settings 1](screenshots/settings1.png) | ![Settings 2](screenshots/settings2.png) |
 
+
 ## Project Structure
 ### 1. lib Structure
 ```
 lib/
 ├── core/
 ├── features/
-│   ├── auth/
+│   ├── authentication/
+│   ├── chat/
 │   ├── disease_detection/
-│   ├── sensor_data/
-│   ├── order_management/
-│   └── chat/
+│   ├── home/
+│   ├── monitoring/
+│   ├── notifications/
+│   ├── onboarding/
+│   └── splash/
 ├── shared/
-└── models/
+├── models/
+└── main.dart
 ```
 
 ### 2. core Structure
 ```
-core
-├── constants
-│   ├── app_assets.dart
-│   └── constant.dart
-│
-├── dependency_injection
-│   └── di.dart
-│
-├── helpers
-│   ├── app_localizations.dart
-│   ├── app_regexp.dart
-│   ├── cache_helper.dart
-│   ├── enums.dart
-│   ├── extensions.dart
-│   ├── location_helper.dart
-│   ├── spaces.dart
-│   ├── validations.dart
-│   └── voice_recorder_utility.dart
-│
-├── network
-│   ├── api_constants.dart
-│   ├── api_error_handler.dart
-│   ├── api_error_model.dart
-│   ├── api_error_model.g.dart
-│   ├── api_result.dart
-│   ├── api_result_freezed.dart
-│   ├── api_service.dart
-│   ├── api_service.g.dart
-│   ├── dio_factory.dart
-│   └── weather_service.dart
-│
-├── routing
-│   ├── app_router.dart
-│   └── app_routes.dart
-│
-├── theme
-│   └── theme_cubit
-│       ├── theme_cubit.dart
-│       └── theme_state.dart
-│   ├── dark_theme.dart
-│   └── light_theme.dart
-│
-├── themes
-│   ├── app_colors.dart
-│   ├── app_theme.dart
-│   ├── font_weights.dart
-│   └── text_styles.dart
-│
-└── utils
-    ├── functions.dart
-    └── utils.dart
-
+core/
+├── constants/
+├── dependency_injection/
+├── helpers/
+├── network/
+├── routing/
+├── services/
+├── theme/
+└── themes/
 ```
 ## Testing
-- **Unit Tests**: `flutter test test/unit`
-- **Integration Tests**: `flutter test integration_test`
-- **UI Tests**: Use `flutter drive` with configured emulators.
+- **Widget Tests**: Run with `flutter test`. The project includes a basic widget test in `test/widget_test.dart`.
 
 ## Contributing
 Contributions are welcome! Please follow these steps:
@@ -230,10 +198,8 @@ Contributions are welcome! Please follow these steps:
 Please adhere to the existing code style and include relevant tests.
 
 ## License
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License.
 
 ## Contact
-Maintainer: **Your Name**
-Email: your.email@example.com
-GitHub: [your-org/agrovision-mobile](https://github.com/your-org/agrovision-mobile)
-
+Maintainer: **Hamdy Haggag**
+GitHub: [hamdyhaggag/agro_vision](https://github.com/hamdyhaggag/agro_vision)
