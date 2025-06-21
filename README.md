@@ -125,5 +125,5 @@ Follow these steps to set up and run AgroVision on your local machine.
 ---
 
 <div align="center">
-  <p>Made with ❤️ for a greener future</p>
+  <p>Made with ❤️ for a greener future By Hamdy Haggag</p>
 </div>
