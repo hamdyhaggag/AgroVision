@@ -88,15 +88,70 @@ State management is handled via **Cubit**, which decouples the UI from business 
 - **Navigate** using the bottom navigation bar to access modules: Home, Disease Detection, Monitoring, and Chat.
 - **Open the drawer** for additional features and settings.
 
-## Screenshots
+### Screenshots
 
-*(Please add actual screenshots to showcase the application's interface and functionality.)*
+### Splash & Onboarding & Login (6 images)
 
-| Onboarding | Home Screen | Disease Detection |
-| :---: | :---: | :---: |
-| | | |
-| **Sensor Monitoring** | **AI Chatbot** | **Dark Mode** |
-| | | |
+| Splash 1 | Splash 2 | Splash 3 |
+|:--------:|:--------:|:--------:|
+| ![Splash 1](screenshots/splash1.png) | ![Splash 2](screenshots/splash2.png) | ![Splash 3](screenshots/splash3.png) |
+| Splash 4 | Splash 5 | Splash 6 |
+| ![Splash 4](screenshots/splash4.png) | ![Splash 5](screenshots/splash5.png) | ![Splash 6](screenshots/splash6.png) |
+
+### Home (3 images)
+
+| Home 1 | Home 2 | Home 3 |
+|:------:|:------:|:------:|
+| ![Home 1](screenshots/home1.png) | ![Home 2](screenshots/home2.png) | ![Home 3](screenshots/home3.png) |
+
+### Disease Detection (4 images)
+
+| Detect 1 | Detect 2 |
+|:--------:|:--------:|
+| ![Detect 1](screenshots/detect1.png) | ![Detect 2](screenshots/detect2.png) |
+| Detect 3 | Detect 4 |
+| ![Detect 3](screenshots/detect3.png) | ![Detect 4](screenshots/detect4.png) |
+
+### Sensor Data (2 images)
+
+| Sensor 1 | Sensor 2 |
+|:--------:|:--------:|
+| ![Sensor 1](screenshots/sensor1.png) | ![Sensor 2](screenshots/sensor2.png) |
+
+### Recommendation (2 images)
+
+| Rec 1 | Rec 2 |
+|:-----:|:-----:|
+| ![Rec 1](screenshots/rec1.png) | ![Rec 2](screenshots/rec2.png) |
+
+### Tasks (3 images)
+
+| Task 1 | Task 2 | Task 3 |
+|:------:|:------:|:------:|
+| ![Task 1](screenshots/task1.png) | ![Task 2](screenshots/task2.png) | ![Task 3](screenshots/task3.png) |
+
+### Drawer
+
+#### Order Analytics (4 images)
+
+| Order 1 | Order 2 |
+|:-------:|:-------:|
+| ![Order 1](screenshots/order1.png) | ![Order 2](screenshots/order2.png) |
+| Order 3 | Order 4 |
+| ![Order 3](screenshots/order3.png) | ![Order 4](screenshots/order4.png) |
+
+#### Farm Inventory (1 image)
+
+| Farm Inventory |
+|:--------------:|
+| ![Farm Inventory](screenshots/farm_inventory.png) |
+
+#### Settings (2 images)
+
+| Settings 1 | Settings 2 |
+|:----------:|:----------:|
+| ![Settings 1](screenshots/settings1.png) | ![Settings 2](screenshots/settings2.png) |
+
 
 ## Project Structure
 ### 1. lib Structure
