@@ -1,35 +1,96 @@
 <div align="center">
   <img src="assets/images/agrovision.png" alt="AgroVision Logo" width="150"/>
-  <h1>AgroVision</h1>
-  <p>Your Smart Farming Companion</p>
 </div>
 
----
+# AgroVision Mobile Application
 
-**AgroVision** is a comprehensive mobile application built with Flutter, designed to empower farmers with cutting-edge technology for modern agriculture. This app serves as an intelligent assistant, providing essential tools for crop disease detection, real-time farm monitoring, and streamlined management.
-
----
-
-## ✨ Key Features
-
--   **🌱 AI-Powered Disease Detection:** Instantly identify plant diseases by uploading an image. Receive detailed information on the disease, its symptoms, and recommended treatment strategies.
--   **🛰️ Real-time Farm Monitoring:** Gain insights into your farm's health with live data from integrated IoT sensors, tracking:
-    -   Soil Moisture
-    -   Humidity
-    -   Temperature
-    -   Electrical Conductivity (EC)
-    -   Soil Fertility
--   **💧 Smart Irrigation Control:** Optimize water usage by remotely controlling water pumps based on sensor data and predictive weather forecasts.
--   **🤖 AI Chatbot Assistant:** Get immediate answers to your farming queries through our integrated, AI-powered chatbot.
--   **👨‍🌾 Farmer Community Chat:** Connect and collaborate with a network of fellow farmers to share knowledge, experiences, and best practices.
--   **✅ Task Management:** Efficiently organize and manage your farming activities with a dedicated task management system.
--   **📊 Health & Analytics Dashboard:** Visualize critical farm data through interactive charts and gauges, facilitating informed decision-making.
--   **🌐 Multi-Language Support:** Available in both English and Arabic to cater to a diverse user base.
--   **🌓 Light & Dark Mode:** Enjoy comfortable viewing in any environment with seamless switching between light and dark themes.
+**AgroVision** is a feature-rich, cross-platform mobile application designed to revolutionize agricultural management by providing real-time sensor monitoring, disease detection, order and inventory management, and multi-channel communication. Built with Flutter, Dart, and Cubit, the app delivers an intuitive and responsive user experience tailored for modern farming needs.
 
 ---
 
-## 📸 Screenshots
+## Table of Contents
+1. [Overview](#overview)
+2. [Features](#features)
+3. [Architecture](#architecture)
+4. [Technology Stack](#technology-stack)
+5. [Installation](#installation)
+6. [Usage](#usage)
+7. [Project Structure](#project-structure)
+8. [Testing](#testing)
+9. [Contributing](#contributing)
+10. [License](#license)
+11. [Contact](#contact)
+
+---
+
+## Overview
+AgroVision bridges field operations with centralized data analysis to enhance farm productivity and decision-making. Key functionalities include:
+- **Real-Time Sensor Monitoring**: View live data on soil pH, temperature, humidity, and more.
+- **Crop Disease Detection**: Capture and analyze crop images for early disease diagnosis.
+- **Task Management**: Efficiently organize and manage your farming activities.
+- **Multi-Channel Communication**: Chat with a chatbot or directly with fellow farmers.
+
+## Features
+- **Splash & Onboarding** with a smooth and welcoming user experience.
+- **Secure Authentication** with instant feedback for login and registration.
+- **Dashboard**: Quick actions for crop health, tasks, sensor data, and detection history.
+- **Disease Detection**: In-app image processing with confidence scores and recommendations.
+- **Detailed Sensor Module**: Real-time and historical data visualization.
+- **Chats**: Tabbed interface for an AI chatbot and peer-to-peer communication.
+- **Settings**: Profile management, notifications, dark mode, feedback, and logout.
+
+## Architecture
+AgroVision employs a **feature-based modular architecture** for scalability and maintainability:
+- **Core** (`lib/core`): Contains shared utilities like constants, dependency injection, helpers, networking services, and theming.
+- **Features** (`lib/features`): Encapsulated modules where each feature (e.g., `authentication`, `chat`) contains its own API, repository, model, logic (Cubit), and UI.
+- **Shared** (`lib/shared`): Common widgets and services that can be reused across different features.
+- **Global Models** (`lib/models`): Cross-cutting data structures used by multiple features.
+
+State management is handled via **Cubit**, which decouples the UI from business logic and ensures a responsive, real-time user experience.
+
+## Technology Stack
+| Layer                 | Technology                |
+|-----------------------|---------------------------|
+| Framework             | Flutter                   |
+| Language              | Dart                      |
+| State Management      | Cubit (BLoC Library)      |
+| IDE                   | VS Code, Android Studio   |
+| Version Control       | Git / GitHub              |
+
+## Installation
+1. **Prerequisites**:
+   - Flutter SDK ≥ 3.5.0
+   - Dart ≥ 3.0.0
+   - Git
+2. **Clone the repository**:
+   ```bash
+   git clone https://github.com/hamdyhaggag/agro_vision.git
+   cd agro_vision
+   ```
+3. **Install dependencies**:
+   ```bash
+   flutter pub get
+   ```
+4.  **Set up environment variables**:
+    -   Create a `.env` file in the root of your project.
+    -   Add any necessary API keys or configuration variables (e.g., `API_BASE_URL=your_api_base_url_here`). This step is crucial for the app to function correctly.
+5.  **Run the code generator**:
+    ```bash
+    flutter pub run build_runner build --delete-conflicting-outputs
+    ```
+6. **Run on device/emulator**:
+   ```bash
+   flutter run
+   ```
+
+## Usage
+- **Login** with your credentials to access the dashboard.
+- **Navigate** using the bottom navigation bar to access modules: Home, Disease Detection, Monitoring, and Chat.
+- **Open the drawer** for additional features and settings.
+
+## Screenshots
+
+*(Please add actual screenshots to showcase the application's interface and functionality.)*
 
 | Onboarding | Home Screen | Disease Detection |
 | :---: | :---: | :---: |
@@ -37,93 +98,53 @@
 | **Sensor Monitoring** | **AI Chatbot** | **Dark Mode** |
 | | | |
 
----
-
-## 🛠️ Tech Stack & Architecture
-
-This project is meticulously crafted using **Flutter** and adheres to a clean, feature-first architecture, ensuring high scalability, maintainability, and robust performance.
-
--   **Framework:** [Flutter](https://flutter.dev/)
--   **State Management:** [BLoC (Cubit)](https://bloclibrary.dev/)
--   **Dependency Injection:** [GetIt](https://pub.dev/packages/get_it)
--   **Networking:** [Dio](https://pub.dev/packages/dio) & [Retrofit](https://pub.dev/packages/retrofit)
--   **Routing:** Custom Routing Implementation
--   **Local Storage:** [Shared Preferences](https://pub.dev/packages/shared_preferences) & [Flutter Secure Storage](https://pub.dev/packages/flutter_secure_storage)
--   **Localization:** [Easy Localization](https://pub.dev/packages/easy_localization)
--   **Real-time Communication:** [Socket.IO Client](https://pub.dev/packages/socket_io_client)
--   **Code Generation:** [Freezed](https://pub.dev/packages/freezed), [JSON Serializable](https://pub.dev/packages/json_serializable)
--   **UI Libraries:**
-    -   [Flutter ScreenUtil](https://pub.dev/packages/flutter_screenutil) for adaptive UI responsiveness.
-    -   [Lottie](https://pub.dev/packages/lottie) for engaging animations.
-    -   [FL Chart](https://pub.dev/packages/fl_chart) & [Syncfusion Gauges](https://pub.dev/packages/syncfusion_flutter_gauges) for sophisticated data visualization.
-
----
-
-## 📂 Project Structure
-
-The project is organized into a modular, feature-based structure, where each feature encapsulates its own data, business logic, and user interface components, promoting clear separation of concerns and ease of development.
-
+## Project Structure
+### 1. lib Structure
 ```
 lib/
-├── core/             # Core utilities, services, themes, and configurations
-│ ├── config/
-│ ├── constants/
-│ ├── dependency_injection/
-│ ├── helpers/
-│ ├── network/
-│ ├── routing/
-│ └── theme/
-├── features/         # Feature-based modules (e.g., authentication, chat, monitoring)
-│ ├── authentication/
-│ ├── chat/
-│ ├── disease_detection/
-│ ├── home/
-│ ├── monitoring/
-│ └── ...             # Other feature modules
-├── shared/           # Reusable widgets, services, and common components
-└── main.dart         # Application entry point
+├── core/
+├── features/
+│   ├── authentication/
+│   ├── chat/
+│   ├── disease_detection/
+│   ├── home/
+│   ├── monitoring/
+│   ├── notifications/
+│   ├── onboarding/
+│   └── splash/
+├── shared/
+├── models/
+└── main.dart
 ```
 
----
+### 2. core Structure
+```
+core/
+├── constants/
+├── dependency_injection/
+├── helpers/
+├── network/
+├── routing/
+├── services/
+├── theme/
+└── themes/
+```
+## Testing
+- **Widget Tests**: Run with `flutter test`. The project includes a basic widget test in `test/widget_test.dart`.
 
-## 🚀 Getting Started
+## Contributing
+Contributions are welcome! Please follow these steps:
+1. Fork the repository.
+2. Create a feature branch: `git checkout -b feature/YourFeature`.
+3. Commit changes: `git commit -m "Add YourFeature"`.
+4. Push: `git push origin feature/YourFeature`.
+5. Open a Pull Request.
 
-Follow these steps to set up and run AgroVision on your local machine.
+Please adhere to the existing code style and include relevant tests.
 
-### Prerequisites
+## License
+This project is licensed under the MIT License.
 
--   **Flutter SDK:** Version 3.5.0 or higher.
--   **Development Environment:** An IDE such as VS Code or Android Studio.
-
-### Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/hamdyhaggag/agro_vision.git
-    ```
-2.  **Navigate to the project directory:**
-    ```bash
-    cd agro_vision
-    ```
-3.  **Install dependencies:**
-    ```bash
-    flutter pub get
-    ```
-4.  **Set up environment variables:**
-    -   Create a `.env` file in the root of your project.
-    -   Add any necessary API keys or configuration variables (e.g., `API_BASE_URL=your_api_base_url_here`). This step is crucial for the app to function correctly.
-
-5.  **Run the code generator:**
-    ```bash
-    flutter pub run build_runner build --delete-conflicting-outputs
-    ```
-6.  **Run the application:**
-    ```bash
-    flutter run
-    ```
-
----
-
-<div align="center">
-  <p>Made with ❤️ for a greener future By Hamdy Haggag</p>
-</div>
+## Contact
+Maintainer: **Hamdy Haggag**
+GitHub: [hamdyhaggag/agro_vision](https://github.com/hamdyhaggag/agro_vision)
