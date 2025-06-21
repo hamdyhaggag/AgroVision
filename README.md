@@ -1,6 +1,3 @@
-<div align="center">
-  <img src="assets/images/agrovision.png" alt="AgroVision Logo" width="150"/>
-</div>
 
 # AgroVision Mobile Application
 
