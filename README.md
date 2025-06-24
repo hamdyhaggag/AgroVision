@@ -8,6 +8,179 @@
 
 ---
 
+<!-- PRO SCREENSHOTS SECTION START -->
+<div align="center">
+  <h2>🏠 Home</h2>
+  <img src="screenshots/000AppHeader.png" alt="Home" width="600"/>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Splash, Onboarding & Login</h3>
+  <table>
+    <tr>
+      <td><b>Splash</b></td>
+      <td><b>Onboarding</b></td>
+      <td><b>Login</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/00Splash.png" alt="Splash" width="200"/></td>
+      <td><img src="screenshots/0On-Boarding%201.png" alt="Onboarding" width="200"/></td>
+      <td><img src="screenshots/1Login.png" alt="Login" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Home</h3>
+  <table>
+    <tr>
+      <td><b>Home 1</b></td>
+      <td><b>Home 2</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/1Home1.png" alt="Home 1" width="200"/></td>
+      <td><img src="screenshots/1Home2.png" alt="Home 2" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Crop Health</h3>
+  <img src="screenshots/2Crop1.png" alt="Crop Health" width="200"/>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Sensor Data</h3>
+  <table>
+    <tr>
+      <td><b>Sensor 1</b></td>
+      <td><b>Sensor 2</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/3Sensor1.png" alt="Sensor 1" width="200"/></td>
+      <td><img src="screenshots/3Sensor2.png" alt="Sensor 2" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Disease Detection</h3>
+  <table>
+    <tr>
+      <td><b>Disease 1</b></td>
+      <td><b>Disease 2</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/4Disease1.png" alt="Disease 1" width="200"/></td>
+      <td><img src="screenshots/4Disease2.png" alt="Disease 2" width="200"/></td>
+    </tr>
+    <tr>
+      <td><b>Disease 3</b></td>
+      <td><b>Disease 4</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/4Disease3.png" alt="Disease 3" width="200"/></td>
+      <td><img src="screenshots/4Disease4.png" alt="Disease 4" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Chats</h3>
+  <table>
+    <tr>
+      <td><b>Chat 1</b></td>
+      <td><b>Chat 2</b></td>
+      <td><b>Chat 3</b></td>
+      <td><b>Chat 4</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/5Chats1.png" alt="Chat 1" width="200"/></td>
+      <td><img src="screenshots/5Chats2.png" alt="Chat 2" width="200"/></td>
+      <td><img src="screenshots/5Chats3.png" alt="Chat 3" width="200"/></td>
+      <td><img src="screenshots/5Chats4.png" alt="Chat 4" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Tasks & Records</h3>
+  <img src="screenshots/12Records.png" alt="Task Records" width="200"/>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Drawer & Analytics</h3>
+  <table>
+    <tr>
+      <td><b>Drawer</b></td>
+      <td><b>Order 1</b></td>
+      <td><b>Order 2</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/11Drawer.png" alt="Drawer" width="200"/></td>
+      <td><img src="screenshots/6Order1.png" alt="Order 1" width="200"/></td>
+      <td><img src="screenshots/6Order2.png" alt="Order 2" width="200"/></td>
+    </tr>
+    <tr>
+      <td><b>Order Management 1</b></td>
+      <td><b>Order Management 2</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/9OrderManagement1.png" alt="Order Management 1" width="200"/></td>
+      <td><img src="screenshots/9OrderManagement2.png" alt="Order Management 2" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Notifications</h3>
+  <table>
+    <tr>
+      <td><b>Notification 1</b></td>
+      <td><b>Notification 2</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/8Notifications1.png" alt="Notification 1" width="200"/></td>
+      <td><img src="screenshots/8Notifications2.png" alt="Notification 2" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Farm Inventory</h3>
+  <img src="screenshots/7Farm.png" alt="Farm Inventory" width="200"/>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Settings</h3>
+  <img src="screenshots/10Settings.png" alt="Settings 1" width="200"/>
+</div>
+
+---
+<!-- PRO SCREENSHOTS SECTION END -->
+
 ## Table of Contents
 1. [Overview](#overview)
 2. [Features](#features)
@@ -87,80 +260,6 @@ State management is handled via **Cubit**, which decouples the UI from business 
 - **Login** with your credentials to access the dashboard.
 - **Navigate** using the bottom navigation bar to access modules: Home, Disease Detection, Monitoring, and Chat.
 - **Open the drawer** for additional features and settings.
-
-### Screenshots
-
-### Splash, Onboarding & Login
-
-| Splash | Onboarding | Login |
-|:------:|:----------:|:-----:|
-| ![Splash](screenshots/00Splash.png) | ![Onboarding](screenshots/0On-Boarding 1.png) | ![Login](screenshots/1Login.png) |
-
-### Home
-
-| Home 1 | Home 2 |
-|:------:|:------:|
-| ![Home 1](screenshots/1Home1.png) | ![Home 2](screenshots/1Home2.png) |
-
-### Crop Health
-
-| Crop Health |
-|:-----------:|
-| ![Crop Health](screenshots/2Crop1.png) |
-
-### Sensor Data
-
-| Sensor 1 | Sensor 2 |
-|:--------:|:--------:|
-| ![Sensor 1](screenshots/3Sensor1.png) | ![Sensor 2](screenshots/3Sensor2.png) |
-
-### Disease Detection
-
-| Disease 1 | Disease 2 |
-|:---------:|:---------:|
-| ![Disease 1](screenshots/4Disease1.png) | ![Disease 2](screenshots/4Disease2.png) |
-| Disease 3 | Disease 4 |
-| ![Disease 3](screenshots/4Disease3.png) | ![Disease 4](screenshots/4Disease4.png) |
-
-### Chats
-
-| Chat 1 | Chat 2 | Chat 3 |
-|:------:|:------:|:------:|
-| ![Chat 1](screenshots/5Chats1.png) | ![Chat 2](screenshots/5Chats2.png) | ![Chat 3](screenshots/5Chats3.png) |
-| Chat 4 |
-| ![Chat 4](screenshots/5Chats4.png) |
-
-### Tasks & Records
-
-| Task Records |
-|:-----------:|
-| ![Task Records](screenshots/12Records.png) |
-
-### Drawer & Analytics
-
-| Drawer | Order 1 | Order 2 |
-|:------:|:-------:|:-------:|
-| ![Drawer](screenshots/11Drawer.png) | ![Order 1](screenshots/6Order1.png) | ![Order 2](screenshots/6Order2.png) |
-| Order Management 1 | Order Management 2 |
-| ![Order Management 1](screenshots/9OrderManagement1.png) | ![Order Management 2](screenshots/9OrderManagement2.png) |
-
-### Notifications
-
-| Notification 1 | Notification 2 |
-|:--------------:|:--------------:|
-| ![Notification 1](screenshots/8Notifications1.png) | ![Notification 2](screenshots/8Notifications2.png) |
-
-### Farm Inventory
-
-| Farm Inventory |
-|:--------------:|
-| ![Farm Inventory](screenshots/7Farm.png) |
-
-### Settings
-
-| Settings 1 | Settings 2 |
-|:----------:|:----------:|
-| ![Settings 1](screenshots/10Settings.png) | ![Settings 2](screenshots/000AppHeader.png) |
 
 ## Project Structure
 ### 1. lib Structure
