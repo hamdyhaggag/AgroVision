@@ -264,3 +264,46 @@ State management is handled via **Cubit**, which decouples the UI from business 
 ## Project Structure
 ### 1. lib Structure
 ```
+lib/
+├── core/
+├── features/
+│   ├── authentication/
+│   ├── chat/
+│   ├── disease_detection/
+│   ├── home/
+│   ├── monitoring/
+│   ├── notifications/
+│   ├── onboarding/
+│   └── splash/
+├── shared/
+├── models/
+└── main.dart
+```
+
+### 2. core Structure
+```
+core/
+├── constants/
+├── dependency_injection/
+├── helpers/
+├── network/
+├── routing/
+├── services/
+├── theme/
+└── themes/
+```
+## Testing
+- **Widget Tests**: Run with `flutter test`. The project includes a basic widget test in `test/widget_test.dart`.
+
+## Contributing
+Contributions are welcome! Please follow these steps:
+1. Fork the repository.
+2. Create a feature branch: `git checkout -b feature/YourFeature`.
+3. Commit changes: `git commit -m "Add YourFeature"`.
+4. Push: `git push origin feature/YourFeature`.
+5. Open a Pull Request.
+
+Please adhere to the existing code style and include relevant tests.
+
+## License
+This project is licensed under the MIT License.
