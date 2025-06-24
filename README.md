@@ -90,116 +90,78 @@ State management is handled via **Cubit**, which decouples the UI from business 
 
 ### Screenshots
 
-### Splash & Onboarding & Login (6 images)
+### Splash, Onboarding & Login
 
-| Splash 1 | Splash 2 | Splash 3 |
-|:--------:|:--------:|:--------:|
-| ![Splash 1](screenshots/splash1.png) | ![Splash 2](screenshots/splash2.png) | ![Splash 3](screenshots/splash3.png) |
-| Splash 4 | Splash 5 | Splash 6 |
-| ![Splash 4](screenshots/splash4.png) | ![Splash 5](screenshots/splash5.png) | ![Splash 6](screenshots/splash6.png) |
+| Splash | Onboarding | Login |
+|:------:|:----------:|:-----:|
+| ![Splash](screenshots/00Splash.png) | ![Onboarding](screenshots/0On-Boarding 1.png) | ![Login](screenshots/1Login.png) |
 
-### Home (3 images)
+### Home
 
-| Home 1 | Home 2 | Home 3 |
-|:------:|:------:|:------:|
-| ![Home 1](screenshots/home1.png) | ![Home 2](screenshots/home2.png) | ![Home 3](screenshots/home3.png) |
+| Home 1 | Home 2 |
+|:------:|:------:|
+| ![Home 1](screenshots/1Home1.png) | ![Home 2](screenshots/1Home2.png) |
 
-### Disease Detection (4 images)
+### Crop Health
 
-| Detect 1 | Detect 2 |
-|:--------:|:--------:|
-| ![Detect 1](screenshots/detect1.png) | ![Detect 2](screenshots/detect2.png) |
-| Detect 3 | Detect 4 |
-| ![Detect 3](screenshots/detect3.png) | ![Detect 4](screenshots/detect4.png) |
+| Crop Health |
+|:-----------:|
+| ![Crop Health](screenshots/2Crop1.png) |
 
-### Sensor Data (2 images)
+### Sensor Data
 
 | Sensor 1 | Sensor 2 |
 |:--------:|:--------:|
-| ![Sensor 1](screenshots/sensor1.png) | ![Sensor 2](screenshots/sensor2.png) |
+| ![Sensor 1](screenshots/3Sensor1.png) | ![Sensor 2](screenshots/3Sensor2.png) |
 
-### Recommendation (2 images)
+### Disease Detection
 
-| Rec 1 | Rec 2 |
-|:-----:|:-----:|
-| ![Rec 1](screenshots/rec1.png) | ![Rec 2](screenshots/rec2.png) |
+| Disease 1 | Disease 2 |
+|:---------:|:---------:|
+| ![Disease 1](screenshots/4Disease1.png) | ![Disease 2](screenshots/4Disease2.png) |
+| Disease 3 | Disease 4 |
+| ![Disease 3](screenshots/4Disease3.png) | ![Disease 4](screenshots/4Disease4.png) |
 
-### Tasks (3 images)
+### Chats
 
-| Task 1 | Task 2 | Task 3 |
+| Chat 1 | Chat 2 | Chat 3 |
 |:------:|:------:|:------:|
-| ![Task 1](screenshots/task1.png) | ![Task 2](screenshots/task2.png) | ![Task 3](screenshots/task3.png) |
+| ![Chat 1](screenshots/5Chats1.png) | ![Chat 2](screenshots/5Chats2.png) | ![Chat 3](screenshots/5Chats3.png) |
+| Chat 4 |
+| ![Chat 4](screenshots/5Chats4.png) |
 
-### Drawer
+### Tasks & Records
 
-#### Order Analytics (4 images)
+| Task Records |
+|:-----------:|
+| ![Task Records](screenshots/12Records.png) |
 
-| Order 1 | Order 2 |
-|:-------:|:-------:|
-| ![Order 1](screenshots/order1.png) | ![Order 2](screenshots/order2.png) |
-| Order 3 | Order 4 |
-| ![Order 3](screenshots/order3.png) | ![Order 4](screenshots/order4.png) |
+### Drawer & Analytics
 
-#### Farm Inventory (1 image)
+| Drawer | Order 1 | Order 2 |
+|:------:|:-------:|:-------:|
+| ![Drawer](screenshots/11Drawer.png) | ![Order 1](screenshots/6Order1.png) | ![Order 2](screenshots/6Order2.png) |
+| Order Management 1 | Order Management 2 |
+| ![Order Management 1](screenshots/9OrderManagement1.png) | ![Order Management 2](screenshots/9OrderManagement2.png) |
+
+### Notifications
+
+| Notification 1 | Notification 2 |
+|:--------------:|:--------------:|
+| ![Notification 1](screenshots/8Notifications1.png) | ![Notification 2](screenshots/8Notifications2.png) |
+
+### Farm Inventory
 
 | Farm Inventory |
 |:--------------:|
-| ![Farm Inventory](screenshots/farm_inventory.png) |
+| ![Farm Inventory](screenshots/7Farm.png) |
 
-#### Settings (2 images)
+### Settings
 
 | Settings 1 | Settings 2 |
 |:----------:|:----------:|
-| ![Settings 1](screenshots/settings1.png) | ![Settings 2](screenshots/settings2.png) |
-
+| ![Settings 1](screenshots/10Settings.png) | ![Settings 2](screenshots/000AppHeader.png) |
 
 ## Project Structure
 ### 1. lib Structure
 ```
-lib/
-├── core/
-├── features/
-│   ├── authentication/
-│   ├── chat/
-│   ├── disease_detection/
-│   ├── home/
-│   ├── monitoring/
-│   ├── notifications/
-│   ├── onboarding/
-│   └── splash/
-├── shared/
-├── models/
-└── main.dart
-```
-
-### 2. core Structure
-```
-core/
-├── constants/
-├── dependency_injection/
-├── helpers/
-├── network/
-├── routing/
-├── services/
-├── theme/
-└── themes/
-```
-## Testing
-- **Widget Tests**: Run with `flutter test`. The project includes a basic widget test in `test/widget_test.dart`.
-
-## Contributing
-Contributions are welcome! Please follow these steps:
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feature/YourFeature`.
-3. Commit changes: `git commit -m "Add YourFeature"`.
-4. Push: `git push origin feature/YourFeature`.
-5. Open a Pull Request.
-
-Please adhere to the existing code style and include relevant tests.
-
-## License
-This project is licensed under the MIT License.
-
-## Contact
-Maintainer: **Hamdy Haggag**
-GitHub: [hamdyhaggag/agro_vision](https://github.com/hamdyhaggag/agro_vision)
