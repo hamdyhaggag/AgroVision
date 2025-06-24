@@ -1,9 +1,185 @@
+<div align="center">
+  <img src="assets/images/agrovision.png" alt="AgroVision Logo" width="150"/>
+</div>
 
 # AgroVision Mobile Application
 
 **AgroVision** is a feature-rich, cross-platform mobile application designed to revolutionize agricultural management by providing real-time sensor monitoring, disease detection, order and inventory management, and multi-channel communication. Built with Flutter, Dart, and Cubit, the app delivers an intuitive and responsive user experience tailored for modern farming needs.
 
 ---
+
+<!-- PRO SCREENSHOTS SECTION START -->
+<div align="center">
+  <h2>🏠 Home</h2>
+  <img src="screenshots/000AppHeader.png" alt="Home" width="600"/>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Splash, Onboarding & Login</h3>
+  <table>
+    <tr>
+      <td><b>Splash</b></td>
+      <td><b>Onboarding</b></td>
+      <td><b>Login</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/00Splash.png" alt="Splash" width="200"/></td>
+      <td><img src="screenshots/0On-Boarding%201.png" alt="Onboarding" width="200"/></td>
+      <td><img src="screenshots/1Login.png" alt="Login" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Home</h3>
+  <table>
+    <tr>
+      <td><b>Home 1</b></td>
+      <td><b>Home 2</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/1Home1.png" alt="Home 1" width="200"/></td>
+      <td><img src="screenshots/1Home2.png" alt="Home 2" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Crop Health</h3>
+  <img src="screenshots/2Crop1.png" alt="Crop Health" width="200"/>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Sensor Data</h3>
+  <table>
+    <tr>
+      <td><b>Sensor 1</b></td>
+      <td><b>Sensor 2</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/3Sensor1.png" alt="Sensor 1" width="200"/></td>
+      <td><img src="screenshots/3Sensor2.png" alt="Sensor 2" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Disease Detection</h3>
+  <table>
+    <tr>
+      <td><b>Disease 1</b></td>
+      <td><b>Disease 2</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/4Disease1.png" alt="Disease 1" width="200"/></td>
+      <td><img src="screenshots/4Disease2.png" alt="Disease 2" width="200"/></td>
+    </tr>
+    <tr>
+      <td><b>Disease 3</b></td>
+      <td><b>Disease 4</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/4Disease3.png" alt="Disease 3" width="200"/></td>
+      <td><img src="screenshots/4Disease4.png" alt="Disease 4" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Chats</h3>
+  <table>
+    <tr>
+      <td><b>Chat 1</b></td>
+      <td><b>Chat 2</b></td>
+      <td><b>Chat 3</b></td>
+      <td><b>Chat 4</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/5Chats1.png" alt="Chat 1" width="200"/></td>
+      <td><img src="screenshots/5Chats2.png" alt="Chat 2" width="200"/></td>
+      <td><img src="screenshots/5Chats3.png" alt="Chat 3" width="200"/></td>
+      <td><img src="screenshots/5Chats4.png" alt="Chat 4" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Tasks & Records</h3>
+  <img src="screenshots/12Records.png" alt="Task Records" width="200"/>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Drawer & Analytics</h3>
+  <table>
+    <tr>
+      <td><b>Drawer</b></td>
+      <td><b>Order 1</b></td>
+      <td><b>Order 2</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/11Drawer.png" alt="Drawer" width="200"/></td>
+      <td><img src="screenshots/6Order1.png" alt="Order 1" width="200"/></td>
+      <td><img src="screenshots/6Order2.png" alt="Order 2" width="200"/></td>
+    </tr>
+    <tr>
+      <td><b>Order Management 1</b></td>
+      <td><b>Order Management 2</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/9OrderManagement1.png" alt="Order Management 1" width="200"/></td>
+      <td><img src="screenshots/9OrderManagement2.png" alt="Order Management 2" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Notifications</h3>
+  <table>
+    <tr>
+      <td><b>Notification 1</b></td>
+      <td><b>Notification 2</b></td>
+    </tr>
+    <tr>
+      <td><img src="screenshots/8Notifications1.png" alt="Notification 1" width="200"/></td>
+      <td><img src="screenshots/8Notifications2.png" alt="Notification 2" width="200"/></td>
+    </tr>
+  </table>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Farm Inventory</h3>
+  <img src="screenshots/7Farm.png" alt="Farm Inventory" width="200"/>
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>Settings</h3>
+  <img src="screenshots/10Settings.png" alt="Settings 1" width="200"/>
+</div>
+
+---
+<!-- PRO SCREENSHOTS SECTION END -->
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -85,71 +261,6 @@ State management is handled via **Cubit**, which decouples the UI from business 
 - **Navigate** using the bottom navigation bar to access modules: Home, Disease Detection, Monitoring, and Chat.
 - **Open the drawer** for additional features and settings.
 
-### Screenshots
-
-### Splash & Onboarding & Login (6 images)
-
-| Splash 1 | Splash 2 | Splash 3 |
-|:--------:|:--------:|:--------:|
-| ![Splash 1](screenshots/splash1.png) | ![Splash 2](screenshots/splash2.png) | ![Splash 3](screenshots/splash3.png) |
-| Splash 4 | Splash 5 | Splash 6 |
-| ![Splash 4](screenshots/splash4.png) | ![Splash 5](screenshots/splash5.png) | ![Splash 6](screenshots/splash6.png) |
-
-### Home (3 images)
-
-| Home 1 | Home 2 | Home 3 |
-|:------:|:------:|:------:|
-| ![Home 1](screenshots/home1.png) | ![Home 2](screenshots/home2.png) | ![Home 3](screenshots/home3.png) |
-
-### Disease Detection (4 images)
-
-| Detect 1 | Detect 2 |
-|:--------:|:--------:|
-| ![Detect 1](screenshots/detect1.png) | ![Detect 2](screenshots/detect2.png) |
-| Detect 3 | Detect 4 |
-| ![Detect 3](screenshots/detect3.png) | ![Detect 4](screenshots/detect4.png) |
-
-### Sensor Data (2 images)
-
-| Sensor 1 | Sensor 2 |
-|:--------:|:--------:|
-| ![Sensor 1](screenshots/sensor1.png) | ![Sensor 2](screenshots/sensor2.png) |
-
-### Recommendation (2 images)
-
-| Rec 1 | Rec 2 |
-|:-----:|:-----:|
-| ![Rec 1](screenshots/rec1.png) | ![Rec 2](screenshots/rec2.png) |
-
-### Tasks (3 images)
-
-| Task 1 | Task 2 | Task 3 |
-|:------:|:------:|:------:|
-| ![Task 1](screenshots/task1.png) | ![Task 2](screenshots/task2.png) | ![Task 3](screenshots/task3.png) |
-
-### Drawer
-
-#### Order Analytics (4 images)
-
-| Order 1 | Order 2 |
-|:-------:|:-------:|
-| ![Order 1](screenshots/order1.png) | ![Order 2](screenshots/order2.png) |
-| Order 3 | Order 4 |
-| ![Order 3](screenshots/order3.png) | ![Order 4](screenshots/order4.png) |
-
-#### Farm Inventory (1 image)
-
-| Farm Inventory |
-|:--------------:|
-| ![Farm Inventory](screenshots/farm_inventory.png) |
-
-#### Settings (2 images)
-
-| Settings 1 | Settings 2 |
-|:----------:|:----------:|
-| ![Settings 1](screenshots/settings1.png) | ![Settings 2](screenshots/settings2.png) |
-
-
 ## Project Structure
 ### 1. lib Structure
 ```
@@ -196,7 +307,3 @@ Please adhere to the existing code style and include relevant tests.
 
 ## License
 This project is licensed under the MIT License.
-
-## Contact
-Maintainer: **Hamdy Haggag**
-GitHub: [hamdyhaggag/agro_vision](https://github.com/hamdyhaggag/agro_vision)
